@@ -5,7 +5,7 @@ import Foundation
 public extension Pamphlet.Public.Fonts {
     static func LatoWoff2() -> Data {
     #if DEBUG
-        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/PicaroonTemplate/Resources/public/fonts/lato.woff2"
+        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/Endeavour/Resources/public/fonts/lato.woff2"
         if let contents = try? Data(contentsOf:URL(fileURLWithPath: fileOnDiskPath)) {
             return contents
         }
@@ -21,7 +21,7 @@ private let uncompressedLatoWoff2 = Data(base64Encoded:"d09GMgABAAAAADbcAA0AAAAA
 public extension Pamphlet.Public.Fonts {
     static func RobotoWoff2() -> Data {
     #if DEBUG
-        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/PicaroonTemplate/Resources/public/fonts/roboto.woff2"
+        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/Endeavour/Resources/public/fonts/roboto.woff2"
         if let contents = try? Data(contentsOf:URL(fileURLWithPath: fileOnDiskPath)) {
             return contents
         }
@@ -37,7 +37,7 @@ private let uncompressedRobotoWoff2 = Data(base64Encoded:"d09GMgABAAAAACsoAA4AAA
 public extension Pamphlet.Public.Fonts {
     static func RobotomonoWoff() -> Data {
     #if DEBUG
-        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/PicaroonTemplate/Resources/public/fonts/robotomono.woff"
+        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/Endeavour/Resources/public/fonts/robotomono.woff"
         if let contents = try? Data(contentsOf:URL(fileURLWithPath: fileOnDiskPath)) {
             return contents
         }

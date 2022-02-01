@@ -2,12 +2,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "PICAROONTEMPLATE",
+    name: "Endeavour",
     platforms: [
         .macOS(.v10_15), .iOS(.v9)
     ],
     products: [
-        .executable(name: "PICAROONTEMPLATE", targets: ["PICAROONTEMPLATE"]),
+        .executable(name: "Endeavour", targets: ["Endeavour"]),
     ],
     dependencies: [
         .package(url: "https://github.com/KittyMac/Figurehead.git", .branch("main")),
@@ -21,7 +21,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "PICAROONTEMPLATE",
+            name: "Endeavour",
             dependencies: [
                 "Flynn",
                 "Sextant",
@@ -37,9 +37,9 @@ let package = Package(
             name: "Pamphlet"
         ),
         .testTarget(
-            name: "PICAROONTEMPLATETests",
+            name: "EndeavourTests",
             dependencies: [
-                "PICAROONTEMPLATE"
+                "Endeavour"
             ],
             exclude: [
                 "Resources"

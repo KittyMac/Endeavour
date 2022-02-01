@@ -5,7 +5,7 @@ import Foundation
 public extension Pamphlet.Public {
     static func Icon192Png() -> Data {
     #if DEBUG
-        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/PicaroonTemplate/Resources/public/icon192.png"
+        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/Endeavour/Resources/public/icon192.png"
         if let contents = try? Data(contentsOf:URL(fileURLWithPath: fileOnDiskPath)) {
             return contents
         }
@@ -21,7 +21,7 @@ private let uncompressedIcon192Png = Data(base64Encoded:"iVBORw0KGgoAAAANSUhEUgA
 public extension Pamphlet.Public {
     static func Icon512Png() -> Data {
     #if DEBUG
-        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/PicaroonTemplate/Resources/public/icon512.png"
+        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/Endeavour/Resources/public/icon512.png"
         if let contents = try? Data(contentsOf:URL(fileURLWithPath: fileOnDiskPath)) {
             return contents
         }
@@ -37,7 +37,7 @@ private let uncompressedIcon512Png = Data(base64Encoded:"iVBORw0KGgoAAAANSUhEUgA
 public extension Pamphlet.Public {
     static func ManifestJson() -> String {
     #if DEBUG
-        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/PicaroonTemplate/Resources/public/manifest.json"
+        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/Endeavour/Resources/public/manifest.json"
         if let contents = try? String(contentsOf:URL(fileURLWithPath: fileOnDiskPath)) {
             if contents.hasPrefix("#define PAMPHLET_PREPROCESSOR") {
                 do {

@@ -5,7 +5,7 @@ import Foundation
 public extension Pamphlet.Private {
     static func ScriptCombinedJs() -> String {
     #if DEBUG
-        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/PicaroonTemplate/Resources/private/script.combined.js"
+        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/Endeavour/Resources/private/script.combined.js"
         if let contents = try? String(contentsOf:URL(fileURLWithPath: fileOnDiskPath)) {
             if contents.hasPrefix("#define PAMPHLET_PREPROCESSOR") {
                 do {
@@ -43,7 +43,7 @@ private let compressedScriptCombinedJs = Data(base64Encoded:"H4sIAAAAAAACA+09+3u
 public extension Pamphlet.Private {
     static func ShellFontsHtml() -> String {
     #if DEBUG
-        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/PicaroonTemplate/Resources/private/shell.fonts.html"
+        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/Endeavour/Resources/private/shell.fonts.html"
         if let contents = try? String(contentsOf:URL(fileURLWithPath: fileOnDiskPath)) {
             if contents.hasPrefix("#define PAMPHLET_PREPROCESSOR") {
                 do {
@@ -105,7 +105,7 @@ private let compressedShellFontsHtml = Data(base64Encoded:"H4sIAAAAAAACA+WUy07DM
 public extension Pamphlet.Private {
     static func ShellHtml() -> String {
     #if DEBUG
-        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/PicaroonTemplate/Resources/private/shell.html"
+        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/Endeavour/Resources/private/shell.html"
         if let contents = try? String(contentsOf:URL(fileURLWithPath: fileOnDiskPath)) {
             if contents.hasPrefix("#define PAMPHLET_PREPROCESSOR") {
                 do {

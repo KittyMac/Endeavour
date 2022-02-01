@@ -57,7 +57,7 @@ func handleStaticRequest(_ httpRequest: HttpRequest) -> Data? {
     return nil
 }
 
-public enum PICAROONTEMPLATE {
+public enum Endeavour {
 
     public static func http(_ address: String,
                             _ httpPort: Int32) {

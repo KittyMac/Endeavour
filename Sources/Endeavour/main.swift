@@ -3,9 +3,9 @@ import ArgumentParser
 
 let httpPort: Int32 = 8080
 
-struct PICAROONTEMPLATECLI: ParsableCommand {
+struct EndeavourCLI: ParsableCommand {
     static var configuration = CommandConfiguration(
-        abstract: "PICAROONTEMPLATE",
+        abstract: "Endeavour",
         subcommands: [Http.self],
         defaultSubcommand: Http.self)
 
@@ -16,10 +16,10 @@ struct PICAROONTEMPLATECLI: ParsableCommand {
         var address: String = "0.0.0.0"
 
         mutating func run() throws {
-            PICAROONTEMPLATE.http(address, httpPort)
+            Endeavour.http(address, httpPort)
         }
     }
 
 }
 
-PICAROONTEMPLATECLI.main()
+EndeavourCLI.main()

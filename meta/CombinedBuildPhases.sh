@@ -8,7 +8,7 @@ if [ "$(uname)" == "Darwin" ]; then
     
     set -e
     
-    killall PICAROONTEMPLATE || true
+    killall Endeavour || true
     
     time ./pamphlet --collapse ../Resources/ ../Sources/Pamphlet/
     
