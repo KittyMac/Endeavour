@@ -5,6 +5,7 @@ import PicaroonFramework
 import Pamphlet
 import Hitch
 import Sextant
+import Endeavour
 
 struct QueryRequest: Codable {
     let json: String

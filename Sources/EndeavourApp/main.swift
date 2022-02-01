@@ -3,9 +3,9 @@ import ArgumentParser
 
 let httpPort: Int32 = 8080
 
-struct EndeavourCLI: ParsableCommand {
+struct EndeavourAppCLI: ParsableCommand {
     static var configuration = CommandConfiguration(
-        abstract: "Endeavour",
+        abstract: "EndeavourApp",
         subcommands: [Http.self],
         defaultSubcommand: Http.self)
 
@@ -16,10 +16,10 @@ struct EndeavourCLI: ParsableCommand {
         var address: String = "0.0.0.0"
 
         mutating func run() throws {
-            Endeavour.http(address, httpPort)
+            EndeavourApp.http(address, httpPort)
         }
     }
 
 }
 
-EndeavourCLI.main()
+EndeavourAppCLI.main()

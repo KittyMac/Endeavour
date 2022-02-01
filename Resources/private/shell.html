@@ -2,6 +2,12 @@
 
 #include <../../.build/checkouts/Figurehead/Resources/figurehead.html>
 
+#macro JAVASCRIPT_HELLOWORLD()
+function helloWorld() {
+    console.log("Hello World");
+}
+#endmacro
+
 <!doctype html>
 <html>
 <head>
@@ -29,8 +35,7 @@
     
     <style>
         body {
-            MAIN_BACKGROUND();
-            VSCROLLING();
+            FULLSCREEN()MAIN_BACKGROUND()GROW()STRETCH()VSTACK()PCTWIDTH(100)PCTHEIGHT(100)
             -webkit-text-size-adjust: none;
         }
         *:focus {
@@ -46,15 +51,39 @@
 		</div>
 	</noscript>
             
-    ELEMENT(GROW()START()CLIPS()VSTACK(),
-        GITHUB("https://github.com/KittyMac/PicaroonTemplate",#535457)
+    ELEMENT(VSTACK()PCTMINHEIGHT(100)GROW()STRETCH(),
+        GITHUB("https://github.com/KittyMac/Endeavour",#535457)
+        
+        ELEMENT(HSTACK()MINHEIGHT(5)PCTWIDTH(100)MARGIN(1,2,0,2),
+            ELEMENT(VSTACK()GROW()MINHEIGHT(5),
+                HEADER2(Endeavour)
+                TEXT(Collaborative code editor using CodeMirror6)
+            )
+        )
+        
+        ELEMENT(HSTACK()BETWEEN()MARGIN(0,2,0,2),
+            TEXT(You are the only one here!)
+            HSPACE()
+        )
+        ELEMENT(VSTACK()GROW()SELF_STRETCH()MINHEIGHT(10)STDSHADOW()MARGIN(0.5,2,2,2)BACKGROUND(255,255,255,1),
+            ID_ELEMENT(editor,GROW()CLIPS(),)
+        )
     )
         
     ID_ELEMENT(alertsContainer,FULLSCREEN()ABSOLUTE()BACKGROUND(0,0,0,0.5)CENTER()CLIPS()HIDE(),)
-        
+    
+    <script src="public/codemirror/editor.bundle.js"></script>
+    
     <script>
         InitFigurehead();
-        alert("Hello World!");
+        
+        let editor = cm.CreateEditor("editor", cm.swiftSetup, true);
+        
+        print(`JAVASCRIPT_HELLOWORLD()`);
+        
+        editor.dispatch({
+            changes: {from: 0, to: editor.state.doc.length, insert: `JAVASCRIPT_HELLOWORLD()`}
+        });
     </script>
     
 </body>
