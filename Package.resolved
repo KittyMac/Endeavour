@@ -1,0 +1,97 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Socket",
+        "repositoryURL": "https://github.com/IBM-Swift/BlueSocket.git",
+        "state": {
+          "branch": null,
+          "revision": "c9894fd117457f1d006575fbfb2fdfd6f79eac03",
+          "version": "1.0.200"
+        }
+      },
+      {
+        "package": "Chronometer",
+        "repositoryURL": "https://github.com/KittyMac/Chronometer.git",
+        "state": {
+          "branch": null,
+          "revision": "35289a90ee0bb4a76f8acd647b773aeacf4d8856",
+          "version": "0.1.2"
+        }
+      },
+      {
+        "package": "Figurehead",
+        "repositoryURL": "https://github.com/KittyMac/Figurehead.git",
+        "state": {
+          "branch": "main",
+          "revision": "636c8248b66eb3ac6aa4ca5d098c190a54e4d741",
+          "version": null
+        }
+      },
+      {
+        "package": "Flynn",
+        "repositoryURL": "https://github.com/KittyMac/Flynn.git",
+        "state": {
+          "branch": "master",
+          "revision": "bef6eb1bc963eb3b55a8e0a7c98ddc8a44a8a90c",
+          "version": null
+        }
+      },
+      {
+        "package": "Gzip",
+        "repositoryURL": "https://github.com/1024jp/GzipSwift.git",
+        "state": {
+          "branch": "develop",
+          "revision": "e8c00b4bdc621b3c714ab72e3958778f5751e146",
+          "version": null
+        }
+      },
+      {
+        "package": "Hitch",
+        "repositoryURL": "https://github.com/KittyMac/Hitch.git",
+        "state": {
+          "branch": null,
+          "revision": "8a958689c995485a8bf63329195a062974efc5e5",
+          "version": "0.3.1"
+        }
+      },
+      {
+        "package": "Picaroon",
+        "repositoryURL": "https://github.com/KittyMac/Picaroon.git",
+        "state": {
+          "branch": "master",
+          "revision": "835e117ea6dee8c3264a960f2092a6c88a02881b",
+          "version": null
+        }
+      },
+      {
+        "package": "Sextant",
+        "repositoryURL": "https://github.com/KittyMac/Sextant.git",
+        "state": {
+          "branch": null,
+          "revision": "9031cecf7335361bc57a8b11d2195378df6dfc52",
+          "version": "0.4.2"
+        }
+      },
+      {
+        "package": "Spanker",
+        "repositoryURL": "https://github.com/KittyMac/Spanker.git",
+        "state": {
+          "branch": null,
+          "revision": "78afeb6c6bf78d0accc6e1374e1a702b382b4825",
+          "version": "0.1.20"
+        }
+      },
+      {
+        "package": "swift-argument-parser",
+        "repositoryURL": "https://github.com/apple/swift-argument-parser",
+        "state": {
+          "branch": null,
+          "revision": "6b2aa2748a7881eebb9f84fb10c01293e15b52ca",
+          "version": "0.5.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
