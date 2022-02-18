@@ -8,6 +8,8 @@ public enum Pamphlet {
     public static func get(string member: String) -> String? {
         switch member {
         case "/public/codemirror/editor.bundle.js": return Pamphlet.Public.Codemirror.EditorBundleJs()
+        case "/private/endeavour/endeavour.html": return Pamphlet.Private.Endeavour.EndeavourHtml()
+        case "/private/endeavour/endeavour.js": return Pamphlet.Private.Endeavour.EndeavourJs()
         case "/public/manifest.json": return Pamphlet.Public.ManifestJson()
         case "/private/script.combined.js": return Pamphlet.Private.ScriptCombinedJs()
         case "/private/shell.fonts.html": return Pamphlet.Private.ShellFontsHtml()
@@ -22,6 +24,8 @@ public enum Pamphlet {
         #else
             switch member {
         case "/public/codemirror/editor.bundle.js": return Pamphlet.Public.Codemirror.EditorBundleJsGzip()
+        case "/private/endeavour/endeavour.html": return Pamphlet.Private.Endeavour.EndeavourHtmlGzip()
+        case "/private/endeavour/endeavour.js": return Pamphlet.Private.Endeavour.EndeavourJsGzip()
         case "/public/manifest.json": return Pamphlet.Public.ManifestJsonGzip()
         case "/private/script.combined.js": return Pamphlet.Private.ScriptCombinedJsGzip()
         case "/private/shell.fonts.html": return Pamphlet.Private.ShellFontsHtmlGzip()
@@ -44,6 +48,7 @@ public enum Pamphlet {
     }
 }
 public extension Pamphlet.Public { enum Codemirror { } }
+public extension Pamphlet.Private { enum Endeavour { } }
 public extension Pamphlet { enum Public { } }
 public extension Pamphlet { enum Private { } }
 public extension Pamphlet.Public { enum Fonts { } }

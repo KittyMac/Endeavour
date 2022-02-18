@@ -32,6 +32,7 @@ pamphlet:
 xcode: pamphlet preprocess
 	swift package generate-xcodeproj
 	meta/addBuildPhase Endeavour.xcodeproj/project.pbxproj "Endeavour::Endeavour" 'export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:$$PATH; cd $${SRCROOT}; ./meta/CombinedBuildPhases.sh'
+	#meta/addBuildPhase Endeavour.xcodeproj/project.pbxproj "Endeavour::Pamphlet" 'export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:$$PATH; cd $${SRCROOT}; ./meta/CombinedBuildPhases.sh'
 	sleep 2
 	open Endeavour.xcodeproj
 

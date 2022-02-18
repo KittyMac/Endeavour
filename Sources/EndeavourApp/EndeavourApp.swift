@@ -1,6 +1,6 @@
 import Foundation
 import ArgumentParser
-import PicaroonFramework
+import Picaroon
 import Flynn
 import Pamphlet
 import Endeavour
@@ -11,47 +11,41 @@ let cacheMaxAge = 5
 let cacheMaxAge = 3600
 #endif
 
-func handleStaticRequest(_ httpRequest: HttpRequest) -> Data? {
+func handleStaticRequest(_ httpRequest: HttpRequest) -> HttpResponse? {
     if let url = httpRequest.url {
 
-        var supportsGzip = false
-        if let acceptEncoding = httpRequest.acceptEncoding {
-            supportsGzip = acceptEncoding.contains("gzip")
-        }
-
         if url.contains("private/") {
-            return HttpResponse.asData(nil, .internalServerError, .txt)
+            return HttpStaticResponse.internalServerError
         } else {
 
             // Request for HTML are never satisfied by the static resources
-            if url.hasSuffix(".htm") {
-                return HttpResponse.asData(nil, .internalServerError, .txt)
+            if url.ends(with: ".htm") {
+                return HttpStaticResponse.internalServerError
             }
 
             // We only ever allow script.combined.js to be downloaded, and it is a combination of scripts.
-            if url.hasSuffix("script.combined.js") {
-#if DEBUG
-                let script = Pamphlet.Private.ScriptCombinedJs()
-                return HttpResponse.asData(nil, .ok, .js, script)
-#else
-                if supportsGzip {
-                    return HttpResponse.asData(nil, .ok, .js, Pamphlet.Private.ScriptCombinedJsGzip(),
-                                               encoding: "gzip")
-                }
-                return HttpResponse.asData(nil, .ok, .js, Pamphlet.Private.ScriptCombinedJs())
-#endif
+            if url.ends(with: "script.combined.js") {
+                let payload: Payloadable = httpRequest.supportsGzip ? Pamphlet.Private.ScriptCombinedJsGzip() : Pamphlet.Private.ScriptCombinedJs()
+                return HttpResponse(javascript: payload)
             }
 
-            if let content = Pamphlet.get(gzip: url), supportsGzip {
-                return HttpResponse.asData(nil, .ok, HttpContentType.fromPath(url), content,
-                                           encoding: "gzip",
-                                           cacheMaxAge: cacheMaxAge)
-            } else if let content = Pamphlet.get(data: url) {
-                return HttpResponse.asData(nil, .ok, HttpContentType.fromPath(url), content,
-                                           cacheMaxAge: cacheMaxAge)
-            } else if let content = Pamphlet.get(string: url) {
-                return HttpResponse.asData(nil, .ok, HttpContentType.fromPath(url), content,
-                                           cacheMaxAge: cacheMaxAge)
+            let urlString = url.description
+            if let content = Pamphlet.get(gzip: urlString), httpRequest.supportsGzip {
+                return HttpResponse(status: .ok,
+                                    type: HttpContentType.fromPath(url),
+                                    payload: content,
+                                    encoding: HttpEncoding.gzip.rawValue,
+                                    cacheMaxAge: cacheMaxAge)
+            } else if let content = Pamphlet.get(data: urlString) {
+                return HttpResponse(status: .ok,
+                                    type: HttpContentType.fromPath(url),
+                                    payload: content,
+                                    cacheMaxAge: cacheMaxAge)
+            } else if let content = Pamphlet.get(string: urlString) {
+                return HttpResponse(status: .ok,
+                                    type: HttpContentType.fromPath(url),
+                                    payload: content,
+                                    cacheMaxAge: cacheMaxAge)
             }
         }
     }

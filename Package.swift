@@ -14,10 +14,10 @@ let package = Package(
         .package(url: "https://github.com/KittyMac/Figurehead.git", .branch("main")),
 		.package(url: "https://github.com/KittyMac/Flynn.git", .upToNextMinor(from: "0.2.0")),
         .package(url: "https://github.com/KittyMac/Sextant.git", .upToNextMinor(from: "0.4.0")),
-        .package(url: "https://github.com/KittyMac/Hitch.git", .upToNextMinor(from: "0.3.0")),
+        .package(url: "https://github.com/KittyMac/Hitch.git", .upToNextMinor(from: "0.4.0")),
+        .package(url: "https://github.com/KittyMac/Picaroon.git", .upToNextMinor(from: "0.3.0")),
         .package(name: "Gzip", url: "https://github.com/1024jp/GzipSwift.git", .branch("develop")),
-        .package(url: "https://github.com/KittyMac/Picaroon.git", .branch("master")),
-        .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
     ],
     targets: [
         .target(
@@ -25,7 +25,8 @@ let package = Package(
             dependencies: [
                 "Flynn",
                 "Sextant",
-                "Hitch"
+                "Hitch",
+                "Picaroon"
             ]
         ),
         .target(
@@ -37,7 +38,7 @@ let package = Package(
                 "Hitch",
                 "Pamphlet",
                 "Gzip",
-				.product(name: "PicaroonFramework", package: "Picaroon"),
+                "Picaroon",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]
         ),

@@ -1,8 +1,13 @@
 import Foundation
 import ArgumentParser
-import PicaroonFramework
+import Picaroon
 import Flynn
+import Hitch
 
-public class Endeavour: Actor {
+public typealias DocumentUUID = HalfHitch
+public typealias OwnerUUID = HalfHitch
+public typealias Error = HalfHitch
+
+public enum Endeavour {
 
 }

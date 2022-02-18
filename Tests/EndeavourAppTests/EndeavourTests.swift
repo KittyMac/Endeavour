@@ -3,7 +3,7 @@ import Flynn
 
 @testable import Endeavour
 
-final class EndeavourTests: UnitTestsBase {
+final class EndeavourTests: XCTestCase {
 
     func testEndeavour() {
 

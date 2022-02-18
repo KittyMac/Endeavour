@@ -12,9 +12,11 @@ if [ "$(uname)" == "Darwin" ]; then
     
     time ./pamphlet --collapse ../Resources/ ../Sources/Pamphlet/
     
+    make -C ../Editor/ all
+    
     # FlynnLint - Confirms all Flynn code is concurrently safe
     FLYNNLINTSWIFTPM=../.build/checkouts/flynn/meta/FlynnLint
-    FLYNNLINTLOCAL=../../../flynn/meta/FlynnLint
+    FLYNNLINTLOCAL=../../flynn/meta/FlynnLint
 
     if [ -f "${FLYNNLINTSWIFTPM}" ]; then
         time ${FLYNNLINTSWIFTPM} ../.build/checkouts/Picaroon ../

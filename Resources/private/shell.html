@@ -1,12 +1,7 @@
 #define PAMPHLET_PREPROCESSOR
 
 #include <../../.build/checkouts/Figurehead/Resources/figurehead.html>
-
-#macro JAVASCRIPT_HELLOWORLD()
-function helloWorld() {
-    console.log("Hello World");
-}
-#endmacro
+#include <./endeavour/endeavour.html>
 
 <!doctype html>
 <html>
@@ -34,8 +29,18 @@ function helloWorld() {
     <script src="script.combined.js"></script>
     
     <style>
+        h1 {
+            ROBOTO(2)
+        }
+        h2 {
+            ROBOTO(1.5)
+        }
+        h3 {
+            ROBOTO(1)
+        }
         body {
-            FULLSCREEN()MAIN_BACKGROUND()GROW()STRETCH()VSTACK()PCTWIDTH(100)PCTHEIGHT(100)
+            MAIN_BACKGROUND();
+            VSCROLLING();
             -webkit-text-size-adjust: none;
         }
         *:focus {
@@ -57,16 +62,15 @@ function helloWorld() {
         ELEMENT(HSTACK()MINHEIGHT(5)PCTWIDTH(100)MARGIN(1,2,0,2),
             ELEMENT(VSTACK()GROW()MINHEIGHT(5),
                 HEADER2(Endeavour)
-                TEXT(Collaborative code editor using CodeMirror6)
+                TEXT(Collaborative code editor using CodeMirror6 and Picaroon)
             )
         )
         
-        ELEMENT(HSTACK()BETWEEN()MARGIN(0,2,0,2),
-            TEXT(You are the only one here!)
-            HSPACE()
+        ELEMENT(HSTACK()BETWEEN()MARGIN(1,2,0,2),
+            ID_ELEMENT(documentHeader,LATO(1)START(),Creating new document...)
         )
-        ELEMENT(VSTACK()GROW()SELF_STRETCH()MINHEIGHT(10)STDSHADOW()MARGIN(0.5,2,2,2)BACKGROUND(255,255,255,1),
-            ID_ELEMENT(editor,GROW()CLIPS(),)
+        ELEMENT(VSTACK()GROW()STRETCH()MINHEIGHT(10)STDSHADOW()MARGIN(0.5,2,2,2)BACKGROUND(255,255,255,1),
+            ID_ELEMENT(editor,SHRINK()PCTWIDTH(100)CLIPS(),)
         )
     )
         
@@ -76,13 +80,23 @@ function helloWorld() {
     
     <script>
         InitFigurehead();
+
+        endeavour.new(function(response) {
+            documentUUID = response.documentUUID;
+            
+            let editor = cm.CreateEditor("editor", [
+                cm.swiftSetup,
+                cm.endeavourExtension(documentUUID, 0)
+            ], true);
+            
+            print(editor)
         
-        let editor = cm.CreateEditor("editor", cm.swiftSetup, true);
-        
-        print(`JAVASCRIPT_HELLOWORLD()`);
-        
-        editor.dispatch({
-            changes: {from: 0, to: editor.state.doc.length, insert: `JAVASCRIPT_HELLOWORLD()`}
+            //editor.dispatch({
+            //    changes: {from: 0, to: editor.state.doc.length, insert: `JAVASCRIPT_HELLOWORLD()`}
+            //});
+            
+            documentHeader.innerText = `Document ${documentUUID}`;
+            
         });
     </script>
     
