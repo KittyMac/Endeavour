@@ -5,7 +5,7 @@ import Flynn
 import Sextant
 import Spanker
 import Hitch
-
+/*
 func errorJson(_ message: HalfHitch) -> JsonElement {
     return JsonElement(unknown:
         [
@@ -13,15 +13,20 @@ func errorJson(_ message: HalfHitch) -> JsonElement {
         ]
     )
 }
+ */
 
 public class EndeavourService: ServiceActor {
 
-    private let userUUID: OwnerUUID = UUID().uuidHitch.halfhitch()
+    private let userUUID: OwnerUUID = UUID().uuidHitch
 
     public override func safeHandleRequest(jsonElement: JsonElement,
                                            httpRequest: HttpRequest,
                                            _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
-        guard let command = jsonElement[halfhitch: "command"] else { return returnCallback(errorJson("command is missing"), nil) }
+        guard let command = jsonElement[halfhitch: "command"] else {
+            return returnCallback(nil, HttpResponse(error: "command is missing"))
+        }
+
+        print(jsonElement)
 
         switch command {
         case "new":
@@ -32,11 +37,10 @@ public class EndeavourService: ServiceActor {
             safeJoinDocument(jsonElement, returnCallback)
         case "push":
             safePushToDocument(jsonElement, returnCallback)
+        case "pull":
+            safePullDocument(jsonElement, returnCallback)
         default:
-
-            print(jsonElement.description)
-
-            return returnCallback(errorJson("unknown command"), nil)
+            return returnCallback(nil, HttpResponse(error: "unknown command"))
         }
     }
 }
@@ -45,29 +49,32 @@ extension EndeavourService {
     func safeNewDocument(_ jsonElement: JsonElement,
                          _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
         Endeavour.Manager.shared.beNewDocument(userUUID: userUUID,
-                                               self) { documentUUID in
-            guard let documentUUID = documentUUID else {
-                returnCallback(errorJson("failed to create document"), nil)
-                return
+                                               self) { documentInfo, error in
+            if let error = error {
+                return returnCallback(nil, HttpResponse(error: error))
+            }
+            guard let documentInfo = documentInfo else {
+                return returnCallback(nil, HttpResponse(error: "document info is nil"))
             }
 
             returnCallback(JsonElement(unknown: [
-                "documentUUID": documentUUID
-            ]), nil)
+                "documentUUID": documentInfo.uuid,
+                "version": documentInfo.version
+            ]), HttpResponse(text: documentInfo.content))
         }
     }
 
     func safeCloseDocument(_ jsonElement: JsonElement,
                            _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
-        guard let documentUUID = jsonElement[halfhitch: "documentUUID"] else {
-            return returnCallback(errorJson("documentUUID is missing"), nil)
+        guard let documentUUID = jsonElement[hitch: "documentUUID"] else {
+            return returnCallback(nil, HttpResponse(error: "documentUUID is missing"))
         }
 
         Endeavour.Manager.shared.beCloseDocument(userUUID: userUUID,
                                                  documentUUID: documentUUID,
                                                  self) { error in
             if let error = error {
-                returnCallback(errorJson(error), nil)
+                return returnCallback(nil, HttpResponse(error: error))
             }
 
             returnCallback(JsonElement(unknown: [
@@ -78,33 +85,37 @@ extension EndeavourService {
 
     func safeJoinDocument(_ jsonElement: JsonElement,
                            _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
-        guard let documentUUID = jsonElement[halfhitch: "documentUUID"] else {
-            return returnCallback(errorJson("documentUUID is missing"), nil)
+        guard let documentUUID = jsonElement[hitch: "documentUUID"] else {
+            return returnCallback(nil, HttpResponse(error: "documentUUID is missing"))
         }
 
-        Endeavour.Manager.shared.beCloseDocument(userUUID: userUUID,
+        Endeavour.Manager.shared.beJoinDocument(userUUID: userUUID,
                                                  documentUUID: documentUUID,
-                                                 self) { error in
+                                                 self) { documentInfo, error in
             if let error = error {
-                returnCallback(errorJson(error), nil)
+                return returnCallback(nil, HttpResponse(error: error))
+            }
+            guard let documentInfo = documentInfo else {
+                return returnCallback(nil, HttpResponse(error: "document info is nil"))
             }
 
             returnCallback(JsonElement(unknown: [
-                "documentUUID": documentUUID
-            ]), nil)
+                "documentUUID": documentInfo.uuid,
+                "version": documentInfo.version
+            ]), HttpResponse(text: documentInfo.content))
         }
     }
 
     func safePushToDocument(_ jsonElement: JsonElement,
                             _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
-        guard let documentUUID = jsonElement[halfhitch: "documentUUID"] else {
-            return returnCallback(errorJson("documentUUID is missing"), nil)
+        guard let documentUUID = jsonElement[hitch: "documentUUID"] else {
+            return returnCallback(nil, HttpResponse(error: "documentUUID is missing"))
         }
         guard let version = jsonElement[int: "version"] else {
-            return returnCallback(errorJson("version is missing"), nil)
+            return returnCallback(nil, HttpResponse(error: "version is missing"))
         }
         guard let updates = jsonElement[element: "updates"] else {
-            return returnCallback(errorJson("updates is missing"), nil)
+            return returnCallback(nil, HttpResponse(error: "updates is missing"))
         }
 
         Endeavour.Manager.shared.bePushToDocument(userUUID: userUUID,
@@ -113,12 +124,32 @@ extension EndeavourService {
                                                   updates: updates,
                                                   self) { error in
             if let error = error {
-                returnCallback(errorJson(error), nil)
+                return returnCallback(nil, HttpResponse(error: error))
             }
 
             returnCallback(JsonElement(unknown: [
                 "documentUUID": documentUUID
             ]), nil)
+        }
+    }
+
+    func safePullDocument(_ jsonElement: JsonElement,
+                            _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
+        guard let documentUUID = jsonElement[hitch: "documentUUID"] else {
+            return returnCallback(nil, HttpResponse(error: "documentUUID is missing"))
+        }
+        guard let version = jsonElement[int: "version"] else {
+            return returnCallback(nil, HttpResponse(error: "version is missing"))
+        }
+
+        Endeavour.Manager.shared.bePullDocument(userUUID: userUUID,
+                                                documentUUID: documentUUID,
+                                                version: version,
+                                                self) { json in
+            guard let json = json else {
+                return returnCallback(nil, HttpResponse(error: "document history is nil"))
+            }
+            returnCallback(Spanker.parse(halfhitch: json), nil)
         }
     }
 }

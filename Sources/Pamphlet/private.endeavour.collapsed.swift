@@ -72,8 +72,8 @@ public extension Pamphlet.Private.Endeavour {
 }
 
 private let uncompressedEndeavourJs = ###"""
-let endeavour={send:function(e,n){send(e,(function(e){let o=e.getResponseHeader("Service-Response");if(null!=o){let e=JSON.parse(o);n(e)}else n(void 0)}))},new:function(e){endeavour.send({service:"EndeavourService",command:"new"},e)},join:function(e,n){endeavour.send({service:"EndeavourService",command:"join",documentUUID:e},n)},close:function(e,n){endeavour.send({service:"EndeavourService",command:"close",documentUUID:e},n)}};
+let endeavour={send:function(e,n){send(e,(function(e){let o=e.getResponseHeader("Service-Response");if(null!=o){let c=JSON.parse(o);n(e,c)}else n(e,void 0)}))},new:function(e){endeavour.send({service:"EndeavourService",command:"new"},e)},join:function(e,n){endeavour.send({service:"EndeavourService",command:"join",documentUUID:e},n)},close:function(e,n){endeavour.send({service:"EndeavourService",command:"close",documentUUID:e},n)}};
 
 """###
-private let compressedEndeavourJs = Data(base64Encoded:"H4sIAAAAAAACA62PwWrCQBCG732KuKddWIPnhNwUtIcWFB8gbH7LymZGskl6kH13x1irlJ5Kb8M/zPf9E9BnoAb1yENXnaPMxWEg13smDUtmimTSj9Scg1xxhfwD/RbxxBSxRt2g02qHbvQO83uuTOkPmoYQZhXfLlG97t7f8lPdRWg25RWZECIy0iP7JluYZEyyhM/i2frdM586SbNJVajVffElV9Zx29byihKGSlb49siefrz2F+AVo2zDbmhB/X6/WRaQqiJwgSP+wTBxflWk8uUCRN3P/7ABAAA=")!
+private let compressedEndeavourJs = Data(base64Encoded:"H4sIAAAAAAACA62PwWrDMBBE7/0KRycJVNOzjW8NpD000JAPMPIkqMi7wbKdQ9C/d+02TQg5hd6GWXbeTECfgRrUIw9ddYqii91ArvdMGpbMbInSF9ecgnxxhXyP/hPxwBSxQt2g02qDbvQOz2dfmdLvNA0hLCr++XTV+2b9kR/qLkKzKSeQMwkhIpv0yL7JXkwyJlnCsbgm/3XN517SbsYVank+/BZQ1nHb1jJHSYZKFpL2xZ5u5j0SOMUo27AbWlC/3b69FpCqAnCBI/6BMOfcRaTy6RudiOEDtAEAAA==")!
 

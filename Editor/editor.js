@@ -1,6 +1,6 @@
 import {Update, receiveUpdates, sendableUpdates, collab, getSyncedVersion} from "@codemirror/collab"
 import {ViewPlugin, keymap, highlightSpecialChars, drawSelection, highlightActiveLine, dropCursor} from "@codemirror/view"
-import {EditorState} from "@codemirror/state"
+import {ChangeSet, Text, EditorState} from "@codemirror/state"
 import {history, historyKeymap} from "@codemirror/history"
 import {foldGutter, foldKeymap} from "@codemirror/fold"
 import {indentOnInput, indentUnit} from "@codemirror/language"
@@ -175,27 +175,35 @@ cm.endeavourExtension = function (documentUUID, startVersion) {
                 command: "push",
                 documentUUID: documentUUID,
                 version: version,
-                updates: updates
-            }, function(xhttp) {
-                localThis.receivedUpdate(xhttp);
+                updates: updates,
+            }, function(response) {
+                localThis.pushing = false;
+                
+                // Regardless of whether the push failed or new updates came in
+                // while it was running, try again if there's updates remaining
+                if (sendableUpdates(localThis.view.state).length) {
+                    setTimeout(() => localThis.push(), 100)
+                }
             });
             
         }
         
-        receivedUpdate(xhttp) {
-            print(xhttp);
-
-            this.pushing = false;
-
-            // Regardless of whether the push failed or new updates came in
-            // while it was running, try again if there's updates remaining
-            //if (sendableUpdates(this.view.state).length) {
-            //    setTimeout(() => this.push(), 100)
-            //}
-        }
-        
         pull() {
-            print("PULL");
+            let version = getSyncedVersion(this.view.state) || 0
+            let localThis = this;
+            
+            this.send({
+                service: "EndeavourService",
+                command: "pull",
+                documentUUID: documentUUID,
+                version: version,
+            }, function(response) {
+                print(response);
+                if (response != undefined) {
+                    localThis.view.dispatch(receiveUpdates(localThis.view.state, response));
+                    localThis.pull()
+                }
+            });
         }
         
         /*
@@ -212,7 +220,11 @@ cm.endeavourExtension = function (documentUUID, startVersion) {
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
-                    callback(this);
+                    let json = xhttp.getResponseHeader("Service-Response");
+                    if (json != undefined) {
+                        let response = JSON.parse(json);
+                        callback(response);
+                    }
                 }
             };
             xhttp.open("POST", "/");

@@ -12,23 +12,26 @@ public extension Endeavour {
 
         private var documents: [DocumentUUID: Document] = [:]
 
-        private func _beNewDocument(userUUID: OwnerUUID) -> DocumentUUID? {
+        private func _beNewDocument(userUUID: OwnerUUID,
+                                    _ returnCallback: @escaping (DocumentInfo?, Error?) -> Void) {
             let document = Document(owner: userUUID)
-            let documentUUID = document.unsafeDocumentUUID
-            documents[documentUUID] = document
-            return documentUUID
+            document.beGetInfo(user: userUUID, self) { documentInfo, error in
+                guard error == nil else { return returnCallback(nil, error) }
+                guard let documentInfo = documentInfo else { return returnCallback(nil, "document info is missing") }
+                self.documents[documentInfo.uuid] = document
+                returnCallback(documentInfo, nil)
+            }
         }
 
         private func _beJoinDocument(userUUID: OwnerUUID,
                                      documentUUID: DocumentUUID,
-                                     _ returnCallback: @escaping (Error?) -> Void) {
+                                     _ returnCallback: @escaping (DocumentInfo?, Error?) -> Void) {
             guard let document = documents[documentUUID] else {
-                return returnCallback("The document does not exist")
+                return returnCallback(nil, "The document does not exist")
             }
-            document.beAdd(waiting: userUUID, self) { error in
-                guard error == nil else { return returnCallback(error) }
-                returnCallback(nil)
-            }
+            document.beAdd(waiting: userUUID,
+                           self,
+                           returnCallback)
         }
 
         private func _beCloseDocument(userUUID: OwnerUUID,
@@ -39,7 +42,7 @@ public extension Endeavour {
             }
             document.beAuthorize(owner: userUUID, self) { error in
                 guard error == nil else { return returnCallback(error) }
-                self.documents[document.unsafeDocumentUUID] = nil
+                self.documents[documentUUID] = nil
                 returnCallback(nil)
             }
         }
@@ -58,6 +61,19 @@ public extension Endeavour {
                               self,
                               returnCallback)
         }
+
+        private func _bePullDocument(userUUID: OwnerUUID,
+                                     documentUUID: DocumentUUID,
+                                     version: Int,
+                                     _ returnCallback: @escaping (HalfHitch?) -> Void) {
+            guard let document = documents[documentUUID] else {
+                return returnCallback("The document does not exist")
+            }
+            document.bePull(peer: userUUID,
+                            version: version,
+                            self,
+                            returnCallback)
+        }
     }
 }
 
@@ -69,10 +85,13 @@ extension Endeavour.Manager {
     @discardableResult
     public func beNewDocument(userUUID: OwnerUUID,
                               _ sender: Actor,
-                              _ callback: @escaping ((DocumentUUID?) -> Void)) -> Self {
+                              _ callback: @escaping ((DocumentInfo?, Error?) -> Void)) -> Self {
         unsafeSend {
-            let result = self._beNewDocument(userUUID: userUUID)
-            sender.unsafeSend { callback(result) }
+            self._beNewDocument(userUUID: userUUID) { arg0, arg1 in
+                sender.unsafeSend {
+                    callback(arg0, arg1)
+                }
+            }
         }
         return self
     }
@@ -80,11 +99,11 @@ extension Endeavour.Manager {
     public func beJoinDocument(userUUID: OwnerUUID,
                                documentUUID: DocumentUUID,
                                _ sender: Actor,
-                               _ callback: @escaping ((Error?) -> Void)) -> Self {
+                               _ callback: @escaping ((DocumentInfo?, Error?) -> Void)) -> Self {
         unsafeSend {
-            self._beJoinDocument(userUUID: userUUID, documentUUID: documentUUID) { arg0 in
+            self._beJoinDocument(userUUID: userUUID, documentUUID: documentUUID) { arg0, arg1 in
                 sender.unsafeSend {
-                    callback(arg0)
+                    callback(arg0, arg1)
                 }
             }
         }
@@ -113,6 +132,21 @@ extension Endeavour.Manager {
                                  _ callback: @escaping ((Error?) -> Void)) -> Self {
         unsafeSend {
             self._bePushToDocument(userUUID: userUUID, documentUUID: documentUUID, version: version, updates: updates) { arg0 in
+                sender.unsafeSend {
+                    callback(arg0)
+                }
+            }
+        }
+        return self
+    }
+    @discardableResult
+    public func bePullDocument(userUUID: OwnerUUID,
+                               documentUUID: DocumentUUID,
+                               version: Int,
+                               _ sender: Actor,
+                               _ callback: @escaping ((HalfHitch?) -> Void)) -> Self {
+        unsafeSend {
+            self._bePullDocument(userUUID: userUUID, documentUUID: documentUUID, version: version) { arg0 in
                 sender.unsafeSend {
                     callback(arg0)
                 }

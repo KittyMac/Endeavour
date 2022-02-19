@@ -80,24 +80,25 @@
     
     <script>
         InitFigurehead();
-
-        endeavour.new(function(response) {
-            documentUUID = response.documentUUID;
+        
+        let didJoinDocument = function(xhttp, serviceJson) {
+            documentUUID = serviceJson.documentUUID;
             
             let editor = cm.CreateEditor("editor", [
                 cm.swiftSetup,
                 cm.endeavourExtension(documentUUID, 0)
             ], true);
             
-            print(editor)
-        
-            //editor.dispatch({
-            //    changes: {from: 0, to: editor.state.doc.length, insert: `JAVASCRIPT_HELLOWORLD()`}
-            //});
+            editor.dispatch({
+                changes: {from: 0, to: editor.state.doc.length, insert: xhttp.responseText}
+            });
             
             documentHeader.innerText = `Document ${documentUUID}`;
             
-        });
+        };
+
+        //endeavour.new(didJoinDocument);
+        endeavour.join("GlobalDocument", didJoinDocument);
     </script>
     
 </body>

@@ -9,9 +9,9 @@ endeavour.send = function(api, callback) {
         let json = xhttp.getResponseHeader("Service-Response");
         if (json != undefined) {
             let response = JSON.parse(json);
-            callback(response);
+            callback(xhttp, response);
         } else {
-            callback(undefined);
+            callback(xhttp, undefined);
         }
     });
 }

@@ -10,45 +10,79 @@ public enum AccessMode {
     case `private`
 }
 
+public struct DocumentInfo {
+    let uuid: DocumentUUID
+    let content: DocumentContent
+    let version: DocumentVersion
+}
+
 public extension Endeavour {
     class Document: Actor {
 
-        let unsafeDocumentUUID = UUID().uuidHitch.halfhitch()
+        // let documentUUID: Hitch = UUID().uuidHitch
+        let documentUUID: Hitch = "GlobalDocument"
+
+        private var history = [Hitch]()
+        private let baseDocument: DocumentContent = "Hello World"
 
         private var owners: [OwnerUUID] = []
         private var peers: [OwnerUUID] = []
         private var waitings: [OwnerUUID] = []
 
-        private var accessMode = AccessMode.private
+        private var accessMode = AccessMode.public
+
+        private var waitingPulls = [(HalfHitch?) -> Void]()
 
         public init(owner: OwnerUUID) {
             owners.append(owner)
         }
 
-        private func confirm(new: OwnerUUID) -> Bool {
-            return owners.contains(new) == false && peers.contains(new) == false && waitings.contains(new) == false
+        private func getDocumentInfo() -> DocumentInfo {
+            return DocumentInfo(uuid: documentUUID,
+                                content: baseDocument,
+                                version: history.count)
         }
 
-        private func _beAdd(peer: OwnerUUID) -> Error? {
-            guard confirm(new: peer) else { return "You are already a peer of this document" }
+        private func canAdd(user: OwnerUUID) -> Bool {
+            return owners.contains(user) == false && peers.contains(user) == false && waitings.contains(user) == false
+        }
+
+        private func canRead(user: OwnerUUID) -> Bool {
+            return owners.contains(user) || peers.contains(user)
+        }
+
+        private func canWrite(user: OwnerUUID) -> Bool {
+            return owners.contains(user) || peers.contains(user)
+        }
+
+        private func _beAdd(peer: OwnerUUID,
+                            _ returnCallback: @escaping (DocumentInfo?, Error?) -> Void) {
+            guard canAdd(user: peer) else { return returnCallback(nil, "You are already a peer of this document") }
             peers.append(peer)
-            return nil
+            returnCallback(getDocumentInfo(), nil)
         }
 
-        private func _beAdd(owner: OwnerUUID) -> Error? {
-            guard confirm(new: owner) else { return "You are already an owner of this document" }
+        private func _beAdd(owner: OwnerUUID,
+                            _ returnCallback: @escaping (DocumentInfo?, Error?) -> Void) {
+            guard canAdd(user: owner) else { return returnCallback(nil, "You are already an owner of this document") }
             owners.append(owner)
-            return nil
+            returnCallback(getDocumentInfo(), nil)
         }
 
-        private func _beAdd(waiting: OwnerUUID) -> Error? {
-            guard confirm(new: waiting) else { return "You are already waiting to join this document" }
+        private func _beAdd(waiting: OwnerUUID,
+                            _ returnCallback: @escaping (DocumentInfo?, Error?) -> Void) {
+            guard accessMode == .private else {
+                // public documents have no waiting list, you can join as a peer
+                return _beAdd(peer: waiting, returnCallback)
+            }
+
+            guard canAdd(user: waiting) else { return returnCallback(nil, "You are already waiting to join this document") }
             waitings.append(waiting)
-            return nil
+            returnCallback(getDocumentInfo(), nil)
         }
 
         private func _beAuthorize(peer: OwnerUUID) -> Error? {
-            guard peers.contains(peer) || owners.contains(peer) else { return "You are not authorized as a peer of this document" }
+            guard peers.contains(peer) else { return "You are not authorized as a peer of this document" }
             return nil
         }
 
@@ -57,19 +91,55 @@ public extension Endeavour {
             return nil
         }
 
+        private func _beGetInfo(user: OwnerUUID,
+                                _ returnCallback: (DocumentInfo?, Error?) -> Void) {
+            guard canRead(user: user) else { return returnCallback(nil, "You are not authorized to access this document") }
+            returnCallback(getDocumentInfo(), nil)
+        }
+
         private func _bePushTo(peer: OwnerUUID,
                                version: Int,
                                updates: JsonElement) -> Error? {
             guard peers.contains(peer) || owners.contains(peer) else { return "You are not authorized as a peer of this document" }
+            guard version == history.count else { return "Wrong version" }
 
-            // TODO: save the updates?
-            print("""
-            Received updates for document {0}
-            Document version {1}
-            {2}
-            """ << [unsafeDocumentUUID, version, updates])
+            for update in updates.iterValues {
+                history.append(update.toHitch())
+            }
+
+            let updatesJson = updates.toHitch().halfhitch()
+            for longPull in waitingPulls {
+                longPull(updatesJson)
+            }
+            waitingPulls.removeAll()
 
             return nil
+        }
+
+        private func _bePull(peer: OwnerUUID,
+                             version: Int,
+                             _ returnCallback: @escaping (HalfHitch?) -> Void) {
+            guard peers.contains(peer) || owners.contains(peer) else {
+               return returnCallback(nil)
+            }
+
+            if version < history.count {
+                let combined = Hitch(capacity: 1024)
+                combined.append(.openBrace)
+                for idx in version..<history.count {
+                    let part = history[idx]
+                    combined.append(part)
+                    combined.append(.comma)
+                }
+                if combined.count > 1 {
+                    combined.count = combined.count - 1
+                }
+                combined.append(.closeBrace)
+                returnCallback(combined.halfhitch())
+                return
+            }
+
+            waitingPulls.append(returnCallback)
         }
     }
 }
@@ -82,30 +152,39 @@ extension Endeavour.Document {
     @discardableResult
     public func beAdd(peer: OwnerUUID,
                       _ sender: Actor,
-                      _ callback: @escaping ((Error?) -> Void)) -> Self {
+                      _ callback: @escaping ((DocumentInfo?, Error?) -> Void)) -> Self {
         unsafeSend {
-            let result = self._beAdd(peer: peer)
-            sender.unsafeSend { callback(result) }
+            self._beAdd(peer: peer) { arg0, arg1 in
+                sender.unsafeSend {
+                    callback(arg0, arg1)
+                }
+            }
         }
         return self
     }
     @discardableResult
     public func beAdd(owner: OwnerUUID,
                       _ sender: Actor,
-                      _ callback: @escaping ((Error?) -> Void)) -> Self {
+                      _ callback: @escaping ((DocumentInfo?, Error?) -> Void)) -> Self {
         unsafeSend {
-            let result = self._beAdd(owner: owner)
-            sender.unsafeSend { callback(result) }
+            self._beAdd(owner: owner) { arg0, arg1 in
+                sender.unsafeSend {
+                    callback(arg0, arg1)
+                }
+            }
         }
         return self
     }
     @discardableResult
     public func beAdd(waiting: OwnerUUID,
                       _ sender: Actor,
-                      _ callback: @escaping ((Error?) -> Void)) -> Self {
+                      _ callback: @escaping ((DocumentInfo?, Error?) -> Void)) -> Self {
         unsafeSend {
-            let result = self._beAdd(waiting: waiting)
-            sender.unsafeSend { callback(result) }
+            self._beAdd(waiting: waiting) { arg0, arg1 in
+                sender.unsafeSend {
+                    callback(arg0, arg1)
+                }
+            }
         }
         return self
     }
@@ -130,6 +209,19 @@ extension Endeavour.Document {
         return self
     }
     @discardableResult
+    public func beGetInfo(user: OwnerUUID,
+                          _ sender: Actor,
+                          _ callback: @escaping ((DocumentInfo?, Error?) -> Void)) -> Self {
+        unsafeSend {
+            self._beGetInfo(user: user) { arg0, arg1 in
+                sender.unsafeSend {
+                    callback(arg0, arg1)
+                }
+            }
+        }
+        return self
+    }
+    @discardableResult
     public func bePushTo(peer: OwnerUUID,
                          version: Int,
                          updates: JsonElement,
@@ -138,6 +230,20 @@ extension Endeavour.Document {
         unsafeSend {
             let result = self._bePushTo(peer: peer, version: version, updates: updates)
             sender.unsafeSend { callback(result) }
+        }
+        return self
+    }
+    @discardableResult
+    public func bePull(peer: OwnerUUID,
+                       version: Int,
+                       _ sender: Actor,
+                       _ callback: @escaping ((HalfHitch?) -> Void)) -> Self {
+        unsafeSend {
+            self._bePull(peer: peer, version: version) { arg0 in
+                sender.unsafeSend {
+                    callback(arg0)
+                }
+            }
         }
         return self
     }

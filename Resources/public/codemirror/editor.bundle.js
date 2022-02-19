@@ -3039,6 +3039,52 @@
         return [collabField, collabConfig.of(Object.assign({ generatedID: Math.floor(Math.random() * 1e9).toString(36) }, config))];
     }
     /**
+    Create a transaction that represents a set of new updates received
+    from the authority. Applying this transaction moves the state
+    forward to adjust to the authority's view of the document.
+    */
+    function receiveUpdates(state, updates) {
+        let { version, unconfirmed } = state.field(collabField);
+        let { clientID } = state.facet(collabConfig);
+        version += updates.length;
+        let own = 0;
+        while (own < updates.length && updates[own].clientID == clientID)
+            own++;
+        if (own) {
+            unconfirmed = unconfirmed.slice(own);
+            updates = updates.slice(own);
+        }
+        // If all updates originated with us, we're done.
+        if (!updates.length)
+            return state.update({ annotations: [collabReceive.of(new CollabState(version, unconfirmed))] });
+        let changes = updates[0].changes, effects = updates[0].effects || [];
+        for (let i = 1; i < updates.length; i++) {
+            let update = updates[i];
+            effects = StateEffect.mapEffects(effects, update.changes);
+            if (update.effects)
+                effects = effects.concat(update.effects);
+            changes = changes.compose(update.changes);
+        }
+        if (unconfirmed.length) {
+            unconfirmed = unconfirmed.map(update => {
+                let updateChanges = update.changes.map(changes);
+                changes = changes.map(update.changes, true);
+                return new LocalUpdate(update.origin, updateChanges, StateEffect.mapEffects(update.effects, changes), clientID);
+            });
+            effects = StateEffect.mapEffects(effects, unconfirmed.reduce((ch, u) => ch.compose(u.changes), ChangeSet.empty(unconfirmed[0].changes.length)));
+        }
+        return state.update({
+            changes,
+            effects,
+            annotations: [
+                Transaction.addToHistory.of(false),
+                Transaction.remote.of(true),
+                collabReceive.of(new CollabState(version, unconfirmed))
+            ],
+            filter: false
+        });
+    }
+    /**
     Returns the set of locally made updates that still have to be sent
     to the authority. The returned objects will also have an `origin`
     property that points at the transaction that created them. This
@@ -23134,27 +23180,35 @@
                     command: "push",
                     documentUUID: documentUUID,
                     version: version,
-                    updates: updates
-                }, function(xhttp) {
-                    localThis.receivedUpdate(xhttp);
+                    updates: updates,
+                }, function(response) {
+                    localThis.pushing = false;
+                    
+                    // Regardless of whether the push failed or new updates came in
+                    // while it was running, try again if there's updates remaining
+                    if (sendableUpdates(localThis.view.state).length) {
+                        setTimeout(() => localThis.push(), 100);
+                    }
                 });
                 
             }
             
-            receivedUpdate(xhttp) {
-                print(xhttp);
-
-                this.pushing = false;
-
-                // Regardless of whether the push failed or new updates came in
-                // while it was running, try again if there's updates remaining
-                //if (sendableUpdates(this.view.state).length) {
-                //    setTimeout(() => this.push(), 100)
-                //}
-            }
-            
             pull() {
-                print("PULL");
+                let version = getSyncedVersion(this.view.state) || 0;
+                let localThis = this;
+                
+                this.send({
+                    service: "EndeavourService",
+                    command: "pull",
+                    documentUUID: documentUUID,
+                    version: version,
+                }, function(response) {
+                    print(response);
+                    if (response != undefined) {
+                        localThis.view.dispatch(receiveUpdates(localThis.view.state, response));
+                        localThis.pull();
+                    }
+                });
             }
             
             /*
@@ -23171,7 +23225,11 @@
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
-                        callback(this);
+                        let json = xhttp.getResponseHeader("Service-Response");
+                        if (json != undefined) {
+                            let response = JSON.parse(json);
+                            callback(response);
+                        }
                     }
                 };
                 xhttp.open("POST", "/");
