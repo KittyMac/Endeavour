@@ -3481,7 +3481,7 @@
         Map this range set through a set of changes, return the new set.
         */
         map(changes) {
-            if (changes.length == 0 || this.isEmpty)
+            if (changes.empty || this.isEmpty)
                 return this;
             let chunks = [], chunkPos = [], maxPoint = -1;
             for (let i = 0; i < this.chunk.length; i++) {
@@ -18130,10 +18130,9 @@
             },
             provide: f => showHoverTooltip.from(f)
         });
-        let hoverTime = options.hoverTime || 600 /* Time */;
         return [
             hoverState,
-            ViewPlugin.define(view => new HoverPlugin(view, source, hoverState, setHover, hoverTime)),
+            ViewPlugin.define(view => new HoverPlugin(view, source, hoverState, setHover, options.hoverTime || 300 /* Time */)),
             showHoverTooltipHost
         ];
     }
@@ -18870,7 +18869,9 @@
         handleUserEvent(tr, type, conf) {
             let from = tr.changes.mapPos(this.from), to = tr.changes.mapPos(this.to, 1);
             let pos = cur(tr.state);
-            if ((this.explicitPos > -1 ? pos < from : pos <= from) || pos > to)
+            if ((this.explicitPos < 0 ? pos <= from : pos < this.from) ||
+                pos > to ||
+                type == "delete" && cur(tr.startState) == this.from)
                 return new ActiveSource(this.source, type == "input" && conf.activateOnTyping ? 1 /* Pending */ : 0 /* Inactive */);
             let explicitPos = this.explicitPos < 0 ? -1 : tr.changes.mapPos(this.explicitPos);
             if (this.span && (from == to || this.span.test(tr.state.sliceDoc(from, to))))
@@ -19222,7 +19223,9 @@
             this.to = to;
         }
         map(changes) {
-            return new FieldRange(this.field, changes.mapPos(this.from, -1), changes.mapPos(this.to, 1));
+            let from = changes.mapPos(this.from, -1, MapMode.TrackDel);
+            let to = changes.mapPos(this.to, 1, MapMode.TrackDel);
+            return from == null || to == null ? null : new FieldRange(this.field, from, to);
         }
     }
     class Snippet {
@@ -19291,7 +19294,14 @@
             this.deco = Decoration.set(ranges.map(r => (r.from == r.to ? fieldMarker : fieldRange).range(r.from, r.to)));
         }
         map(changes) {
-            return new ActiveSnippet(this.ranges.map(r => r.map(changes)), this.active);
+            let ranges = [];
+            for (let r of this.ranges) {
+                let mapped = r.map(changes);
+                if (!mapped)
+                    return null;
+                ranges.push(mapped);
+            }
+            return new ActiveSnippet(ranges, this.active);
         }
         selectionInsideField(sel) {
             return sel.ranges.every(range => this.ranges.some(r => r.field == this.active && r.from <= range.from && r.to >= range.to));
@@ -23150,7 +23160,10 @@
         },
     });
 
-    cm.endeavourExtension = function (documentUUID, startVersion) {
+    cm.endeavourExtension = function (serviceJson) {
+        let documentUUID = serviceJson.documentUUID;
+        let documentVersion = serviceJson.version;
+        
         let plugin = ViewPlugin.fromClass(class {
             pushing = false;
             
@@ -23166,16 +23179,16 @@
             }
             
             push() {
-                let updates = sendableUpdates(this.view.state);
-                if (this.pushing || !updates.length) {
+                let localThis = this;
+                
+                let updates = sendableUpdates(localThis.view.state);
+                if (this.pushing || updates.length == 0) {
                     return
                 }
                 
-                let version = getSyncedVersion(this.view.state);
-                let localThis = this;
-                
-                this.pushing = true;
-                this.send({
+                let version = getSyncedVersion(localThis.view.state);
+                localThis.pushing = true;
+                localThis.send({
                     service: "EndeavourService",
                     command: "push",
                     documentUUID: documentUUID,
@@ -23190,45 +23203,43 @@
                         setTimeout(() => localThis.push(), 100);
                     }
                 });
-                
             }
             
             pull() {
-                let version = getSyncedVersion(this.view.state) || 0;
                 let localThis = this;
                 
-                this.send({
+                
+                let version = getSyncedVersion(this.view.state) || 0;
+                localThis.send({
                     service: "EndeavourService",
                     command: "pull",
                     documentUUID: documentUUID,
                     version: version,
                 }, function(response) {
-                    print(response);
                     if (response != undefined) {
-                        localThis.view.dispatch(receiveUpdates(localThis.view.state, response));
+                        let changes = response.map(function(x) {
+                            return {
+                                changes: ChangeSet.fromJSON(x.changes),
+                                clientID: x.clientID
+                            };
+                        });
+                        localThis.view.dispatch(receiveUpdates(localThis.view.state, changes));
                         localThis.pull();
                     }
                 });
             }
-            
-            /*
-            async pull() {
-                while (!this.done) {
-                    let version = getSyncedVersion(this.view.state)
-                    let updates = await pullUpdates(connection, version)
-                    this.view.dispatch(receiveUpdates(this.view.state, updates))
-                }
-            }
-            */
-            
+        
             send(command, callback) {
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
-                        let json = xhttp.getResponseHeader("Service-Response");
-                        if (json != undefined) {
-                            let response = JSON.parse(json);
-                            callback(response);
+                        xhttp.getResponseHeader("Service-Response");
+                        try {
+                            let updatesJson = JSON.parse(xhttp.responseText);
+                            callback(updatesJson);
+                        }
+                        catch (error) {
+                            callback();
                         }
                     }
                 };
@@ -23246,11 +23257,10 @@
             
             destroy() {  }
         });
-        return [collab({startVersion}), plugin]
+        return [collab({documentVersion}), plugin]
     };
 
-
-    cm.CreateEditor = function(parentDivId, extensions, editable=true) {
+    cm.CreateEditor = function(parentDivId, extensions, content="", editable=true) {
         let parentDiv = document.getElementById(parentDivId);
         
         extensions.push(myTheme);
@@ -23267,6 +23277,7 @@
             
         return new EditorView({
             state: EditorState.create({
+                doc: Text.of(content.split("\n")),
                 extensions: extensions,
                 tabSize: 2
             }),

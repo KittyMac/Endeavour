@@ -1,4 +1,4 @@
-import {Update, receiveUpdates, sendableUpdates, collab, getSyncedVersion} from "@codemirror/collab"
+import {Update, receiveUpdates, sendableUpdates, collab, getSyncedVersion, getClientID} from "@codemirror/collab"
 import {ViewPlugin, keymap, highlightSpecialChars, drawSelection, highlightActiveLine, dropCursor} from "@codemirror/view"
 import {ChangeSet, Text, EditorState} from "@codemirror/state"
 import {history, historyKeymap} from "@codemirror/history"
@@ -145,7 +145,10 @@ const myTheme = EditorView.baseTheme({
     },
 })
 
-cm.endeavourExtension = function (documentUUID, startVersion) {
+cm.endeavourExtension = function (serviceJson) {
+    let documentUUID = serviceJson.documentUUID;
+    let documentVersion = serviceJson.version;
+    
     let plugin = ViewPlugin.fromClass(class {
         pushing = false;
         
@@ -161,16 +164,16 @@ cm.endeavourExtension = function (documentUUID, startVersion) {
         }
         
         push() {
-            let updates = sendableUpdates(this.view.state)
-            if (this.pushing || !updates.length) {
+            let localThis = this;
+            
+            let updates = sendableUpdates(localThis.view.state)
+            if (this.pushing || updates.length == 0) {
                 return
             }
             
-            let version = getSyncedVersion(this.view.state)
-            let localThis = this;
-            
-            this.pushing = true;
-            this.send({
+            let version = getSyncedVersion(localThis.view.state)
+            localThis.pushing = true;
+            localThis.send({
                 service: "EndeavourService",
                 command: "push",
                 documentUUID: documentUUID,
@@ -185,45 +188,43 @@ cm.endeavourExtension = function (documentUUID, startVersion) {
                     setTimeout(() => localThis.push(), 100)
                 }
             });
-            
         }
         
         pull() {
-            let version = getSyncedVersion(this.view.state) || 0
             let localThis = this;
             
-            this.send({
+            
+            let version = getSyncedVersion(this.view.state) || 0
+            localThis.send({
                 service: "EndeavourService",
                 command: "pull",
                 documentUUID: documentUUID,
                 version: version,
             }, function(response) {
-                print(response);
                 if (response != undefined) {
-                    localThis.view.dispatch(receiveUpdates(localThis.view.state, response));
+                    let changes = response.map(function(x) {
+                        return {
+                            changes: ChangeSet.fromJSON(x.changes),
+                            clientID: x.clientID
+                        };
+                    });
+                    localThis.view.dispatch(receiveUpdates(localThis.view.state, changes));
                     localThis.pull()
                 }
             });
         }
-        
-        /*
-        async pull() {
-            while (!this.done) {
-                let version = getSyncedVersion(this.view.state)
-                let updates = await pullUpdates(connection, version)
-                this.view.dispatch(receiveUpdates(this.view.state, updates))
-            }
-        }
-        */
-        
+    
         send(command, callback) {
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
-                    let json = xhttp.getResponseHeader("Service-Response");
-                    if (json != undefined) {
-                        let response = JSON.parse(json);
-                        callback(response);
+                    let serviceJson = xhttp.getResponseHeader("Service-Response");
+                    try {
+                        let updatesJson = JSON.parse(xhttp.responseText);
+                        callback(updatesJson);
+                    }
+                    catch (error) {
+                        callback();
                     }
                 }
             };
@@ -241,11 +242,10 @@ cm.endeavourExtension = function (documentUUID, startVersion) {
         
         destroy() {  }
     })
-    return [collab({startVersion}), plugin]
+    return [collab({documentVersion}), plugin]
 }
 
-
-cm.CreateEditor = function(parentDivId, extensions, editable=true) {
+cm.CreateEditor = function(parentDivId, extensions, content="", editable=true) {
     let parentDiv = document.getElementById(parentDivId);
     
     extensions.push(myTheme);
@@ -262,6 +262,7 @@ cm.CreateEditor = function(parentDivId, extensions, editable=true) {
         
     return new EditorView({
         state: EditorState.create({
+            doc: Text.of(content.split("\n")),
             extensions: extensions,
             tabSize: 2
         }),

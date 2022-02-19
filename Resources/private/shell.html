@@ -70,7 +70,10 @@
             ID_ELEMENT(documentHeader,LATO(1)START(),Creating new document...)
         )
         ELEMENT(VSTACK()GROW()STRETCH()MINHEIGHT(10)STDSHADOW()MARGIN(0.5,2,2,2)BACKGROUND(255,255,255,1),
-            ID_ELEMENT(editor,SHRINK()PCTWIDTH(100)CLIPS(),)
+            ID_ELEMENT(editorNew,SHRINK()PCTWIDTH(100)CLIPS(),)
+        )
+        ELEMENT(VSTACK()GROW()STRETCH()MINHEIGHT(10)STDSHADOW()MARGIN(0.5,2,2,2)BACKGROUND(255,255,255,1),
+            ID_ELEMENT(editorJoin,SHRINK()PCTWIDTH(100)CLIPS(),)
         )
     )
         
@@ -81,24 +84,27 @@
     <script>
         InitFigurehead();
         
-        let didJoinDocument = function(xhttp, serviceJson) {
-            documentUUID = serviceJson.documentUUID;
-            
-            let editor = cm.CreateEditor("editor", [
+        endeavour.new(function(xhttp, serviceJson) {            
+            let editor = cm.CreateEditor("editorNew", [
                 cm.swiftSetup,
-                cm.endeavourExtension(documentUUID, 0)
-            ], true);
+                cm.endeavourExtension(serviceJson)
+            ], xhttp.responseText, true);
+            documentHeader.innerText = `Document ${serviceJson.documentUUID}`;
             
-            editor.dispatch({
-                changes: {from: 0, to: editor.state.doc.length, insert: xhttp.responseText}
+            
+            // Simple peer on the same page...
+            endeavour.join(serviceJson.documentUUID, function(xhttp, serviceJson) {            
+                let editor = cm.CreateEditor("editorJoin", [
+                    cm.swiftSetup,
+                    cm.endeavourExtension(serviceJson)
+                ], xhttp.responseText, true);
             });
-            
-            documentHeader.innerText = `Document ${documentUUID}`;
-            
-        };
-
-        //endeavour.new(didJoinDocument);
-        endeavour.join("GlobalDocument", didJoinDocument);
+        });
+        
+        
+        
+        
+        //endeavour.join("GlobalDocument", didJoinDocument);
     </script>
     
 </body>

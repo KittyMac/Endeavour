@@ -149,7 +149,7 @@ extension EndeavourService {
             guard let json = json else {
                 return returnCallback(nil, HttpResponse(error: "document history is nil"))
             }
-            returnCallback(Spanker.parse(halfhitch: json), nil)
+            returnCallback(nil, HttpResponse(json: json))
         }
     }
 }

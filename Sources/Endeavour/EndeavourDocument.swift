@@ -19,8 +19,7 @@ public struct DocumentInfo {
 public extension Endeavour {
     class Document: Actor {
 
-        // let documentUUID: Hitch = UUID().uuidHitch
-        let documentUUID: Hitch = "GlobalDocument"
+        let documentUUID: Hitch = UUID().uuidHitch
 
         private var history = [Hitch]()
         private let baseDocument: DocumentContent = "Hello World"
@@ -40,7 +39,7 @@ public extension Endeavour {
         private func getDocumentInfo() -> DocumentInfo {
             return DocumentInfo(uuid: documentUUID,
                                 content: baseDocument,
-                                version: history.count)
+                                version: 0)
         }
 
         private func canAdd(user: OwnerUUID) -> Bool {
@@ -57,15 +56,17 @@ public extension Endeavour {
 
         private func _beAdd(peer: OwnerUUID,
                             _ returnCallback: @escaping (DocumentInfo?, Error?) -> Void) {
-            guard canAdd(user: peer) else { return returnCallback(nil, "You are already a peer of this document") }
-            peers.append(peer)
+            if canAdd(user: peer) {
+                peers.append(peer)
+            }
             returnCallback(getDocumentInfo(), nil)
         }
 
         private func _beAdd(owner: OwnerUUID,
                             _ returnCallback: @escaping (DocumentInfo?, Error?) -> Void) {
-            guard canAdd(user: owner) else { return returnCallback(nil, "You are already an owner of this document") }
-            owners.append(owner)
+            if canAdd(user: owner) {
+                owners.append(owner)
+            }
             returnCallback(getDocumentInfo(), nil)
         }
 
@@ -75,9 +76,9 @@ public extension Endeavour {
                 // public documents have no waiting list, you can join as a peer
                 return _beAdd(peer: waiting, returnCallback)
             }
-
-            guard canAdd(user: waiting) else { return returnCallback(nil, "You are already waiting to join this document") }
-            waitings.append(waiting)
+            if canAdd(user: waiting) {
+                waitings.append(waiting)
+            }
             returnCallback(getDocumentInfo(), nil)
         }
 
@@ -101,7 +102,7 @@ public extension Endeavour {
                                version: Int,
                                updates: JsonElement) -> Error? {
             guard peers.contains(peer) || owners.contains(peer) else { return "You are not authorized as a peer of this document" }
-            guard version == history.count else { return "Wrong version" }
+            guard version == history.count else { return "Wrong version ({0} != {1})" << [version, history.count] }
 
             for update in updates.iterValues {
                 history.append(update.toHitch())
