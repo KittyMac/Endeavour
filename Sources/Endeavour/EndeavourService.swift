@@ -26,7 +26,7 @@ public class EndeavourService: ServiceActor {
             return returnCallback(nil, HttpResponse(error: "command is missing"))
         }
 
-        print(jsonElement)
+        // print(jsonElement)
 
         switch command {
         case "new":

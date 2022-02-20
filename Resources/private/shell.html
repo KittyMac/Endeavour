@@ -3,6 +3,20 @@
 #include <../../.build/checkouts/Figurehead/Resources/figurehead.html>
 #include <./endeavour/endeavour.html>
 
+#macro EDITOR(ID)
+ID_ELEMENT(document##ID, VSTACK(),
+    ELEMENT(HSTACK()BETWEEN()MARGIN(1,1,0,1),
+        ID_ELEMENT(header##ID,LATO(1)FBLACK()START()BOTTOM(),Creating new document...)
+        ANY_BUTTON(AROUND()BOTTOM()SIZEALL(2,2)CLICKABLE(),closeDocument('ID'),
+            IMAGE(SIZEALL(1,1),public/close.svg)
+        )
+    )
+    ELEMENT(VSTACK()GROW()STRETCH()MINHEIGHT(10)STDSHADOW()MARGIN(0.5,1,1,1)BACKGROUND(255,255,255,1),
+        ID_ELEMENT(editor##ID,GROW()PCTWIDTH(100)CLIPS(),)
+    )
+)
+#endmacro
+
 <!doctype html>
 <html>
 <head>
@@ -59,22 +73,18 @@
     ELEMENT(VSTACK()PCTMINHEIGHT(100)GROW()STRETCH(),
         GITHUB("https://github.com/KittyMac/Endeavour",#535457)
         
-        ELEMENT(HSTACK()MINHEIGHT(5)PCTWIDTH(100)MARGIN(1,2,0,2),
+        ELEMENT(HSTACK()MINHEIGHT(5)PCTWIDTH(100)MARGIN(1,1,0,1),
             ELEMENT(VSTACK()GROW()MINHEIGHT(5),
                 HEADER2(Endeavour)
-                TEXT(Collaborative code editor using CodeMirror6 and Picaroon)
+                TEXT(Collaborative Swift editor using CodeMirror6)
             )
         )
+        ELEMENT(HSTACK()END()MARGIN(0,0.5,0,0.5)GROW()SELF_STRETCH(),
+            ID_BUTTON(newDocumentButton,PADDING(0,1,0,1),New Document,newDocument())
+            ID_BUTTON(joinDocumentButton,PADDING(0,1,0,1),Join Document,askJoinDocument())
+        )
+        ID_ELEMENT(documents, VSTACK()PCTWIDTH(100),)
         
-        ELEMENT(HSTACK()BETWEEN()MARGIN(1,2,0,2),
-            ID_ELEMENT(documentHeader,LATO(1)START(),Creating new document...)
-        )
-        ELEMENT(VSTACK()GROW()STRETCH()MINHEIGHT(10)STDSHADOW()MARGIN(0.5,2,2,2)BACKGROUND(255,255,255,1),
-            ID_ELEMENT(editorNew,SHRINK()PCTWIDTH(100)CLIPS(),)
-        )
-        ELEMENT(VSTACK()GROW()STRETCH()MINHEIGHT(10)STDSHADOW()MARGIN(0.5,2,2,2)BACKGROUND(255,255,255,1),
-            ID_ELEMENT(editorJoin,SHRINK()PCTWIDTH(100)CLIPS(),)
-        )
     )
         
     ID_ELEMENT(alertsContainer,FULLSCREEN()ABSOLUTE()BACKGROUND(0,0,0,0.5)CENTER()CLIPS()HIDE(),)
@@ -84,27 +94,64 @@
     <script>
         InitFigurehead();
         
-        endeavour.new(function(xhttp, serviceJson) {            
-            let editor = cm.CreateEditor("editorNew", [
+        function handleCreateDocument(xhttp, serviceJson) {
+            let documentUUID = serviceJson.documentUUID;
+            let documentID = `document${documentUUID}`
+            let editorID = `editor${documentUUID}`
+            let headerID = `header${documentUUID}`
+            
+            print(`handleCreateDocument(${documentUUID})`)
+                
+            let html = `EDITOR(${documentUUID})`
+            insertHtml(documents, html);
+
+            let editor = cm.CreateEditor(editorID, [
                 cm.swiftSetup,
                 cm.endeavourExtension(serviceJson)
             ], xhttp.responseText, true);
-            documentHeader.innerText = `Document ${serviceJson.documentUUID}`;
+
+            let documentHeader = document.getElementById(headerID);
+            documentHeader.innerText = `Document ${documentUUID}`;
             
-            
-            // Simple peer on the same page...
-            endeavour.join(serviceJson.documentUUID, function(xhttp, serviceJson) {            
-                let editor = cm.CreateEditor("editorJoin", [
-                    cm.swiftSetup,
-                    cm.endeavourExtension(serviceJson)
-                ], xhttp.responseText, true);
+            let myDocument = document.getElementById(documentID);
+            Laba.animate(myDocument, "!<200!f")
+        }
+        
+        function askJoinDocument() {
+            ask("What document would you like to join?",
+                "enter document uuid here",
+                ["Cancel", "Join"], 
+                [undefined, function(uuid) {
+                    joinDocument(uuid);
+                }]);
+        }
+        
+        function closeDocument(documentUUID) {
+            endeavour.close(documentUUID, function(xhttp, serviceJson) {
+                let documentID = `document${documentUUID}`
+                let myDocument = document.getElementById(documentID);
+                let fromHeight = myDocument.clientHeight;
+                Laba.animate(myDocument, "^50f0", function(item,t) {
+                    item.style.height = lerp(fromHeight,0,t) + "px";
+                }, function() {
+                    removeFromParent(myDocument);
+                });
             });
-        });
+            print(documentUUID)
+        }
         
+        function newDocument() {
+            endeavour.new(handleCreateDocument);
+        }
         
+        function joinDocument(documentUUID) {
+            print(`endeavour.join(${documentUUID})`)
+            endeavour.join(documentUUID, handleCreateDocument);
+        }
         
+        //newDocument();
+        //newDocument();
         
-        //endeavour.join("GlobalDocument", didJoinDocument);
     </script>
     
 </body>

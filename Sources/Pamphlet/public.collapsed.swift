@@ -3,6 +3,43 @@ import Foundation
 // swiftlint:disable all
 
 public extension Pamphlet.Public {
+    static func CloseSvg() -> String {
+    #if DEBUG
+        let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/Endeavour/Resources/public/close.svg"
+        if let contents = try? String(contentsOf:URL(fileURLWithPath: fileOnDiskPath)) {
+            if contents.hasPrefix("#define PAMPHLET_PREPROCESSOR") {
+                do {
+                    let task = Process()
+                    task.executableURL = URL(fileURLWithPath: "/usr/local/bin/pamphlet")
+                    task.arguments = ["preprocess", fileOnDiskPath]
+                    let outputPipe = Pipe()
+                    task.standardOutput = outputPipe
+                    try task.run()
+                    let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+                    let output = String(decoding: outputData, as: UTF8.self)
+                    return output
+                } catch {
+                    return "Failed to use /usr/local/bin/pamphlet to preprocess the requested file"
+                }
+            }
+            return contents
+        }
+        return String()
+    #else
+        return uncompressedCloseSvg
+    #endif
+    }
+    static func CloseSvgGzip() -> Data {
+        return compressedCloseSvg
+    }
+}
+
+private let uncompressedCloseSvg = ###"""
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 32 32" x="0px" y="0px"><title>close</title><path fill="#535457" d="M23.879 21.22l-5.224-5.221 5.22-5.224c0.602-0.6 0.602-1.565 0.002-2.167l-0.485-0.486c-0.285-0.292-0.675-0.451-1.085-0.451-0.002 0-0.002 0-0.002 0-0.41 0-0.795 0.161-1.083 0.45l-5.222 5.226-5.224-5.22c-0.599-0.6-1.563-0.603-2.165-0.003l-0.486 0.481c-0.293 0.287-0.453 0.677-0.453 1.086 0 0.411 0.161 0.798 0.45 1.086l5.226 5.222-5.221 5.224c-0.602 0.6-0.602 1.565-0.002 2.169l0.485 0.485c0.287 0.292 0.676 0.451 1.086 0.451 0.408 0 0.798-0.163 1.085-0.45l5.221-5.225 5.222 5.219c0.296 0.299 0.69 0.45 1.085 0.45 0.391 0 0.783-0.149 1.082-0.447l0.485-0.484c0.294-0.285 0.453-0.675 0.453-1.085 0.002-0.41-0.159-0.797-0.448-1.086z"></path></svg>
+"""###
+private let compressedCloseSvg = Data(base64Encoded:"H4sIAAAAAAACA22S3W7DIAyFXwWx6xLMX2BKerH7PcSUdV0l1lRN1HR7+uFDs/ZiUmQfArY/bLrpshfXr3ycevk5z6fnplmWRS1Wjed9Y7TWTTkhxWV3ng7jsZekqKwOu+VlvPZSCy2sKZ8UvDpdpfiuftvNhznvtkMep13X1EV3eps/xcch514+eeudb6V47+WrsSq2SRhSxuSNL9bBkmBbfwxaBW02xYqqSPngi9ZFG0WhzWXTRQ8bhuIMFiYhqsWGpxKn46oRLfQ/3hFcm7gEhRpmBYdVQgO28EDLJX1KXAxwlpW2gPNIbSsi38BFAmLinCa2AGId2lVzxXKUDxNVCsFEERR1OwMCKOahZW5AbcP5bgrtul2QiVJGt4DiBzAINAsMQPS0MkAXqyN4CsOGeSpjbSZICAxe/DWIEqdOAakTp053el+lVjZRzRu5Z+QStnlszrX5PlWHZK6OFsG2jvam16QaD8XxfMknjBFNdRFHwk95nw0/xuLK+97+AtlhE3MHAwAA")!
+
+public extension Pamphlet.Public {
     static func Icon192Png() -> Data {
     #if DEBUG
         let fileOnDiskPath = "/Volumes/Development/Development/chimerasw3/Endeavour/Resources/public/icon192.png"

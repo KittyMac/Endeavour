@@ -7,6 +7,7 @@ import Foundation
 public enum Pamphlet {
     public static func get(string member: String) -> String? {
         switch member {
+        case "/public/close.svg": return Pamphlet.Public.CloseSvg()
         case "/public/codemirror/editor.bundle.js": return Pamphlet.Public.Codemirror.EditorBundleJs()
         case "/private/endeavour/endeavour.html": return Pamphlet.Private.Endeavour.EndeavourHtml()
         case "/private/endeavour/endeavour.js": return Pamphlet.Private.Endeavour.EndeavourJs()
@@ -23,6 +24,7 @@ public enum Pamphlet {
             return nil
         #else
             switch member {
+        case "/public/close.svg": return Pamphlet.Public.CloseSvgGzip()
         case "/public/codemirror/editor.bundle.js": return Pamphlet.Public.Codemirror.EditorBundleJsGzip()
         case "/private/endeavour/endeavour.html": return Pamphlet.Private.Endeavour.EndeavourHtmlGzip()
         case "/private/endeavour/endeavour.js": return Pamphlet.Private.Endeavour.EndeavourJsGzip()
@@ -47,8 +49,8 @@ public enum Pamphlet {
         return nil
     }
 }
+public extension Pamphlet { enum Public { } }
 public extension Pamphlet.Public { enum Codemirror { } }
 public extension Pamphlet.Private { enum Endeavour { } }
-public extension Pamphlet { enum Public { } }
 public extension Pamphlet { enum Private { } }
 public extension Pamphlet.Public { enum Fonts { } }

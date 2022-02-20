@@ -22,7 +22,7 @@ public extension Endeavour {
         let documentUUID: Hitch = UUID().uuidHitch
 
         private var history = [Hitch]()
-        private let baseDocument: DocumentContent = "Hello World"
+        private let baseDocument: DocumentContent = ""
 
         private var owners: [OwnerUUID] = []
         private var peers: [OwnerUUID] = []
