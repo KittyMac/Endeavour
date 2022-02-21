@@ -48,7 +48,7 @@ cm.swiftSetup = [
         ...completionKeymap,
         ...lintKeymap
     ]),
-    indentUnit.of("  "),
+    indentUnit.of("    "),
     keymap.of([indentWithTab]),
     swift()
 ]
@@ -76,7 +76,7 @@ cm.javascriptSetup = [
         ...completionKeymap,
         ...lintKeymap
     ]),
-    indentUnit.of("  "),
+    indentUnit.of("    "),
     keymap.of([indentWithTab]),
     javascript()
 ]
@@ -105,7 +105,7 @@ cm.jsonSetup = [
         ...completionKeymap,
         ...lintKeymap
     ]),
-    indentUnit.of("  "),
+    indentUnit.of("    "),
     keymap.of([indentWithTab]),
     json()
 ]
@@ -129,7 +129,7 @@ cm.minimalSetup = [
         ...completionKeymap,
         ...lintKeymap
     ]),
-    indentUnit.of("  "),
+    indentUnit.of("    "),
     keymap.of([indentWithTab]),
     json()
 ]
@@ -266,7 +266,7 @@ cm.CreateEditor = function(parentDivId, extensions, content="", editable=true) {
         state: EditorState.create({
             doc: Text.of(content.split("\n")),
             extensions: extensions,
-            tabSize: 2
+            tabSize: 4
         }),
         parent: parentDiv
     })
