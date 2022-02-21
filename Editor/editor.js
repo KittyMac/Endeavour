@@ -20,6 +20,8 @@ import {indentWithTab} from "@codemirror/commands"
 import {json} from "@codemirror/lang-json"
 import {javascript} from "@codemirror/lang-javascript"
 
+import {swift} from "./index.swift.js"
+
 let cm = {};
 window.cm = cm;
 
@@ -48,7 +50,7 @@ cm.swiftSetup = [
     ]),
     indentUnit.of("  "),
     keymap.of([indentWithTab]),
-    javascript()
+    swift()
 ]
 
 cm.javascriptSetup = [
