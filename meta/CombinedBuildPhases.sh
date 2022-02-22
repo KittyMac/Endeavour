@@ -10,7 +10,7 @@ if [ "$(uname)" == "Darwin" ]; then
     
     killall Endeavour || true
     
-    time ./pamphlet --collapse ../Resources/ ../Sources/Pamphlet/
+    time ./pamphlet --collapse ../Resources/ ../Sources/EndeavourPamphlet/
     
     make -C ../Editor/ all
     

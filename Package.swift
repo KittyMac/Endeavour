@@ -36,14 +36,14 @@ let package = Package(
                 "Flynn",
                 "Sextant",
                 "Hitch",
-                "Pamphlet",
                 "Gzip",
                 "Picaroon",
+                "EndeavourPamphlet",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]
         ),
         .target(
-            name: "Pamphlet"
+            name: "EndeavourPamphlet"
         ),
         .testTarget(
             name: "EndeavourTests",
