@@ -29,6 +29,7 @@ ID_ELEMENT(document##ID, VSTACK(),
     <link rel="apple-touch-icon" sizes="512x512" href="/public/icon512.png">
     
     #include <./shell.fonts.html>
+    #include <./endeavour/editor.fonts.html>
     
     <script>
         // Required by Picaroon to hook up server-side actor with user to maintain state across connections
@@ -89,7 +90,7 @@ ID_ELEMENT(document##ID, VSTACK(),
         
     ID_ELEMENT(alertsContainer,FULLSCREEN()ABSOLUTE()BACKGROUND(0,0,0,0.5)CENTER()CLIPS()HIDE(),)
     
-    <script src="public/codemirror/editor.bundle.js"></script>
+    <script src="public/endeavour/editor.bundle.js"></script>
     
     <script>
         InitFigurehead();

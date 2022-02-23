@@ -10,9 +10,13 @@ if [ "$(uname)" == "Darwin" ]; then
     
     killall Endeavour || true
     
-    time ./pamphlet --collapse ../Resources/ ../Sources/EndeavourPamphlet/
+    time ./pamphlet --prefix Endeavour --collapse ../Resources/ ../Sources/EndeavourPamphlet/
     
     make -C ../Editor/ all
+    
+    # make the dist
+    rsync -av --progress --delete ../Resources/public/endeavour/ ../dist/public/endeavour
+    rsync -av --progress --delete ../Resources/private/endeavour/ ../dist/private/endeavour
     
     # FlynnLint - Confirms all Flynn code is concurrently safe
     FLYNNLINTSWIFTPM=../.build/checkouts/flynn/meta/FlynnLint

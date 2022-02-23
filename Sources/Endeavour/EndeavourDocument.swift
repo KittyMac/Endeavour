@@ -16,6 +16,27 @@ let f = x
 var x1 = "a", y1 = "b", z1 = "c"
 let x2 = 0, y2 = 1, z2 = 1
 
+func test() {
+    var x = 10
+    repeat {
+        x -= 1
+    } while x >= 0
+
+    while true {
+        if true {
+            continue
+        }
+        break
+    }
+
+    switch x {
+        // Comment
+        case 0: break
+        case 1: return
+        default: print("default") break
+    }
+}
+
 private func canAdd(user: OwnerUUID) -> Bool {
     return owners.contains(user) == false && peers.contains(user) == false && waitings.contains(user) == false
 }
