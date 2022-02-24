@@ -17,7 +17,7 @@ public struct DocumentInfo {
 }
 
 extension Endeavour {
-    class Document: Actor {
+    public class Document: Actor {
 
         private let documentUUID: Hitch
 
@@ -30,7 +30,11 @@ extension Endeavour {
 
         private var accessMode = AccessMode.public
 
-        private var waitingPulls = [(HalfHitch?) -> Void]()
+        private var subscribedServices = [Service]()
+
+        // TODO: ALLOW ONLY ONE OWNER
+        // TODO: USERS SHOULD "LEAVE" A DOCUMENT NOT "CLOSE" A DOCUMENT
+        // TODO: DOCUMENT IS "CLOSED" WHEN THE OWNER LEAVES THE DOCUMENT
 
         public init(owner: OwnerUUID,
                     content: Hitch?) {
@@ -109,32 +113,48 @@ extension Endeavour {
             returnCallback(getDocumentInfo(), nil)
         }
 
-        private func _bePushTo(peer: OwnerUUID,
-                               version: Int,
-                               updates: JsonElement) -> Error? {
+        private func _bePublish(peer: OwnerUUID,
+                                version: Int,
+                                updates: JsonElement) -> Error? {
             guard peers.contains(peer) || owners.contains(peer) else { return "You are not authorized as a peer of this document" }
-            guard version == history.count else { return "Wrong version ({0} != {1})" << [version, history.count] }
+            guard version == history.count else {
+                return "Wrong version ({0} != {1})" << [version, history.count]
+            }
 
             for update in updates.iterValues {
                 history.append(update.toHitch())
             }
 
-            let updatesJson = updates.toHitch().halfhitch()
-            for longPull in waitingPulls {
-                longPull(updatesJson)
+            for service in subscribedServices {
+                service.beDocumentDidUpdate(document: self,
+                                            documentUUID: documentUUID,
+                                            documentVersion: history.count)
             }
-            waitingPulls.removeAll()
 
             return nil
         }
 
-        private func _bePull(peer: OwnerUUID,
-                             version: Int,
-                             _ returnCallback: @escaping (HalfHitch?) -> Void) {
+        private func _beSubscribe(peer: OwnerUUID,
+                                  service: Endeavour.Service) {
             guard peers.contains(peer) || owners.contains(peer) else {
-               return returnCallback(nil)
+               return
             }
 
+            subscribedServices.removeAll(service)
+            subscribedServices.append(service)
+
+            service.beDocumentDidUpdate(document: self,
+                                        documentUUID: documentUUID,
+                                        documentVersion: history.count)
+        }
+
+        private func _beGetUpdates(peer: OwnerUUID,
+                                   version: DocumentVersion) -> HalfHitch? {
+            guard peers.contains(peer) || owners.contains(peer) else {
+               return nil
+            }
+
+            print("\(version) < \(history.count)")
             if version < history.count {
                 let combined = Hitch(capacity: 1024)
                 combined.append(.openBrace)
@@ -147,11 +167,10 @@ extension Endeavour {
                     combined.count = combined.count - 1
                 }
                 combined.append(.closeBrace)
-                returnCallback(combined.halfhitch())
-                return
+                return combined.halfhitch()
             }
 
-            waitingPulls.append(returnCallback)
+            return nil
         }
     }
 }
@@ -234,28 +253,31 @@ extension Endeavour.Document {
         return self
     }
     @discardableResult
-    public func bePushTo(peer: OwnerUUID,
-                         version: Int,
-                         updates: JsonElement,
-                         _ sender: Actor,
-                         _ callback: @escaping ((Error?) -> Void)) -> Self {
+    public func bePublish(peer: OwnerUUID,
+                          version: Int,
+                          updates: JsonElement,
+                          _ sender: Actor,
+                          _ callback: @escaping ((Error?) -> Void)) -> Self {
         unsafeSend {
-            let result = self._bePushTo(peer: peer, version: version, updates: updates)
+            let result = self._bePublish(peer: peer, version: version, updates: updates)
             sender.unsafeSend { callback(result) }
         }
         return self
     }
     @discardableResult
-    public func bePull(peer: OwnerUUID,
-                       version: Int,
-                       _ sender: Actor,
-                       _ callback: @escaping ((HalfHitch?) -> Void)) -> Self {
+    public func beSubscribe(peer: OwnerUUID,
+                            service: Endeavour.Service) -> Self {
+        unsafeSend { self._beSubscribe(peer: peer, service: service) }
+        return self
+    }
+    @discardableResult
+    public func beGetUpdates(peer: OwnerUUID,
+                             version: DocumentVersion,
+                             _ sender: Actor,
+                             _ callback: @escaping ((HalfHitch?) -> Void)) -> Self {
         unsafeSend {
-            self._bePull(peer: peer, version: version) { arg0 in
-                sender.unsafeSend {
-                    callback(arg0)
-                }
-            }
+            let result = self._beGetUpdates(peer: peer, version: version)
+            sender.unsafeSend { callback(result) }
         }
         return self
     }

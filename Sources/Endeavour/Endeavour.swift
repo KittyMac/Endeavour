@@ -78,24 +78,21 @@ public class Endeavour: Actor {
         guard let document = documents[documentUUID] else {
             return returnCallback("The document does not exist")
         }
-        document.bePushTo(peer: userUUID,
+        document.bePublish(peer: userUUID,
                           version: version,
                           updates: updates,
                           self,
                           returnCallback)
     }
 
-    private func _bePullDocument(userUUID: OwnerUUID,
-                                 documentUUID: DocumentUUID,
-                                 version: Int,
-                                 _ returnCallback: @escaping (HalfHitch?) -> Void) {
+    private func _beSubscribe(userUUID: OwnerUUID,
+                              documentUUID: DocumentUUID,
+                              service: Service) {
         guard let document = documents[documentUUID] else {
-            return returnCallback("The document does not exist")
+            return
         }
-        document.bePull(peer: userUUID,
-                        version: version,
-                        self,
-                        returnCallback)
+        document.beSubscribe(peer: userUUID,
+                             service: service)
     }
 }
 
@@ -178,18 +175,10 @@ extension Endeavour {
         return self
     }
     @discardableResult
-    public func bePullDocument(userUUID: OwnerUUID,
-                               documentUUID: DocumentUUID,
-                               version: Int,
-                               _ sender: Actor,
-                               _ callback: @escaping ((HalfHitch?) -> Void)) -> Self {
-        unsafeSend {
-            self._bePullDocument(userUUID: userUUID, documentUUID: documentUUID, version: version) { arg0 in
-                sender.unsafeSend {
-                    callback(arg0)
-                }
-            }
-        }
+    public func beSubscribe(userUUID: OwnerUUID,
+                            documentUUID: DocumentUUID,
+                            service: Service) -> Self {
+        unsafeSend { self._beSubscribe(userUUID: userUUID, documentUUID: documentUUID, service: service) }
         return self
     }
 

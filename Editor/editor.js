@@ -147,16 +147,126 @@ const myTheme = EditorView.baseTheme({
     },
 })
 
+cm.endeavourSend = function(command, callback) {
+    let xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4) {
+            if (this.status != 200) {
+                callback();
+            } else {                
+                let serviceResponse = xhttp.getResponseHeader("Service-Response");
+                try {
+                    let serviceJson = JSON.parse(serviceResponse);
+                    let updatesJson = JSON.parse(xhttp.responseText);
+                    callback(serviceJson, updatesJson);
+                }
+                catch (error) {
+                    callback();
+                }
+            }
+        }
+    };
+    xhttp.open("POST", "/");
+    let sessionId = sessionStorage.getItem("Session-Id");
+    if (sessionId != undefined) {
+        xhttp.setRequestHeader("Session-Id", sessionId);
+    }    
+    xhttp.setRequestHeader("Pragma", "no-cache");
+    xhttp.setRequestHeader("Expires", "-1");
+    xhttp.setRequestHeader("Cache-Control", "no-cache");
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.send(JSON.stringify(command));
+}
+
+// Modern browsers can only keep open a limited number of concurrent connections to the backend.
+// To allow for any number of open documents, we need all documents to share the same long pull,
+// otherwise we can lead to a deadlock.
+cm.endeavourDocuments = {};
+
+cm.endeavourIsPushing = false;
+cm.endeavourPushQueue = [];
+cm.endeavourPushUpdates = function(documentUUID, version, updates, callback) {
+    
+    if (documentUUID != undefined) {
+        cm.endeavourPushQueue.push({
+            service: "EndeavourService",
+            command: "push",
+            documentUUID: documentUUID,
+            version: version,
+            updates: updates,
+            callback: callback
+        });
+    }
+    
+    if (cm.endeavourIsPushing == false && cm.endeavourPushQueue.length > 0) {
+        let msg = cm.endeavourPushQueue.shift();
+        
+        let callback = msg.callback;
+        msg.callback = undefined;
+        
+        cm.endeavourIsPushing = true;
+        cm.endeavourSend(msg, function(serviceJson, responseJson) {
+            cm.endeavourIsPushing = false;
+            callback(responseJson);
+        });
+    }
+}
+
+cm.endeavourIsPulling = false;
+cm.endeavourPullUpdates = function() {    
+    if (cm.endeavourIsPulling == false) {
+        var documentUUIDs = [];
+        var documentVersions = [];
+        
+        for (let documentUUID in cm.endeavourDocuments) {
+            let plugin = cm.endeavourDocuments[documentUUID];
+            documentUUIDs.push(documentUUID);
+            documentVersions.push(plugin.documentVersion());
+        }
+        
+        let msg = {
+            service: "EndeavourService",
+            command: "pull",
+            documentUUIDs: documentUUIDs,
+            documentVersions: documentVersions
+        };
+        
+        cm.endeavourIsPulling = true;
+        cm.endeavourSend(msg, function(documentUUID, response) {
+            cm.endeavourIsPulling = false;
+            
+            if (documentUUID != undefined && response != undefined) {
+                let changes = response.map(function(x) {
+                    return {
+                        changes: ChangeSet.fromJSON(x.changes),
+                        clientID: x.clientID
+                    };
+                });
+                
+                let plugin = cm.endeavourDocuments[documentUUID];
+                plugin.pull(changes);
+            }
+            
+            cm.endeavourPullUpdates();
+        });
+    }
+}
+
+// We pull regardless of how many documents we are connected to
+cm.endeavourPullUpdates();
+
 cm.endeavourExtension = function (serviceJson) {
-    let documentUUID = serviceJson.documentUUID;
-    let documentVersion = serviceJson.version;
+    let startingDocumentUUID = serviceJson.documentUUID;
+    let startingDocumentVersion = serviceJson.version;
     
     let plugin = ViewPlugin.fromClass(class {
         pushing = false;
         
         constructor(view) {
+            this.documentUUID = startingDocumentUUID;
             this.view = view;
-            this.pull();
+                        
+            cm.endeavourDocuments[this.documentUUID] = this;
         }
 
         update(update) {
@@ -165,14 +275,19 @@ cm.endeavourExtension = function (serviceJson) {
             }
         }
         
+        documentVersion() {
+            return getSyncedVersion(this.view.state) || 0;
+        }
+        
+        clientID() {
+            return getClientID(this.view.state);
+        }
+        
         push() {
-            let localThis = this;
-            
-            let updates = sendableUpdates(localThis.view.state)
-            if (this.pushing || updates.length == 0) {
+            let updates = sendableUpdates(this.view.state)
+            if (updates.length == 0) {
                 return
             }
-            
             updates = updates.map(function(x) {
                 return {
                     changes: x.changes.toJSON(),
@@ -180,78 +295,24 @@ cm.endeavourExtension = function (serviceJson) {
                 };
             });
             
-            let version = getSyncedVersion(localThis.view.state)
-            localThis.pushing = true;
-            localThis.send({
-                service: "EndeavourService",
-                command: "push",
-                documentUUID: documentUUID,
-                version: version,
-                updates: updates,
-            }, function(response) {
-                localThis.pushing = false;
-                
-                // Regardless of whether the push failed or new updates came in
-                // while it was running, try again if there's updates remaining
-                if (sendableUpdates(localThis.view.state).length) {
+            let version = this.documentVersion();
+            
+            let localThis = this;
+            cm.endeavourPushUpdates(this.documentUUID, version, updates, function(response) {
+                // if we didn't error and there are more updates to send
+                if (response != undefined && sendableUpdates(localThis.view.state).length) {
                     setTimeout(() => localThis.push(), 100)
                 }
             });
         }
         
-        pull() {
-            let localThis = this;
-            
-            
-            let version = getSyncedVersion(this.view.state) || 0
-            localThis.send({
-                service: "EndeavourService",
-                command: "pull",
-                documentUUID: documentUUID,
-                version: version,
-            }, function(response) {
-                if (response != undefined) {
-                    let changes = response.map(function(x) {
-                        return {
-                            changes: ChangeSet.fromJSON(x.changes),
-                            clientID: x.clientID
-                        };
-                    });
-                    localThis.view.dispatch(receiveUpdates(localThis.view.state, changes));
-                    localThis.pull()
-                }
-            });
-        }
-    
-        send(command, callback) {
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    let serviceJson = xhttp.getResponseHeader("Service-Response");
-                    try {
-                        let updatesJson = JSON.parse(xhttp.responseText);
-                        callback(updatesJson);
-                    }
-                    catch (error) {
-                        callback();
-                    }
-                }
-            };
-            xhttp.open("POST", "/");
-            let sessionId = sessionStorage.getItem("Session-Id");
-            if (sessionId != undefined) {
-                xhttp.setRequestHeader("Session-Id", sessionId);
-            }    
-            xhttp.setRequestHeader("Pragma", "no-cache");
-            xhttp.setRequestHeader("Expires", "-1");
-            xhttp.setRequestHeader("Cache-Control", "no-cache");
-            xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xhttp.send(JSON.stringify(command));
+        pull(changes) {
+            this.view.dispatch(receiveUpdates(this.view.state, changes));
         }
         
-        destroy() {  }
+        destroy() { cm.endeavourDocuments[this.documentUUID] = undefined; }
     })
-    return [collab({documentVersion}), plugin]
+    return [collab({startingDocumentVersion}), plugin]
 }
 
 cm.CreateEditor = function(parentDivId, extensions, content="", editable=true) {
