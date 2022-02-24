@@ -173,6 +173,13 @@ cm.endeavourExtension = function (serviceJson) {
                 return
             }
             
+            updates = updates.map(function(x) {
+                return {
+                    changes: x.changes.toJSON(),
+                    clientID: x.clientID
+                };
+            });
+            
             let version = getSyncedVersion(localThis.view.state)
             localThis.pushing = true;
             localThis.send({

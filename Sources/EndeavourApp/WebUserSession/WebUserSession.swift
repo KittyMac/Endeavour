@@ -12,14 +12,14 @@ public class WebUserSession: UserServiceableSession {
         super.init()
         unsafePriority = 99
 
-        beAdd(service: EndeavourService())
+        beAdd(service: Endeavour.Service())
     }
 
     required init(cookieSessionUUID: Hitch?, javascriptSessionUUID: Hitch?) {
         super.init(cookieSessionUUID: cookieSessionUUID, javascriptSessionUUID: javascriptSessionUUID)
         unsafePriority = 99
 
-        beAdd(service: EndeavourService())
+        beAdd(service: Endeavour.Service())
     }
 
     public override func safeHandleRequest(connection: AnyConnection,

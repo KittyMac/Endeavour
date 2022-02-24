@@ -2,135 +2,8 @@ import Foundation
 import ArgumentParser
 import Picaroon
 import Flynn
-import EndeavourPamphlet
-import Endeavour
 import Hitch
-
-#if DEBUG
-let cacheMaxAge = 5
-#else
-let cacheMaxAge = 3600
-#endif
-
-func handleStaticRequest(_ httpRequest: HttpRequest) -> HttpResponse? {
-    if let url = httpRequest.url {
-
-        if url.contains("private/") {
-            return HttpStaticResponse.internalServerError
-        } else {
-
-            // Request for HTML are never satisfied by the static resources
-            if url.ends(with: ".htm") {
-                return HttpStaticResponse.internalServerError
-            }
-
-            // We only ever allow script.combined.js to be downloaded, and it is a combination of scripts.
-            if url.ends(with: "script.combined.js") {
-                let payload: Payloadable = httpRequest.supportsGzip ? EndeavourPamphlet.Private.ScriptCombinedJsGzip() : EndeavourPamphlet.Private.ScriptCombinedJs()
-                return HttpResponse(javascript: payload)
-            }
-
-            let urlString = url.description
-            if let content = EndeavourPamphlet.get(gzip: urlString), httpRequest.supportsGzip {
-                return HttpResponse(status: .ok,
-                                    type: HttpContentType.fromPath(url),
-                                    payload: content,
-                                    encoding: HttpEncoding.gzip.rawValue,
-                                    cacheMaxAge: cacheMaxAge)
-            } else if let content = EndeavourPamphlet.get(data: urlString) {
-                return HttpResponse(status: .ok,
-                                    type: HttpContentType.fromPath(url),
-                                    payload: content,
-                                    cacheMaxAge: cacheMaxAge)
-            } else if let content = EndeavourPamphlet.get(string: urlString) {
-                return HttpResponse(status: .ok,
-                                    type: HttpContentType.fromPath(url),
-                                    payload: content,
-                                    cacheMaxAge: cacheMaxAge)
-            }
-        }
-    }
-    return nil
-}
-
-public enum EndeavourApp {
-
-    public static func http(_ address: String,
-                            _ httpPort: Int32) {
-
-        Flynn.startup()
-
-        let ownerUUID = UUID().uuidHitch
-        Endeavour.shared.beNewDocument(userUUID: ownerUUID,
-                                       named: "SwiftSample",
-                                       content: swiftSample,
-                                       Flynn.any) { _, error in
-            if let error = error {
-                fatalError(error.description)
-            }
-        }
-
-        let config = ServerConfig(address: address,
-                                  port: Int(httpPort),
-                                  requestTimeout: 30.0,
-                                  maxRequestInBytes: 65536)
-
-        Server<WebUserSession>(config: config,
-                               staticStorageHandler: handleStaticRequest).run()
-    }
-
-}
-
-let swiftSample: Hitch = """
-import Sextant
-
-var x: Int = 0
-let z: Double = 1.0
-var x3 = 5
-var y = "hello"
-let f = x
-var x1 = "a", y1 = "b", z1 = "c"
-let x2 = 0, y2 = 1, z2 = 1
-
-func test() {
-    var x = 10
-    repeat {
-        x -= 1
-    } while x >= 0
-
-    while true {
-        if true {
-            continue
-        }
-        break
-    }
-
-    switch x {
-        // Comment
-        case 0: break
-        case 1: return
-        default: print("default") break
-    }
-}
-
-private func canAdd(user: OwnerUUID) -> Bool {
-    return owners.contains(user) == false && peers.contains(user) == false && waitings.contains(user) == false
-}
-
-private func canRead(user: OwnerUUID) -> Bool {
-    return owners.contains(user) || peers.contains(user)
-}
-
-private func canWrite(user: OwnerUUID) -> Bool {
-    return owners.contains(user) || peers.contains(user)
-}
-
-func sextantSample() {
-    let json = #"{"store":{"book":[{"category":"reference","author":"Nigel Rees","title":"Sayings of the Century","display-price":8.95,"bargain":true},{"category":"fiction","author":"Evelyn Waugh","title":"Sword of Honour","display-price":12.99,"bargain":false},{"category":"fiction","author":"Herman Melville","title":"Moby Dick","isbn":"0-553-21311-3","display-price":8.99,"bargain":true},{"category":"fiction","author":"J. R. R. Tolkien","title":"The Lord of the Rings","isbn":"0-395-19395-8","display-price":22.99,"bargain":false}],"bicycle":{"color":"red","display-price":19.95,"foo:bar":"fooBar","dot.notation":"new","dash-notation":"dashes"}}}"#
-    if let results = json.query(values: "$.store.book[*].author") {
-        print(results)
-    }
-}
+import Spanker
 
 public enum AccessMode {
     case `public`
@@ -143,13 +16,13 @@ public struct DocumentInfo {
     let version: DocumentVersion
 }
 
-public extension Endeavour {
+extension Endeavour {
     class Document: Actor {
 
-        let documentUUID: Hitch = UUID().uuidHitch
+        private let documentUUID: Hitch
 
         private var history = [Hitch]()
-        private let baseDocument: DocumentContent = sampleSwift
+        private let baseDocument: DocumentContent
 
         private var owners: [OwnerUUID] = []
         private var peers: [OwnerUUID] = []
@@ -159,8 +32,19 @@ public extension Endeavour {
 
         private var waitingPulls = [(HalfHitch?) -> Void]()
 
-        public init(owner: OwnerUUID) {
+        public init(owner: OwnerUUID,
+                    content: Hitch?) {
             owners.append(owner)
+            documentUUID = UUID().uuidHitch
+            baseDocument = content ?? ""
+        }
+
+        public init(owner: OwnerUUID,
+                    named: Hitch?,
+                    content: Hitch?) {
+            owners.append(owner)
+            documentUUID = named ?? UUID().uuidHitch
+            baseDocument = content ?? ""
         }
 
         private func getDocumentInfo() -> DocumentInfo {
@@ -272,7 +156,7 @@ public extension Endeavour {
     }
 }
 
-// MARK: - Autogeneratedsdfsdf by FlysdfsdfnnLisdfsdf nt
+// MARK: - Autogenerated by FlynnLint
 // Contents of file after this marker will be overwritten as needed
 
 extension Endeavour.Document {
@@ -378,4 +262,6 @@ extension Endeavour.Document {
 
 }
 
-"""
+extension Endeavour {
+
+}

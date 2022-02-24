@@ -35,7 +35,7 @@ public extension EndeavourPamphlet.Private.Endeavour {
 }
 
 private let uncompressedEditorFontsHtml = ###"""
-<link rel="preload" href="public/endeavour/robotomono_400.woff" as="font" type="font/woff2" crossorigin> <link rel="preload" href="public/endeavour/robotomono_500.woff" as="font" type="font/woff2" crossorigin> <style>
+<link rel="preload" href="public/endeavour/robotomono_400.woff" as="font" type="font/woff2" crossorigin> <style>
     @font-face {
       font-family: 'Roboto Mono';
       font-style: normal;
@@ -54,7 +54,7 @@ private let uncompressedEditorFontsHtml = ###"""
     }
 </style>
 """###
-private let compressedEditorFontsHtml = Data(base64Encoded:"H4sIAAAAAAACA91Sy2rDMBC85ysWX5zQuLaVOKVuEppHdeul0HNRbDkRVbRGshtC6b9XthxooIcScqoOO5pdMbMMmkqh3kFzOfNKW5HlHuw0LyytN1JkIVc5Zx9Y61DjBivco8K3cRTdHrAoPGBm5hWoKg+qY8ndPWxGxINMozGoxVaoOUwvMkouMDLVUfJ5D+x5bF4FBcs4fLYNgK6zF/KYgv/SWsGz9fIffr5oRVJQqPdMnk0OXGx3VQo2g7N+LkwpmRU1B1aeJkZnKdRa9v+S5sAKWbuq7zfMH5xEaiUyzHmgmdranV5vInuCKKJ02JB4FDtMSGDLqCVkuQxsWTmymjhcLzps+6SRIdGEOnI3drhww5gQh/dxh60ysYMOkwbpk1uDUrp2C38Nr5P9BmX+a/LJ1ZJP/lnyvWnofv83qeVI9NcDAAA=")!
+private let compressedEditorFontsHtml = Data(base64Encoded:"H4sIAAAAAAACA91SPU/DMBDd+ytOWdKKhiRuU0RoK/qBNxYkZuQkTmvh+iI7oaoQ/x0nTiUqMTB0wsM9v3und+eT51Kod9BcLrzKRmSFB3vNS0ubTIo85Krg7AMbHWrMsMYDKnybRtHtEcvSA2YWXomq9qA+Vdzdw1YiHuQajUEtdkItYW7qk+TLAdjz2FYFJcs5fHYJgD5zEPKUgv/StYJn28t/+FnRmaSgUB+YvFCOXOz2dQp2tIt8IUwlmTU1R1adFaPzFBoth3955Mga2Xb10G+ZPzqbNErkWPBAM7WzM73eRPYEUUTpuCXxJHaYkMCGSUfIeh3YsHFkM3O4XfXY5UlrQ6IZdeRu6nDlxJgQh/dxj50zsUKPSYv0yY1BKd26gb/G19l9hrL4dfPJ1Taf/LPND+ah+/3fBcaYqm4DAAA=")!
 
 public extension EndeavourPamphlet.Private.Endeavour {
     static func EndeavourHtml() -> String {

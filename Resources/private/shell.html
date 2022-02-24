@@ -81,6 +81,8 @@ ID_ELEMENT(document##ID, VSTACK(),
             )
         )
         ELEMENT(HSTACK()END()MARGIN(0,0.5,0,0.5)GROW()SELF_STRETCH(),
+            ID_BUTTON(newDocumentButton,PADDING(0,1,0,1),Shared Document,sharedDocument())
+            HSPACE()
             ID_BUTTON(newDocumentButton,PADDING(0,1,0,1),New Document,newDocument())
             ID_BUTTON(joinDocumentButton,PADDING(0,1,0,1),Join Document,askJoinDocument())
         )
@@ -141,18 +143,18 @@ ID_ELEMENT(document##ID, VSTACK(),
             print(documentUUID)
         }
         
+        function sharedDocument() {
+            endeavour.join("SwiftSample", handleCreateDocument);
+        }
+        
         function newDocument() {
             endeavour.new(handleCreateDocument);
         }
         
         function joinDocument(documentUUID) {
-            print(`endeavour.join(${documentUUID})`)
             endeavour.join(documentUUID, handleCreateDocument);
         }
-        
-        //newDocument();
-        //newDocument();
-        
+
     </script>
     
 </body>
