@@ -24,29 +24,28 @@ extension Endeavour {
         private var history = [Hitch]()
         private let baseDocument: DocumentContent
 
-        private var owners: [OwnerUUID] = []
-        private var peers: [OwnerUUID] = []
-        private var waitings: [OwnerUUID] = []
+        private let owner: UserUUID
+        private var peers: [UserUUID] = []
+        private var waitings: [UserUUID] = []
 
         private var accessMode = AccessMode.public
 
         private var subscribedServices = [Service]()
 
-        // TODO: ALLOW ONLY ONE OWNER
         // TODO: USERS SHOULD "LEAVE" A DOCUMENT NOT "CLOSE" A DOCUMENT
         // TODO: DOCUMENT IS "CLOSED" WHEN THE OWNER LEAVES THE DOCUMENT
 
-        public init(owner: OwnerUUID,
+        public init(owner: UserUUID,
                     content: Hitch?) {
-            owners.append(owner)
+            self.owner = owner
             documentUUID = UUID().uuidHitch
             baseDocument = content ?? ""
         }
 
-        public init(owner: OwnerUUID,
+        public init(owner: UserUUID,
                     named: Hitch?,
                     content: Hitch?) {
-            owners.append(owner)
+            self.owner = owner
             documentUUID = named ?? UUID().uuidHitch
             baseDocument = content ?? ""
         }
@@ -57,19 +56,19 @@ extension Endeavour {
                                 version: 0)
         }
 
-        private func canAdd(user: OwnerUUID) -> Bool {
-            return owners.contains(user) == false && peers.contains(user) == false && waitings.contains(user) == false
+        private func canAdd(user: UserUUID) -> Bool {
+            return owner != user && peers.contains(user) == false && waitings.contains(user) == false
         }
 
-        private func canRead(user: OwnerUUID) -> Bool {
-            return owners.contains(user) || peers.contains(user)
+        private func canRead(user: UserUUID) -> Bool {
+            return owner == user || peers.contains(user)
         }
 
-        private func canWrite(user: OwnerUUID) -> Bool {
-            return owners.contains(user) || peers.contains(user)
+        private func canWrite(user: UserUUID) -> Bool {
+            return owner == user || peers.contains(user)
         }
 
-        private func _beAdd(peer: OwnerUUID,
+        private func _beAdd(peer: UserUUID,
                             _ returnCallback: @escaping (DocumentInfo?, Error?) -> Void) {
             if canAdd(user: peer) {
                 peers.append(peer)
@@ -77,15 +76,7 @@ extension Endeavour {
             returnCallback(getDocumentInfo(), nil)
         }
 
-        private func _beAdd(owner: OwnerUUID,
-                            _ returnCallback: @escaping (DocumentInfo?, Error?) -> Void) {
-            if canAdd(user: owner) {
-                owners.append(owner)
-            }
-            returnCallback(getDocumentInfo(), nil)
-        }
-
-        private func _beAdd(waiting: OwnerUUID,
+        private func _beAdd(waiting: UserUUID,
                             _ returnCallback: @escaping (DocumentInfo?, Error?) -> Void) {
             guard accessMode == .private else {
                 // public documents have no waiting list, you can join as a peer
@@ -97,26 +88,26 @@ extension Endeavour {
             returnCallback(getDocumentInfo(), nil)
         }
 
-        private func _beAuthorize(peer: OwnerUUID) -> Error? {
+        private func _beAuthorize(peer: UserUUID) -> Error? {
             guard peers.contains(peer) else { return "You are not authorized as a peer of this document" }
             return nil
         }
 
-        private func _beAuthorize(owner: OwnerUUID) -> Error? {
-            guard owners.contains(owner) else { return "You are not authorized as an owner of this document" }
+        private func _beAuthorize(owner: UserUUID) -> Error? {
+            guard self.owner == owner else { return "You are not authorized as an owner of this document" }
             return nil
         }
 
-        private func _beGetInfo(user: OwnerUUID,
+        private func _beGetInfo(user: UserUUID,
                                 _ returnCallback: (DocumentInfo?, Error?) -> Void) {
             guard canRead(user: user) else { return returnCallback(nil, "You are not authorized to access this document") }
             returnCallback(getDocumentInfo(), nil)
         }
 
-        private func _bePublish(peer: OwnerUUID,
+        private func _bePublish(peer: UserUUID,
                                 version: Int,
                                 updates: JsonElement) -> Error? {
-            guard peers.contains(peer) || owners.contains(peer) else { return "You are not authorized as a peer of this document" }
+            guard owner == peer || peers.contains(peer) else { return "You are not authorized as a peer of this document" }
             guard version == history.count else {
                 return "Wrong version ({0} != {1})" << [version, history.count]
             }
@@ -134,9 +125,9 @@ extension Endeavour {
             return nil
         }
 
-        private func _beSubscribe(peer: OwnerUUID,
+        private func _beSubscribe(peer: UserUUID,
                                   service: Endeavour.Service) {
-            guard peers.contains(peer) || owners.contains(peer) else {
+            guard owner == peer || peers.contains(peer) else {
                return
             }
 
@@ -148,13 +139,12 @@ extension Endeavour {
                                         documentVersion: history.count)
         }
 
-        private func _beGetUpdates(peer: OwnerUUID,
+        private func _beGetUpdates(peer: UserUUID,
                                    version: DocumentVersion) -> HalfHitch? {
-            guard peers.contains(peer) || owners.contains(peer) else {
+            guard owner == peer || peers.contains(peer) else {
                return nil
             }
 
-            print("\(version) < \(history.count)")
             if version < history.count {
                 let combined = Hitch(capacity: 1024)
                 combined.append(.openBrace)
@@ -181,7 +171,7 @@ extension Endeavour {
 extension Endeavour.Document {
 
     @discardableResult
-    public func beAdd(peer: OwnerUUID,
+    public func beAdd(peer: UserUUID,
                       _ sender: Actor,
                       _ callback: @escaping ((DocumentInfo?, Error?) -> Void)) -> Self {
         unsafeSend {
@@ -194,20 +184,7 @@ extension Endeavour.Document {
         return self
     }
     @discardableResult
-    public func beAdd(owner: OwnerUUID,
-                      _ sender: Actor,
-                      _ callback: @escaping ((DocumentInfo?, Error?) -> Void)) -> Self {
-        unsafeSend {
-            self._beAdd(owner: owner) { arg0, arg1 in
-                sender.unsafeSend {
-                    callback(arg0, arg1)
-                }
-            }
-        }
-        return self
-    }
-    @discardableResult
-    public func beAdd(waiting: OwnerUUID,
+    public func beAdd(waiting: UserUUID,
                       _ sender: Actor,
                       _ callback: @escaping ((DocumentInfo?, Error?) -> Void)) -> Self {
         unsafeSend {
@@ -220,7 +197,7 @@ extension Endeavour.Document {
         return self
     }
     @discardableResult
-    public func beAuthorize(peer: OwnerUUID,
+    public func beAuthorize(peer: UserUUID,
                             _ sender: Actor,
                             _ callback: @escaping ((Error?) -> Void)) -> Self {
         unsafeSend {
@@ -230,7 +207,7 @@ extension Endeavour.Document {
         return self
     }
     @discardableResult
-    public func beAuthorize(owner: OwnerUUID,
+    public func beAuthorize(owner: UserUUID,
                             _ sender: Actor,
                             _ callback: @escaping ((Error?) -> Void)) -> Self {
         unsafeSend {
@@ -240,7 +217,7 @@ extension Endeavour.Document {
         return self
     }
     @discardableResult
-    public func beGetInfo(user: OwnerUUID,
+    public func beGetInfo(user: UserUUID,
                           _ sender: Actor,
                           _ callback: @escaping ((DocumentInfo?, Error?) -> Void)) -> Self {
         unsafeSend {
@@ -253,7 +230,7 @@ extension Endeavour.Document {
         return self
     }
     @discardableResult
-    public func bePublish(peer: OwnerUUID,
+    public func bePublish(peer: UserUUID,
                           version: Int,
                           updates: JsonElement,
                           _ sender: Actor,
@@ -265,13 +242,13 @@ extension Endeavour.Document {
         return self
     }
     @discardableResult
-    public func beSubscribe(peer: OwnerUUID,
+    public func beSubscribe(peer: UserUUID,
                             service: Endeavour.Service) -> Self {
         unsafeSend { self._beSubscribe(peer: peer, service: service) }
         return self
     }
     @discardableResult
-    public func beGetUpdates(peer: OwnerUUID,
+    public func beGetUpdates(peer: UserUUID,
                              version: DocumentVersion,
                              _ sender: Actor,
                              _ callback: @escaping ((HalfHitch?) -> Void)) -> Self {

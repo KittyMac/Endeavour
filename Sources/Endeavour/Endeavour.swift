@@ -9,7 +9,7 @@ public typealias DocumentUUID = Hitch
 public typealias DocumentContent = Hitch
 public typealias DocumentVersion = Int
 
-public typealias OwnerUUID = Hitch
+public typealias UserUUID = Hitch
 public typealias Error = HalfHitch
 
 public class Endeavour: Actor {
@@ -18,7 +18,7 @@ public class Endeavour: Actor {
 
     private var documents: [DocumentUUID: Document] = [:]
 
-    private func _beNewDocument(userUUID: OwnerUUID,
+    private func _beNewDocument(userUUID: UserUUID,
                                 content: Hitch?,
                                 _ returnCallback: @escaping (DocumentInfo?, Error?) -> Void) {
         let document = Document(owner: userUUID,
@@ -31,7 +31,7 @@ public class Endeavour: Actor {
         }
     }
 
-    private func _beNewDocument(userUUID: OwnerUUID,
+    private func _beNewDocument(userUUID: UserUUID,
                                 named: Hitch?,
                                 content: Hitch?,
                                 _ returnCallback: @escaping (DocumentInfo?, Error?) -> Void) {
@@ -46,7 +46,7 @@ public class Endeavour: Actor {
         }
     }
 
-    private func _beJoinDocument(userUUID: OwnerUUID,
+    private func _beJoinDocument(userUUID: UserUUID,
                                  documentUUID: DocumentUUID,
                                  _ returnCallback: @escaping (DocumentInfo?, Error?) -> Void) {
         guard let document = documents[documentUUID] else {
@@ -57,7 +57,7 @@ public class Endeavour: Actor {
                        returnCallback)
     }
 
-    private func _beCloseDocument(userUUID: OwnerUUID,
+    private func _beCloseDocument(userUUID: UserUUID,
                                   documentUUID: DocumentUUID,
                                   _ returnCallback: @escaping (Error?) -> Void) {
         guard let document = documents[documentUUID] else {
@@ -70,7 +70,7 @@ public class Endeavour: Actor {
         }
     }
 
-    private func _bePushToDocument(userUUID: OwnerUUID,
+    private func _bePushToDocument(userUUID: UserUUID,
                                    documentUUID: DocumentUUID,
                                    version: Int,
                                    updates: JsonElement,
@@ -85,7 +85,7 @@ public class Endeavour: Actor {
                           returnCallback)
     }
 
-    private func _beSubscribe(userUUID: OwnerUUID,
+    private func _beSubscribe(userUUID: UserUUID,
                               documentUUID: DocumentUUID,
                               service: Service) {
         guard let document = documents[documentUUID] else {
@@ -102,7 +102,7 @@ public class Endeavour: Actor {
 extension Endeavour {
 
     @discardableResult
-    public func beNewDocument(userUUID: OwnerUUID,
+    public func beNewDocument(userUUID: UserUUID,
                               content: Hitch?,
                               _ sender: Actor,
                               _ callback: @escaping ((DocumentInfo?, Error?) -> Void)) -> Self {
@@ -116,7 +116,7 @@ extension Endeavour {
         return self
     }
     @discardableResult
-    public func beNewDocument(userUUID: OwnerUUID,
+    public func beNewDocument(userUUID: UserUUID,
                               named: Hitch?,
                               content: Hitch?,
                               _ sender: Actor,
@@ -131,7 +131,7 @@ extension Endeavour {
         return self
     }
     @discardableResult
-    public func beJoinDocument(userUUID: OwnerUUID,
+    public func beJoinDocument(userUUID: UserUUID,
                                documentUUID: DocumentUUID,
                                _ sender: Actor,
                                _ callback: @escaping ((DocumentInfo?, Error?) -> Void)) -> Self {
@@ -145,7 +145,7 @@ extension Endeavour {
         return self
     }
     @discardableResult
-    public func beCloseDocument(userUUID: OwnerUUID,
+    public func beCloseDocument(userUUID: UserUUID,
                                 documentUUID: DocumentUUID,
                                 _ sender: Actor,
                                 _ callback: @escaping ((Error?) -> Void)) -> Self {
@@ -159,7 +159,7 @@ extension Endeavour {
         return self
     }
     @discardableResult
-    public func bePushToDocument(userUUID: OwnerUUID,
+    public func bePushToDocument(userUUID: UserUUID,
                                  documentUUID: DocumentUUID,
                                  version: Int,
                                  updates: JsonElement,
@@ -175,7 +175,7 @@ extension Endeavour {
         return self
     }
     @discardableResult
-    public func beSubscribe(userUUID: OwnerUUID,
+    public func beSubscribe(userUUID: UserUUID,
                             documentUUID: DocumentUUID,
                             service: Service) -> Self {
         unsafeSend { self._beSubscribe(userUUID: userUUID, documentUUID: documentUUID, service: service) }

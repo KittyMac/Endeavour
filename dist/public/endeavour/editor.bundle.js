@@ -23433,8 +23433,6 @@
                 documentVersions: documentVersions
             };
             
-            print(msg);
-            
             cm.endeavourIsPulling = true;
             cm.endeavourSend(msg, function(documentUUID, response) {
                 cm.endeavourIsPulling = false;

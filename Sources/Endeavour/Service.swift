@@ -14,7 +14,7 @@ extension Endeavour {
             lhs.userUUID == rhs.userUUID
         }
 
-        private let userUUID: OwnerUUID = UUID().uuidHitch
+        private let userUUID: UserUUID = UUID().uuidHitch
 
         private var longPull: SubscribeLongPull?
         private var openDocumentVersions: [DocumentUUID: DocumentVersion] = [:]
@@ -28,7 +28,7 @@ extension Endeavour {
                 return returnCallback(nil, HttpResponse(error: "command is missing"))
             }
 
-            print(jsonElement)
+            //print(jsonElement)
 
             switch command {
             case "new":
