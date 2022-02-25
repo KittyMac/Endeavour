@@ -7,7 +7,7 @@
 ID_ELEMENT(document##ID, VSTACK(),
     ELEMENT(HSTACK()BETWEEN()MARGIN(1,1,0,1),
         ID_ELEMENT(header##ID,LATO(1)FBLACK()START()BOTTOM(),Creating new document...)
-        ANY_BUTTON(AROUND()BOTTOM()SIZEALL(2,2)CLICKABLE(),closeDocument('ID'),
+        ANY_BUTTON(AROUND()BOTTOM()SIZEALL(2,2)CLICKABLE(),leaveDocument('ID'),
             IMAGE(SIZEALL(1,1),public/close.svg)
         )
     )
@@ -105,14 +105,39 @@ ID_ELEMENT(document##ID, VSTACK(),
                             
             let html = `EDITOR(${documentUUID})`
             insertHtml(documents, html);
+            
+            let documentHeader = document.getElementById(headerID);
+            documentHeader.innerText = `Document ${documentUUID}`;
+            
+            let documentStatus = function(status, isError) {
+                let ignoreStatuses = [
+                    //"Version mismatch"
+                ];
+                
+                if (isError) {
+                    FOREACH(ignoreStatus,ignoreStatuses) {
+                        if (status.includes(ignoreStatus)) {
+                            status = undefined;
+                        }
+                    }
+                }
+                
+                if (status != undefined && documentHeader.innerText != status) {
+                    print(status);
+                    documentHeader.innerText = status;
+                    
+                    if (isError) {
+                        documentHeader.style.color = `rgba(214,62,87,1)`;
+                    } else {
+                        documentHeader.style.color = `rgba(83,84,87,1)`;
+                    }
+                }
+            }
 
             let editor = cm.CreateEditor(editorID, [
                 cm.swiftSetup,
-                cm.endeavourExtension(serviceJson)
+                cm.endeavourExtension(serviceJson, documentStatus)
             ], xhttp.responseText, true);
-
-            let documentHeader = document.getElementById(headerID);
-            documentHeader.innerText = `Document ${documentUUID}`;
             
             let myDocument = document.getElementById(documentID);
             Laba.animate(myDocument, "!<200!f")
@@ -127,8 +152,8 @@ ID_ELEMENT(document##ID, VSTACK(),
                 }]);
         }
         
-        function closeDocument(documentUUID) {
-            endeavour.close(documentUUID, function(xhttp, serviceJson) {
+        function leaveDocument(documentUUID) {
+            endeavour.leave(documentUUID, function(xhttp, serviceJson) {
                 let documentID = `document${documentUUID}`
                 let myDocument = document.getElementById(documentID);
                 let fromHeight = myDocument.clientHeight;
@@ -138,7 +163,6 @@ ID_ELEMENT(document##ID, VSTACK(),
                     removeFromParent(myDocument);
                 });
             });
-            print(documentUUID)
         }
         
         function sharedDocument() {

@@ -31,10 +31,10 @@ endeavour.join = function(documentUUID, callback) {
     }, callback);
 }
 
-endeavour.close = function(documentUUID, callback) {
+endeavour.leave = function(documentUUID, callback) {
     endeavour.send({
         "service": "EndeavourService",
-        "command": "close",
+        "command": "leave",
         "documentUUID": documentUUID
     }, callback);
 }

@@ -6,6 +6,7 @@ import Hitch
 import Spanker
 
 public enum AccessMode {
+    case closed
     case `public`
     case `private`
 }
@@ -32,8 +33,8 @@ extension Endeavour {
 
         private var subscribedServices = [Service]()
 
-        // TODO: USERS SHOULD "LEAVE" A DOCUMENT NOT "CLOSE" A DOCUMENT
-        // TODO: DOCUMENT IS "CLOSED" WHEN THE OWNER LEAVES THE DOCUMENT
+        // TODO: DOCUMENTS SHOULD "CLOSE" IF THE OWNER "LEAVES" BY CLOSING THE BROWSER
+        // (IE OWNER'S LONGPULL GOES AWAY AND DOESN'T COME BACK QUICKLY)
 
         public init(owner: UserUUID,
                     content: Hitch?) {
@@ -70,6 +71,7 @@ extension Endeavour {
 
         private func _beAdd(peer: UserUUID,
                             _ returnCallback: @escaping (DocumentInfo?, Error?) -> Void) {
+            guard accessMode != .closed else { return returnCallback(nil, "document is closed") }
             if canAdd(user: peer) {
                 peers.append(peer)
             }
@@ -78,8 +80,9 @@ extension Endeavour {
 
         private func _beAdd(waiting: UserUUID,
                             _ returnCallback: @escaping (DocumentInfo?, Error?) -> Void) {
+            guard accessMode != .closed else { return returnCallback(nil, "document is closed") }
             guard accessMode == .private else {
-                // public documents have no waiting list, you can join as a peer
+                // public documents have no waiting list, you can join as a peer immediately
                 return _beAdd(peer: waiting, returnCallback)
             }
             if canAdd(user: waiting) {
@@ -88,18 +91,44 @@ extension Endeavour {
             returnCallback(getDocumentInfo(), nil)
         }
 
+        private func _beLeave(user: UserUUID) -> (Bool, Error?) {
+            guard accessMode != .closed else { return (true, "document is closed") }
+
+            waitings.removeOne(user)
+            peers.removeOne(user)
+
+            if owner == user {
+                accessMode = .closed
+
+                peers.removeAll()
+                waitings.removeAll()
+
+                for service in subscribedServices {
+                    service.beDocumentDidClose(documentUUID: documentUUID)
+                }
+
+                subscribedServices.removeAll()
+
+                return (true, nil)
+            }
+            return (false, nil)
+        }
+
         private func _beAuthorize(peer: UserUUID) -> Error? {
+            guard accessMode != .closed else { return "document is closed" }
             guard peers.contains(peer) else { return "You are not authorized as a peer of this document" }
             return nil
         }
 
         private func _beAuthorize(owner: UserUUID) -> Error? {
+            guard accessMode != .closed else { return "document is closed" }
             guard self.owner == owner else { return "You are not authorized as an owner of this document" }
             return nil
         }
 
         private func _beGetInfo(user: UserUUID,
                                 _ returnCallback: (DocumentInfo?, Error?) -> Void) {
+            guard accessMode != .closed else { return returnCallback(nil, "document is closed") }
             guard canRead(user: user) else { return returnCallback(nil, "You are not authorized to access this document") }
             returnCallback(getDocumentInfo(), nil)
         }
@@ -107,9 +136,10 @@ extension Endeavour {
         private func _bePublish(peer: UserUUID,
                                 version: Int,
                                 updates: JsonElement) -> Error? {
+            guard accessMode != .closed else { return "document is closed" }
             guard owner == peer || peers.contains(peer) else { return "You are not authorized as a peer of this document" }
             guard version == history.count else {
-                return "Wrong version ({0} != {1})" << [version, history.count]
+                return "Version mismatch ({0} != {1})" << [version, history.count]
             }
 
             for update in updates.iterValues {
@@ -127,6 +157,7 @@ extension Endeavour {
 
         private func _beSubscribe(peer: UserUUID,
                                   service: Endeavour.Service) {
+            guard accessMode != .closed else { return }
             guard owner == peer || peers.contains(peer) else {
                return
             }
@@ -141,6 +172,7 @@ extension Endeavour {
 
         private func _beGetUpdates(peer: UserUUID,
                                    version: DocumentVersion) -> HalfHitch? {
+            guard accessMode != .closed else { return nil }
             guard owner == peer || peers.contains(peer) else {
                return nil
             }
@@ -193,6 +225,16 @@ extension Endeavour.Document {
                     callback(arg0, arg1)
                 }
             }
+        }
+        return self
+    }
+    @discardableResult
+    public func beLeave(user: UserUUID,
+                        _ sender: Actor,
+                        _ callback: @escaping (((Bool, Error?)) -> Void)) -> Self {
+        unsafeSend {
+            let result = self._beLeave(user: user)
+            sender.unsafeSend { callback(result) }
         }
         return self
     }

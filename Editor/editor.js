@@ -147,21 +147,56 @@ const myTheme = EditorView.baseTheme({
     },
 })
 
-cm.endeavourSend = function(command, callback) {
+cm.endeavourJsonParse = function(json) {
+    try {
+        return JSON.parse(json);
+    } catch (error) {
+        return {};
+    }
+}
+
+cm.endeavourSend = function(command, documentUUID) {
     let xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4) {
-            if (this.status != 200) {
-                callback();
-            } else {                
-                let serviceResponse = xhttp.getResponseHeader("Service-Response");
-                try {
-                    let serviceJson = JSON.parse(serviceResponse);
-                    let updatesJson = JSON.parse(xhttp.responseText);
-                    callback(serviceJson, updatesJson);
+            let serviceResponse = xhttp.getResponseHeader("Service-Response");
+            let serviceJson = cm.endeavourJsonParse(serviceResponse);
+        
+            if (documentUUID == undefined) {
+                documentUUID = serviceJson.documentUUID;
+            }
+        
+            let plugin = cm.endeavourDocuments[documentUUID];
+            
+            try {
+                if (this.status != 200) {
+                    plugin.didError(xhttp.responseText);
+                } else {                
+                    let contentJson = cm.endeavourJsonParse(xhttp.responseText)                
+                    switch (command.command) {
+                    case "pull":
+                        plugin.didPull(serviceJson, contentJson);
+                        break;
+                    case "push":
+                        plugin.didPush(serviceJson, contentJson);
+                        break;
+                    }
                 }
-                catch (error) {
-                    callback();
+            
+                switch (command.command) {
+                case "pull":
+                    cm.endeavourIsPulling = false;
+                    cm.endeavourPullUpdates();
+                    break;
+                case "push":
+                    cm.endeavourIsPushing = false;
+                    break;
+                }
+            } catch (error) {
+                if (plugin != undefined) {
+                    plugin.didError(error);
+                } else {
+                    print(`Uncaught error: ${error}`);
                 }
             }
         }
@@ -184,31 +219,17 @@ cm.endeavourSend = function(command, callback) {
 cm.endeavourDocuments = {};
 
 cm.endeavourIsPushing = false;
-cm.endeavourPushQueue = [];
-cm.endeavourPushUpdates = function(documentUUID, version, updates, callback) {
-    
-    if (documentUUID != undefined) {
-        cm.endeavourPushQueue.push({
+cm.endeavourPushUpdates = function(documentUUID, version, updates) {
+    if (cm.endeavourIsPushing == false) {
+        let msg = {
             service: "EndeavourService",
             command: "push",
             documentUUID: documentUUID,
             version: version,
-            updates: updates,
-            callback: callback
-        });
-    }
-    
-    if (cm.endeavourIsPushing == false && cm.endeavourPushQueue.length > 0) {
-        let msg = cm.endeavourPushQueue.shift();
-        
-        let callback = msg.callback;
-        msg.callback = undefined;
-        
+            updates: updates
+        };
         cm.endeavourIsPushing = true;
-        cm.endeavourSend(msg, function(serviceJson, responseJson) {
-            cm.endeavourIsPushing = false;
-            callback(responseJson);
-        });
+        cm.endeavourSend(msg, documentUUID);
     }
 }
 
@@ -232,30 +253,14 @@ cm.endeavourPullUpdates = function() {
         };
         
         cm.endeavourIsPulling = true;
-        cm.endeavourSend(msg, function(documentUUID, response) {
-            cm.endeavourIsPulling = false;
-            
-            if (documentUUID != undefined && response != undefined) {
-                let changes = response.map(function(x) {
-                    return {
-                        changes: ChangeSet.fromJSON(x.changes),
-                        clientID: x.clientID
-                    };
-                });
-                
-                let plugin = cm.endeavourDocuments[documentUUID];
-                plugin.pull(changes);
-            }
-            
-            cm.endeavourPullUpdates();
-        });
+        cm.endeavourSend(msg);
     }
 }
 
 // We pull regardless of how many documents we are connected to
 cm.endeavourPullUpdates();
 
-cm.endeavourExtension = function (serviceJson) {
+cm.endeavourExtension = function (serviceJson, statusCallback) {
     let startingDocumentUUID = serviceJson.documentUUID;
     let startingDocumentVersion = serviceJson.version;
     
@@ -263,6 +268,7 @@ cm.endeavourExtension = function (serviceJson) {
         pushing = false;
         
         constructor(view) {
+            this.statusCallback = statusCallback;
             this.documentUUID = startingDocumentUUID;
             this.view = view;
                         
@@ -295,19 +301,34 @@ cm.endeavourExtension = function (serviceJson) {
                 };
             });
             
-            let version = this.documentVersion();
-            
-            let localThis = this;
-            cm.endeavourPushUpdates(this.documentUUID, version, updates, function(response) {
-                // if we didn't error and there are more updates to send
-                if (response != undefined && sendableUpdates(localThis.view.state).length) {
-                    setTimeout(() => localThis.push(), 100)
-                }
-            });
+            cm.endeavourPushUpdates(this.documentUUID, this.documentVersion(), updates);
         }
         
-        pull(changes) {
+        didPush(serviceJson, contentJson) {
+            if (sendableUpdates(this.view.state).length) {
+                setTimeout(() => this.push(), 100)
+            }
+        }
+        
+        didPull(serviceJson, contentJson) {
+            let changes = contentJson.map(function(x) {
+                return {
+                    changes: ChangeSet.fromJSON(x.changes),
+                    clientID: x.clientID
+                };
+            });
+            
             this.view.dispatch(receiveUpdates(this.view.state, changes));
+            
+            if (statusCallback != undefined) {
+                statusCallback(`Document ${this.documentUUID}`, false);
+            }
+        }
+        
+        didError(errorResponse) {
+            if (statusCallback != undefined) {
+                statusCallback(errorResponse, true);
+            }
         }
         
         destroy() { cm.endeavourDocuments[this.documentUUID] = undefined; }

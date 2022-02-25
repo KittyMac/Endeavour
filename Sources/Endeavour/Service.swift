@@ -28,13 +28,13 @@ extension Endeavour {
                 return returnCallback(nil, HttpResponse(error: "command is missing"))
             }
 
-            //print(jsonElement)
+            print(jsonElement)
 
             switch command {
             case "new":
                 safeNewDocument(jsonElement, returnCallback)
-            case "close":
-                safeCloseDocument(jsonElement, returnCallback)
+            case "leave":
+                safeLeaveDocument(jsonElement, returnCallback)
             case "join":
                 safeJoinDocument(jsonElement, returnCallback)
             case "push":
@@ -73,15 +73,15 @@ extension Endeavour {
             }
         }
 
-        func safeCloseDocument(_ jsonElement: JsonElement,
+        func safeLeaveDocument(_ jsonElement: JsonElement,
                                _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
             guard let documentUUID = jsonElement[hitch: "documentUUID"] else {
                 return returnCallback(nil, HttpResponse(error: "documentUUID is missing"))
             }
 
-            Endeavour.shared.beCloseDocument(userUUID: userUUID,
+            Endeavour.shared.beLeaveDocument(userUUID: userUUID,
                                              documentUUID: documentUUID,
-                                                     self) { error in
+                                             self) { error in
                 if let error = error {
                     return returnCallback(nil, HttpResponse(error: error))
                 }
@@ -179,9 +179,15 @@ extension Endeavour {
                                   self) { updateJson in
                 guard let updateJson = updateJson else { return }
 
-                self.longPull?(JsonElement(unknown: documentUUID), HttpResponse(json: updateJson))
+                self.longPull?(JsonElement(unknown: ["documentUUID": documentUUID]),
+                               HttpResponse(json: updateJson))
                 self.longPull = nil
             }
+        }
+
+        private func _beDocumentDidClose(documentUUID: DocumentUUID) {
+            self.longPull?(JsonElement(unknown: ["documentUUID": documentUUID]),
+                           HttpResponse(error: "Document was closed by the owner"))
         }
     }
 }
@@ -196,6 +202,11 @@ extension Endeavour.Service {
                                     documentUUID: DocumentUUID,
                                     documentVersion: DocumentVersion) -> Self {
         unsafeSend { self._beDocumentDidUpdate(document: document, documentUUID: documentUUID, documentVersion: documentVersion) }
+        return self
+    }
+    @discardableResult
+    public func beDocumentDidClose(documentUUID: DocumentUUID) -> Self {
+        unsafeSend { self._beDocumentDidClose(documentUUID: documentUUID) }
         return self
     }
 

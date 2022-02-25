@@ -57,16 +57,19 @@ public class Endeavour: Actor {
                        returnCallback)
     }
 
-    private func _beCloseDocument(userUUID: UserUUID,
+    private func _beLeaveDocument(userUUID: UserUUID,
                                   documentUUID: DocumentUUID,
                                   _ returnCallback: @escaping (Error?) -> Void) {
         guard let document = documents[documentUUID] else {
             return returnCallback("The document does not exist")
         }
-        document.beAuthorize(owner: userUUID, self) { error in
-            guard error == nil else { return returnCallback(error) }
-            self.documents[documentUUID] = nil
-            returnCallback(nil)
+
+        document.beLeave(user: userUUID,
+                         self) { closed, error in
+            if closed {
+                self.documents[documentUUID] = nil
+            }
+            returnCallback(error)
         }
     }
 
@@ -145,12 +148,12 @@ extension Endeavour {
         return self
     }
     @discardableResult
-    public func beCloseDocument(userUUID: UserUUID,
+    public func beLeaveDocument(userUUID: UserUUID,
                                 documentUUID: DocumentUUID,
                                 _ sender: Actor,
                                 _ callback: @escaping ((Error?) -> Void)) -> Self {
         unsafeSend {
-            self._beCloseDocument(userUUID: userUUID, documentUUID: documentUUID) { arg0 in
+            self._beLeaveDocument(userUUID: userUUID, documentUUID: documentUUID) { arg0 in
                 sender.unsafeSend {
                     callback(arg0)
                 }
