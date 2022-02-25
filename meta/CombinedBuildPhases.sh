@@ -10,6 +10,8 @@ if [ "$(uname)" == "Darwin" ]; then
     
     killall Endeavour || true
     
+    ./CopyDependencyResources.sh
+    
     time ./pamphlet --prefix Endeavour --collapse ../Resources/ ../Sources/EndeavourPamphlet/
     
     make -C ../Editor/ all

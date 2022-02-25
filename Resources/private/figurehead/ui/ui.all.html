@@ -1,0 +1,349 @@
+#define PAMPHLET_PREPROCESSOR
+
+#include <../utility/defines.js>
+
+#define ROBOTO(S) font-size:S##rem;font-family:'Roboto';
+#define LATO(S) font-size:S##rem;font-family:'Lato';
+
+#define BOLD() font-weight:bold;
+#define ITALIC() font-style:italic;
+
+#define HIDE() display:none;
+#define SHOW() display:flex;
+
+#define SCRIPT(JS) <script type="text/javascript">JS</script>
+
+#define ID_CLASS_TABLE(ID,CLASS,CONTENT) <table id="ID" class="CLASS">CONTENT</table>
+
+#define ROW(CONTENT) <tr>CONTENT</tr>
+#define COL(CONTENT) <td>CONTENT</td>
+
+#define LINK(URL,CONTENT) <a href=URL>CONTENT</a>
+
+#define ID_ELEMENT(ID,STYLE,CONTENT) <div id="ID" style="DEFAULT()STYLE">CONTENT</div>
+#define CLASS_ELEMENT(CLASS,STYLE,CONTENT) <div class="CLASS" style="DEFAULT()STYLE">CONTENT</div>
+#define ID_CLASS_ELEMENT(ID,CLASS,STYLE,CONTENT) <div id="ID" class="CLASS" style="DEFAULT()STYLE">CONTENT</div>
+#define ELEMENT(STYLE,CONTENT) <div style="DEFAULT()STYLE">CONTENT</div>
+
+#define ID_IMAGE(ID,STYLE,SRC) <img id="ID" style="DEFAULT()STYLE" draggable="false" src="SRC" />
+#define IMAGE(STYLE,SRC) <img style="DEFAULT()STYLE" draggable="false" src="SRC" />
+
+#define ID_DATEFIELD(ID,STYLE) <input type="date" id="ID" style="DEFAULT()STYLE" />
+
+#define ID_TEXTFIELD(ID,STYLE,PLACEHOLDER) <input id="ID" style="DEFAULT()STYLE" type="text" placeholder="PLACEHOLDER" />
+#define TEXTFIELD(STYLE,PLACEHOLDER) <input style="DEFAULT()STYLE" type="text" placeholder="PLACEHOLDER" />
+
+#define ID_PASSWORD(ID,STYLE,PLACEHOLDER) <input id="ID" style="DEFAULT()STYLE" type="password" placeholder="PLACEHOLDER" />
+#define PASSWORD(STYLE,PLACEHOLDER) <input style="DEFAULT()STYLE" type="password" placeholder="PLACEHOLDER" />
+
+#define ID_TEXTAREA(ID,STYLE) <textarea id="ID" name="ID" style="resize:none;DEFAULT()STYLE"></textarea>
+
+#define ID_TEXTENTRY(ID,STYLE) <span id="ID" role="textbox" contenteditable="true" style="DEFAULT()STYLE"></span>
+
+#define ID_RADIO_INPUT(ID,STYLE,VALUE,GROUP) <input id="ID" style="DEFAULT()STYLE" type="radio" value="VALUE" name="GROUP" />
+#define RADIO_INPUT(ID,STYLE,VALUE,GROUP) <input style="DEFAULT()STYLE" type="radio" value="VALUE" name="GROUP" />
+
+#define LABEL(STYLE,CONTENT) <label style="DEFAULT()STYLE">CONTENT</label>
+#define ID_LABEL(ID,STYLE,CONTENT) <label id="ID" style="DEFAULT()STYLE">CONTENT</label>
+
+#define FCLEAR() color:rgba(255,255,255,0);
+#define FWHITE() color:white;
+#define FDARKGREY() color:rgba(100,100,100,1);
+#define FGREY() color:rgba(200,200,200,1);
+#define FBLACK() color:rgba(83,84,87,1);
+
+#define HEADER2(CONTENT) ELEMENT(ROBOTO(2.2)FBLACK(),CONTENT)
+#define HEADER(CONTENT) ELEMENT(ROBOTO(1.2)FBLACK(),CONTENT)
+#define TEXT(CONTENT) ELEMENT(LATO(1.0)FBLACK(),CONTENT)
+
+#define ID_HEADER(ID,STYLE,CONTENT) ID_ELEMENT(ID,ROBOTO(1.2)FWHITE()STYLE,CONTENT)
+#define ID_TEXT(ID,STYLE,CONTENT) ID_ELEMENT(ID,LATO(1.0)FWHITE()STYLE,CONTENT)
+
+#define RELATIVE() position:relative;
+#define ABSOLUTE() position:absolute;
+#define FIXED() position:fixed;
+
+#define BACKGROUNDIMGBLEND(R,G,B,A) background-color:rgba(R,G,B,A);background-blend-mode:multiply;
+#define BACKGROUNDIMGCENTER(SRC) background-image:url(SRC);background-repeat:no-repeat;background-size:contain;background-position:center;
+#define BACKGROUNDIMGREPEAT(SRC) background-image:url(SRC);
+#define BACKGROUNDIMG(SRC) background-image:url(SRC);background-repeat:no-repeat;background-size:cover;background-position:center;
+#define MASK(SRC) mask-image:url(SRC);mask-size:100% 100%;-webkit-mask-image:url(SRC);-webkit-mask-size:100% 100%;
+
+
+#define OFFSET_TOP(V) top:V##rem;
+#define OFFSET_LEFT(V) left:V##rem;
+#define OFFSET_BOTTOM(V) bottom:V##rem;
+#define OFFSET_RIGHT(V) right:V##rem;
+
+#define FULLSCREEN() left:0px;top:0px;margin:0px;padding:0px;width:100%;height:100%;position:fixed;
+
+#define ALPHA(A) opacity:A;
+
+#define ZINDEX(X) z-index:X;
+
+#define ASPECTFILL() width:100%;object-fit:scale-down;
+#define OBJECTPOS(H,V) object-position: H V;
+
+#define FILTERWHITE() filter: brightness(0) invert(1);
+
+#define RADIUS(X) border-radius:X##rem;
+#define PCTRADIUS(X) border-radius:X%;
+
+#define COLOR(RED,GREEN,BLUE,ALPHA) color:rgba(RED,GREEN,BLUE,ALPHA);
+#define BACKGROUND(RED,GREEN,BLUE,ALPHA) background:rgba(RED,GREEN,BLUE,ALPHA);
+
+#define CLEAR() border:none;background-image:none;background-color:transparent;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;outline:none;-webkit-appearance:none;-webkit-focus-ring-color:none;
+
+#define OUTLINE(X,RED,GREEN,BLUE,ALPHA) outline:X##rem solid rgba(RED,GREEN,BLUE,ALPHA);
+
+#define BORDER(X,RED,GREEN,BLUE,ALPHA) border:X##rem solid rgba(RED,GREEN,BLUE,ALPHA);
+#define BORDERBOTTOM(X,RED,GREEN,BLUE,ALPHA) border-bottom:X##rem solid rgba(RED,GREEN,BLUE,ALPHA);
+
+#define SHADOW(X,Y,BLUR,SPREAD,RED,GREEN,BLUE,ALPHA) box-shadow: X##rem Y##rem BLUR##rem SPREAD##rem rgba(RED,GREEN,BLUE,ALPHA);
+
+#define GLOW(COLOR) -webkit-filter: drop-shadow(0 0 5px COLOR);filter: drop-shadow(0 0 5px COLOR);
+
+#define LIGHTING(COLOR1,COLOR2) -webkit-filter: drop-shadow(1px 1px 0px COLOR1) drop-shadow(-1px -1px 0px COLOR2);filter: drop-shadow(1px 1px 0px COLOR1) drop-shadow(-1px -1px 0px COLOR2);
+
+#define LEFTSHADOW() background:url(shared/left_shadow.png) 0% 0% repeat-y;padding-left:28px;margin-left:-28px;
+
+
+#define SAFELEFT() env(safe-area-inset-left)
+#define SAFETOP() env(safe-area-inset-top)
+#define SAFERIGHT() env(safe-area-inset-right)
+#define SAFEBOTTOM() env(safe-area-inset-bottom)
+
+#define SAFEALL() padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+
+#define RED() background:rgba(255, 0, 0, 1);
+#define GREEN() background:rgba(0, 255, 0, 1);
+#define BLUE() background:rgba(0, 0, 255, 1);
+#define CYAN() background:rgba(0, 255, 255, 1);
+#define YELLOW() background:rgba(255, 255, 0, 1);
+#define WHITE() background:rgba(255, 255, 255, 1);
+#define BLACK() background:rgba(0, 0, 0, 1);
+
+#define DRED() background:rgba(255, 0, 0, 0.4);
+#define DGREEN() background:rgba(0, 255, 0, 0.4);
+#define DBLUE() background:rgba(0, 0, 255, 0.4);
+#define DCYAN() background:rgba(0, 255, 255, 0.4);
+#define DYELLOW() background:rgba(255, 255, 0, 0.4);
+#define DWHITE() background:rgba(255, 255, 255, 0.4);
+#define DBLACK() background:rgba(0, 0, 0, 0.4);
+
+#define MARGIN(TOP,LEFT,BOTTOM,RIGHT) margin-top:TOP##rem;margin-left:LEFT##rem;margin-bottom:BOTTOM##rem;margin-right:RIGHT##rem;
+#define PADDING(TOP,LEFT,BOTTOM,RIGHT) padding-top:TOP##rem;padding-left:LEFT##rem;padding-bottom:BOTTOM##rem;padding-right:RIGHT##rem;
+
+#define PCTMARGIN(TOP,LEFT,BOTTOM,RIGHT) margin-top:TOP%;margin-left:LEFT%;margin-bottom:BOTTOM%;margin-right:RIGHT%;
+#define PCTPADDING(TOP,LEFT,BOTTOM,RIGHT) padding-top:TOP%;padding-left:LEFT%;padding-bottom:BOTTOM%;padding-right:RIGHT%;
+
+#define MAXWIDTH(W) max-width:W##rem;
+#define MAXHEIGHT(H) max-height:H##rem;
+#define MAXSIZE(W,H) MAXWIDTH(W)MAXHEIGHT(H)
+
+#define MINWIDTH(W) min-width:W##rem;
+#define MINHEIGHT(H) min-height:H##rem;
+#define MINSIZE(W,H) MINWIDTH(W)MINHEIGHT(H)
+
+#define WIDTH(W) width:W##rem;
+#define WIDTHALL(W) WIDTH(W)MINWIDTH(W)MAXWIDTH(W)
+
+#define HEIGHT(H) height:H##rem;
+#define HEIGHTALL(H) HEIGHT(H)MINHEIGHT(H)MAXHEIGHT(H)
+
+#define PCTMAXWIDTH(W) max-width:W##%;
+#define PCTMAXHEIGHT(H) max-height:H##%;
+#define PCTMAXSIZE(W,H) PCTMAXWIDTH(W)PCTMAXHEIGHT(H)
+
+#define PCTMINWIDTH(W) min-width:W##%;
+#define PCTMINHEIGHT(H) min-height:H##%;
+#define PCTMINSIZE(W,H) PCTMINWIDTH(W)PCTMINHEIGHT(H)
+
+#define PCTWIDTH(W) width:W##%;
+#define PCTHEIGHT(H) height:H##%;
+#define PCTSIZE(W,H) PCTWIDTH(W)PCTHEIGHT(H)
+
+
+#define VHMAXWIDTH(W) max-width:W##vh;
+#define VHMAXHEIGHT(H) max-height:H##vh;
+#define VHMAXSIZE(W,H) VHMAXWIDTH(W)VHMAXHEIGHT(H)
+
+#define VHMINWIDTH(W) min-width:W##vh;
+#define VHMINHEIGHT(H) min-height:H##vh;
+#define VHMINSIZE(W,H) VHMINWIDTH(W)VHMINHEIGHT(H)
+
+#define VHWIDTH(W) width:W##vh;
+#define VHHEIGHT(H) height:H##vh;
+#define VHSIZE(W,H) VHWIDTH(W)VHHEIGHT(H)
+
+#define VHWIDTHALL(W) VHWIDTH(W)VHMINWIDTH(W)VHMAXWIDTH(W)
+#define VHHEIGHTALL(H) VHHEIGHT(H)VHMINHEIGHT(H)VHMAXHEIGHT(H)
+
+#define SIZE(W,H) WIDTH(W)HEIGHT(H)
+#define SIZEALL(W,H) SIZE(W,H)MINSIZE(W,H)MAXSIZE(W,H)
+
+#define IGNORETOUCH() touch-action:none;
+#define TOUCH() touch-action:auto;
+
+#define IGNOREMOUSE() pointer-events:none;
+#define MOUSE() pointer-events:auto;
+
+#define NOSELECT() -webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;
+
+#define CLICKABLE() NOSELECT();cursor:pointer;
+
+#define FLEX() display:flex;
+#define GROW() flex: 1 1 auto;
+#define NOGROW() flex: 0 0 auto;
+#define SHRINK() flex: 0 1 auto;
+#define FILL() width:100%;height:100%;
+#define PCTFLEXBASIS(V) flex-basis:V%;
+#define FLEXBASIS(V) flex-basis:V##rem;
+
+#define SCROLLING() overflow:auto;
+#define HSCROLLING() overflow-x:scroll;overflow-y:hidden;
+#define VSCROLLING() overflow-y:scroll;overflow-x:hidden;
+
+#define CLIPS() overflow:hidden;
+
+#define WRAP() flex-wrap:wrap;
+#define NOWRAP() flex-wrap:nowrap;
+
+#define HSTACK() flex-direction:row;
+#define VSTACK() flex-direction:column;
+
+#define HSTACKREV() flex-direction:row-reverse;
+#define VSTACKREV() flex-direction:column-reverse;
+
+#define START() justify-content:flex-start;
+#define END() justify-content:flex-end;
+#define BETWEEN() justify-content:space-between;
+#define AROUND() justify-content:space-around;
+#define EVENLY() justify-content:space-evenly;
+
+#define CENTER() justify-content:center;align-items:center;
+
+#define TOP() align-items:flex-start;
+#define MIDDLE() align-items:center;
+#define BOTTOM() align-items:flex-end;
+#define BASELINE() align-items:baseline;
+#define STRETCH() align-items:stretch;
+
+#define SELF_TOP() align-self:flex-start;
+#define SELF_MIDDLE() align-self:center;
+#define SELF_BOTTOM() align-self:flex-end;
+#define SELF_BASELINE() align-self:baseline;
+#define SELF_STRETCH() align-self:stretch;
+
+#define DEFAULT() FLEX()
+
+#define DISABLED() cursor:not-allowed;IGNOREMOUSE()ALPHA(0.3)
+
+#define VGRADIENT(R1,G1,B1,A1,R2,G2,B2,A2) background:linear-gradient(to bottom, rgba(R1,G1,B1,A1), rgba(R2,G2,B2,A2))
+#define HGRADIENT(R1,G1,B1,A1,R2,G2,B2,A2) background:linear-gradient(to right, rgba(R1,G1,B1,A1), rgba(R2,G2,B2,A2))
+
+#define MAIN_BACKGROUND() BACKGROUND(251,253,254,1)
+
+<!-- (X,Y,BLUR,SPREAD,RED,GREEN,BLUE,ALPHA -->
+#define BOTTOMSHADOW() SHADOW(0,0.5,0.5,0.1,0,0,0,0.1)
+#define STDSHADOW() SHADOW(0,0.5,2.0,0.1,0,0,0,0.1)
+#define DIALOG_BACKGROUND()RADIUS(1)WHITE()STDSHADOW()
+
+#define TEXTMIDDLE() vertical-align: middle;
+#define TEXTCENTER() text-align:center;
+#define TEXTLEFT() text-align:left;
+#define TEXTRIGHT() text-align:right;
+#define TEXTJUSTIFY() text-align:justify;
+#define TEXTTRUNCATE() text-overflow:ellipsis;overflow:hidden;MINWIDTH(0)
+#define TEXTOUTLINE() text-shadow:-1px -1px 0 black,1px -1px 0 black,-1px 1px 0 black,1px 1px 0 black;
+
+#define VSPACE() ELEMENT(GROW()SELF_STRETCH(),)
+#define HSPACE() ELEMENT(GROW()SELF_STRETCH(),)
+
+#define ITEM_OUTLINE() BORDER(0.2,255,255,255,1)
+
+#define ELLIPSES() border-bottom-style:dashed;border-bottom-width:thin;
+
+#define ERRORRED() rgba(208,116,112,1)
+
+#define CENTER_LOADING() ELEMENT(CENTER()GROW()SELF_STRETCH(),LOADING())
+
+#define LOADING() IMAGE(SIZEALL(4,4),public/loading_animation.gif)
+#define ID_LOADING(ID) ID_IMAGE(ID, SIZEALL(4,4),public/loading_animation.gif)
+
+#define FILEDROP_BORDER(X) border:X##rem dotted black;
+
+#define HORIZONTAL_RULE() border-bottom:0.2rem dotted gray;
+
+#define PLUS_ICON() <img style="NOGROW()ALPHA(A)SIZE(1.5,1.5)MARGIN(0,0,0,1)" src="shared/icons/plus.svg"/>
+#define MINUS_ICON() <img style="NOGROW()ALPHA(A)SIZE(1.5,1.5)MARGIN(0,0,0,1)" src="shared/icons/minus.svg"/>
+#define DRAG_ICON() <img style="NOGROW()ALPHA(A)SIZE(1.5,1.5)MARGIN(0,0,0,1)" src="shared/icons/drag.svg"/>
+
+#define OPTION_DIVIDER() <option disabled>──────────</option>
+#define DISABLED_OPTION(VALUE,TITLE) <option value="VALUE" disabled>TITLE</option>
+#define OPTION(VALUE,TITLE) <option value="VALUE">TITLE</option>
+
+#define AMAZON_STORE_ID 200087
+#define AMAZONPRIMEVIDEO_STORE_ID 365685
+#define GMAIL_STORE_ID 1097211
+#define INSTACART_STORE_ID 348636
+#define KROGER_STORE_ID 556183
+#define STARBUCKS_STORE_ID 10
+#define WALMART_STORE_ID 101
+
+
+#macro MERCHANTSELECT(ID,STYLE)
+<select id="ID" style="DEFAULT()STYLE">
+    OPTION(AMAZON_STORE_ID,Amazon)
+    OPTION(AMAZONPRIMEVIDEO_STORE_ID,Amazon Prime Video)
+    OPTION(GMAIL_STORE_ID,Gmail)
+    OPTION(INSTACART_STORE_ID,Instacart)
+    OPTION(KROGER_STORE_ID,Kroger)
+    OPTION(STARBUCKS_STORE_ID,Starbucks)
+    OPTION(WALMART_STORE_ID,Walmart)
+</select>
+#endmacro
+
+#macro MONTHSSELECT(ID,STYLE)
+<select id="ID" style="DEFAULT()STYLE">
+    OPTION(1,1 Month)
+    OPTION(3,3 Months)
+    OPTION(6,6 Months)
+    OPTION(12,12 Months)
+    OPTION(300,All)
+</select>
+#endmacro
+
+#macro DAYSSELECT(ID,STYLE)
+<select id="ID" style="DEFAULT()STYLE">
+    OPTION(30,1 Month)
+    OPTION(90,3 Months)
+    OPTION(180,6 Months)
+    OPTION(365,12 Months)
+    OPTION(999999999,All)
+</select>
+#endmacro
+
+#macro DEVICEOSIDSELECT(ID,STYLE)
+<select id="ID" style="DEFAULT()STYLE">
+    OPTION(DEVICEOSID_BOTH,Both)
+    OPTION(DEVICEOSID_IOS,iOS)
+    OPTION(DEVICEOSID_ANDROID,Android)
+</select>
+#endmacro
+
+#macro APPVERSIONSELECT(ID,STYLE)
+<select id="ID" style="DEFAULT()STYLE">
+    OPTION(none,All)
+</select>
+#endmacro
+
+#macro JSVERSIONSELECT(ID,STYLE)
+<select id="ID" style="DEFAULT()STYLE">
+    OPTION(0,All)
+</select>
+#endmacro
+
+#macro GITHUB(URL,COLOR)
+<a href=URL class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:COLOR; color:white; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+#endmacro
