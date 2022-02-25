@@ -33,9 +33,6 @@ extension Endeavour {
 
         private var subscribedServices = [Service]()
 
-        // TODO: DOCUMENTS SHOULD "CLOSE" IF THE OWNER "LEAVES" BY CLOSING THE BROWSER
-        // (IE OWNER'S LONGPULL GOES AWAY AND DOESN'T COME BACK QUICKLY)
-
         public init(owner: UserUUID,
                     content: Hitch?) {
             self.owner = owner
