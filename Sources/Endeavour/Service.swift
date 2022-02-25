@@ -16,6 +16,7 @@ extension Endeavour {
 
         private let userUUID: UserUUID = UUID().uuidHitch
 
+        private var longPullLastSendDate = Date()
         private var longPull: SubscribeLongPull?
         private var openDocumentVersions: [DocumentUUID: DocumentVersion] = [:]
 
@@ -28,7 +29,7 @@ extension Endeavour {
                 return returnCallback(nil, HttpResponse(error: "command is missing"))
             }
 
-            print(jsonElement)
+            // print(jsonElement)
 
             switch command {
             case "new":
@@ -179,9 +180,25 @@ extension Endeavour {
                                   self) { updateJson in
                 guard let updateJson = updateJson else { return }
 
-                self.longPull?(JsonElement(unknown: ["documentUUID": documentUUID]),
-                               HttpResponse(json: updateJson))
-                self.longPull = nil
+                if let longPull = self.longPull {
+                    longPull(JsonElement(unknown: ["documentUUID": documentUUID]),
+                                    HttpResponse(json: updateJson))
+                    self.longPull = nil
+                    self.longPullLastSendDate = Date()
+                } else {
+                    // We might be sending to someone who no longer exists.  We give them a short
+                    // period of time to reconnect otherwise we make them leave all documents they
+                    // are connected to
+                    if abs(self.longPullLastSendDate.timeIntervalSinceNow) > 10.0 {
+                        print("User self.userUUID disconnected due to inactivity")
+                        for documentUUID in self.openDocumentVersions.keys {
+                            Endeavour.shared.beLeaveDocument(userUUID: self.userUUID,
+                                                             documentUUID: documentUUID,
+                                                             self) { _ in }
+                        }
+                    }
+                }
+
             }
         }
 
