@@ -1,6 +1,6 @@
 import {Update, receiveUpdates, sendableUpdates, collab, getSyncedVersion, getClientID} from "@codemirror/collab"
 import {ViewPlugin, keymap, highlightSpecialChars, drawSelection, highlightActiveLine, dropCursor} from "@codemirror/view"
-import {ChangeSet, Text, EditorState} from "@codemirror/state"
+import {ChangeSet, Text, EditorState, StateEffect} from "@codemirror/state"
 import {history, historyKeymap} from "@codemirror/history"
 import {foldGutter, foldKeymap} from "@codemirror/fold"
 import {indentOnInput, indentUnit} from "@codemirror/language"
@@ -23,7 +23,7 @@ import {javascript} from "@codemirror/lang-javascript"
 import {swift} from "./index.swift.js"
 
 import {light} from "./light.js"
-//import {dark} from "./dark.js"
+import {dark} from "./dark.js"
 
 let cm = {};
 window.cm = cm;
@@ -328,8 +328,6 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
 
 cm.CreateEditor = function(parentDivId, extensions, content="", editable=true) {
     let parentDiv = document.getElementById(parentDivId);
-    
-    extensions.push(light);
         
     if (editable) {
         extensions.push(lineNumbers());
@@ -340,14 +338,42 @@ cm.CreateEditor = function(parentDivId, extensions, content="", editable=true) {
         extensions.push(EditorView.editable.of(false));
         extensions.push(EditorState.readOnly.of(true));
     }
+    
+    var darkExtensions = [].concat(extensions);
+    var lightExtensions = [].concat(extensions);
+    
+    darkExtensions.push(dark);
+    lightExtensions.push(light);
+    
+    if (window.matchMedia &&  window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        extensions = darkExtensions;
+    } else {
+        extensions = lightExtensions;
+    }
         
-    return new EditorView({
+    let editor = new EditorView({
         state: EditorState.create({
             doc: Text.of(content.split("\n")),
             extensions: extensions,
             tabSize: 4
         }),
         parent: parentDiv
-    })
+    });
+    
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+        if (event.matches) {
+            console.log("SWITCH TO DARK")
+            editor.dispatch({
+                effects: StateEffect.reconfigure.of(darkExtensions)
+            });
+        } else {
+            console.log("SWITCH TO LIGHT")
+            editor.dispatch({
+                effects: StateEffect.reconfigure.of(lightExtensions)
+            });
+        }
+    });
+
+    return editor;
 }
 

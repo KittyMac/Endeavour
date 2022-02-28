@@ -9285,7 +9285,7 @@
     }
 
     const theme = /*@__PURE__*/Facet.define({ combine: strs => strs.join(" ") });
-    const darkTheme = /*@__PURE__*/Facet.define({ combine: values => values.indexOf(true) > -1 });
+    const darkTheme$1 = /*@__PURE__*/Facet.define({ combine: values => values.indexOf(true) > -1 });
     const baseThemeID = /*@__PURE__*/StyleModule.newName(), baseLightID = /*@__PURE__*/StyleModule.newName(), baseDarkID = /*@__PURE__*/StyleModule.newName();
     const lightDarkIDs = { "&light": "." + baseLightID, "&dark": "." + baseDarkID };
     function buildTheme(main, spec, scopes) {
@@ -10365,7 +10365,7 @@
         */
         get themeClasses() {
             return baseThemeID + " " +
-                (this.state.facet(darkTheme) ? baseDarkID : baseLightID) + " " +
+                (this.state.facet(darkTheme$1) ? baseDarkID : baseLightID) + " " +
                 this.state.facet(theme);
         }
         updateAttrs() {
@@ -10803,7 +10803,7 @@
             let prefix = StyleModule.newName();
             let result = [theme.of(prefix), styleModule.of(buildTheme(`.${prefix}`, spec))];
             if (options && options.dark)
-                result.push(darkTheme.of(true));
+                result.push(darkTheme$1.of(true));
             return result;
         }
         /**
@@ -10901,7 +10901,7 @@
     includes an instance of this when the `dark` option is set to
     true.
     */
-    EditorView.darkTheme = darkTheme;
+    EditorView.darkTheme = darkTheme$1;
     /**
     Facet that provides additional DOM attributes for the editor's
     editable DOM element.
@@ -23268,17 +23268,131 @@
         return new LanguageSupport(swiftLanguage, [swiftCompletion]);
     }
 
-    const textColor = "#272727";
-    const lightBackground = "#f5f5f5";
-    const highlightBackground = "#f3f9ff";
-    const gutterBackground = "#f5f5f5";
-    const hightlightGutterBackground = "#e5f1fe";
-    const background = "#ffffff";
-    const tooltipBackground = "#f5f5f5";
-    const selection = "#d9d9d9";
-    const cursor = "#272727";
+    const textColor$1 = "#272727";
+    const lightBackground$1 = "#f5f5f5";
+    const highlightBackground$1 = "#f3f9ff";
+    const gutterBackground$1 = "#f5f5f5";
+    const hightlightGutterBackground$1 = "#e5f1fe";
+    const background$1 = "#ffffff";
+    const tooltipBackground$1 = "#f5f5f5";
+    const selection$1 = "#d9d9d9";
+    const cursor$1 = "#272727";
 
     const lightTheme = EditorView.theme({
+        "&.cm-editor": {
+            color: textColor$1,
+            fontSize: '1rem',
+            flex: '1 1 auto',
+            alignSelf: 'stretch',
+            minHeight: '0px'
+        },
+        ".cm-scroller": {
+            fontFamily:'Roboto Mono, Courier New, monospace',
+            overflow: 'auto',
+        },
+        "&": {
+            color: textColor$1,
+            backgroundColor: background$1
+        },
+
+        ".cm-content": {
+            caretColor: cursor$1
+        },
+
+        ".cm-cursor, .cm-dropCursor": {borderLeftColor: cursor$1},
+        "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {backgroundColor: selection$1},
+
+        ".cm-panels": {backgroundColor: lightBackground$1, color: textColor$1},
+        ".cm-panels.cm-panels-top": {borderBottom: "2px solid black"},
+        ".cm-panels.cm-panels-bottom": {borderTop: "2px solid black"},
+
+        ".cm-searchMatch": {
+            backgroundColor: "#72a1ff59",
+            outline: "1px solid #457dff"
+        },
+        ".cm-searchMatch.cm-searchMatch-selected": {
+            backgroundColor: "#6199ff2f"
+        },
+
+        ".cm-activeLine": {backgroundColor: highlightBackground$1},
+        ".cm-selectionMatch": {backgroundColor: "#aafe661a"},
+
+        "&.cm-focused .cm-matchingBracket, &.cm-focused .cm-nonmatchingBracket": {
+            backgroundColor: "#bad0f847",
+            outline: "1px solid #515a6b"
+        },
+
+        ".cm-gutters": {
+            backgroundColor: gutterBackground$1,
+            color: "#999999",
+            border: "none"
+        },
+
+        ".cm-activeLineGutter": {
+            backgroundColor: hightlightGutterBackground$1
+        },
+
+        ".cm-foldPlaceholder": {
+            backgroundColor: "transparent",
+            border: "none",
+            color: "#ddd"
+        },
+
+        ".cm-tooltip": {
+            border: "none",
+            backgroundColor: tooltipBackground$1
+        },
+        ".cm-tooltip .cm-tooltip-arrow:before": {
+            borderTopColor: "transparent",
+            borderBottomColor: "transparent"
+        },
+        ".cm-tooltip .cm-tooltip-arrow:after": {
+            borderTopColor: tooltipBackground$1,
+            borderBottomColor: tooltipBackground$1
+        },
+        ".cm-tooltip-autocomplete": {
+            "& > ul > li[aria-selected]": {
+                backgroundColor: highlightBackground$1,
+                color: textColor$1
+            }
+        }
+    });
+
+    const lightHighlightStyle = HighlightStyle.define([
+      {tag: tags.link, textDecoration: "underline"},
+      {tag: tags.heading, textDecoration: "underline", fontWeight: "bold"},
+      {tag: tags.emphasis, fontStyle: "italic"},
+      {tag: tags.strong, fontWeight: "bold"},
+      {tag: tags.strikethrough, textDecoration: "line-through"},
+      {tag: tags.keyword, color: "#708"},
+      {tag: [tags.atom, tags.bool, tags.url, tags.contentSeparator, tags.labelName], color: "#219"},
+      {tag: [tags.literal, tags.inserted], color: "#164"},
+      {tag: [tags.string, tags.deleted], color: "#a11"},
+      {tag: [tags.regexp, tags.escape, tags.special(tags.string)], color: "#e40"},
+      {tag: tags.definition(tags.variableName), color: "#619bd3"},
+      {tag: tags.local(tags.variableName), color: "#30a"},
+      {tag: [tags.typeName, tags.namespace], color: "#085"},
+      {tag: tags.className, color: "#167"},
+      {tag: [tags.special(tags.variableName), tags.macroName], color: "#256"},
+      {tag: tags.definition(tags.propertyName), color: "#00c"},
+      {tag: tags.comment, color: "#737f8c"},
+      {tag: tags.meta, color: "#999999"},
+      {tag: tags.invalid, color: "#f00"}
+    ]);
+
+    const light = [lightTheme, lightHighlightStyle];
+
+    const textColor = "#d9d9d9";
+    const lightBackground = "#0a0a0a";
+    const highlightBackground = "#3f4044";
+    const gutterBackground = "#404040";
+    const hightlightGutterBackground = "#676c73";
+    const background = "#292a2c";
+    const tooltipBackground = "#262626";
+    const selection = "#4b4b4b";
+    const cursor = "#d9d9d9";
+
+    const darkTheme = EditorView.theme({
         "&.cm-editor": {
             color: textColor,
             fontSize: '1rem',
@@ -23358,31 +23472,29 @@
         }
     });
 
-    const lightHighlightStyle = HighlightStyle.define([
+    const darkHighlightStyle = HighlightStyle.define([
       {tag: tags.link, textDecoration: "underline"},
       {tag: tags.heading, textDecoration: "underline", fontWeight: "bold"},
       {tag: tags.emphasis, fontStyle: "italic"},
       {tag: tags.strong, fontWeight: "bold"},
       {tag: tags.strikethrough, textDecoration: "line-through"},
-      {tag: tags.keyword, color: "#708"},
-      {tag: [tags.atom, tags.bool, tags.url, tags.contentSeparator, tags.labelName], color: "#219"},
-      {tag: [tags.literal, tags.inserted], color: "#164"},
-      {tag: [tags.string, tags.deleted], color: "#a11"},
-      {tag: [tags.regexp, tags.escape, tags.special(tags.string)], color: "#e40"},
-      {tag: tags.definition(tags.variableName), color: "#619bd3"},
-      {tag: tags.local(tags.variableName), color: "#30a"},
-      {tag: [tags.typeName, tags.namespace], color: "#085"},
-      {tag: tags.className, color: "#167"},
-      {tag: [tags.special(tags.variableName), tags.macroName], color: "#256"},
-      {tag: tags.definition(tags.propertyName), color: "#00c"},
-      {tag: tags.comment, color: "#737f8c"},
-      {tag: tags.meta, color: "#999999"},
-      {tag: tags.invalid, color: "#f00"}
+      {tag: tags.keyword, color: "#b800d2"},
+      {tag: [tags.atom, tags.bool, tags.url, tags.contentSeparator, tags.labelName], color: "#6859cf"},
+      {tag: [tags.literal, tags.inserted], color: "#559e81"},
+      {tag: [tags.string, tags.deleted], color: "#ca6666"},
+      {tag: [tags.regexp, tags.escape, tags.special(tags.string)], color: "#f17d4e"},
+      {tag: tags.definition(tags.variableName), color: "#94b9dc"},
+      {tag: tags.local(tags.variableName), color: "#9579d7"},
+      {tag: [tags.typeName, tags.namespace], color: "#6fc8a7"},
+      {tag: tags.className, color: "#69a3ae"},
+      {tag: [tags.special(tags.variableName), tags.macroName], color: "#639bad"},
+      {tag: tags.definition(tags.propertyName), color: "#7171d6"},
+      {tag: tags.comment, color: "#929da9"},
+      {tag: tags.meta, color: "#929da9"},
+      {tag: tags.invalid, color: "#ff8888"}
     ]);
 
-    const light = [lightTheme, lightHighlightStyle];
-
-    //import {dark} from "./dark.js"
+    const dark = [darkTheme, darkHighlightStyle];
 
     let cm = {};
     window.cm = cm;
@@ -23687,8 +23799,6 @@
 
     cm.CreateEditor = function(parentDivId, extensions, content="", editable=true) {
         let parentDiv = document.getElementById(parentDivId);
-        
-        extensions.push(light);
             
         if (editable) {
             extensions.push(lineNumbers());
@@ -23699,15 +23809,43 @@
             extensions.push(EditorView.editable.of(false));
             extensions.push(EditorState.readOnly.of(true));
         }
+        
+        var darkExtensions = [].concat(extensions);
+        var lightExtensions = [].concat(extensions);
+        
+        darkExtensions.push(dark);
+        lightExtensions.push(light);
+        
+        if (window.matchMedia &&  window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            extensions = darkExtensions;
+        } else {
+            extensions = lightExtensions;
+        }
             
-        return new EditorView({
+        let editor = new EditorView({
             state: EditorState.create({
                 doc: Text.of(content.split("\n")),
                 extensions: extensions,
                 tabSize: 4
             }),
             parent: parentDiv
-        })
+        });
+        
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                console.log("SWITCH TO DARK");
+                editor.dispatch({
+                    effects: StateEffect.reconfigure.of(darkExtensions)
+                });
+            } else {
+                console.log("SWITCH TO LIGHT");
+                editor.dispatch({
+                    effects: StateEffect.reconfigure.of(lightExtensions)
+                });
+            }
+        });
+
+        return editor;
     };
 
 })();

@@ -9285,7 +9285,7 @@
     }
 
     const theme = /*@__PURE__*/Facet.define({ combine: strs => strs.join(" ") });
-    const darkTheme = /*@__PURE__*/Facet.define({ combine: values => values.indexOf(true) > -1 });
+    const darkTheme$1 = /*@__PURE__*/Facet.define({ combine: values => values.indexOf(true) > -1 });
     const baseThemeID = /*@__PURE__*/StyleModule.newName(), baseLightID = /*@__PURE__*/StyleModule.newName(), baseDarkID = /*@__PURE__*/StyleModule.newName();
     const lightDarkIDs = { "&light": "." + baseLightID, "&dark": "." + baseDarkID };
     function buildTheme(main, spec, scopes) {
@@ -10365,7 +10365,7 @@
         */
         get themeClasses() {
             return baseThemeID + " " +
-                (this.state.facet(darkTheme) ? baseDarkID : baseLightID) + " " +
+                (this.state.facet(darkTheme$1) ? baseDarkID : baseLightID) + " " +
                 this.state.facet(theme);
         }
         updateAttrs() {
@@ -10803,7 +10803,7 @@
             let prefix = StyleModule.newName();
             let result = [theme.of(prefix), styleModule.of(buildTheme(`.${prefix}`, spec))];
             if (options && options.dark)
-                result.push(darkTheme.of(true));
+                result.push(darkTheme$1.of(true));
             return result;
         }
         /**
@@ -10901,7 +10901,7 @@
     includes an instance of this when the `dark` option is set to
     true.
     */
-    EditorView.darkTheme = darkTheme;
+    EditorView.darkTheme = darkTheme$1;
     /**
     Facet that provides additional DOM attributes for the editor's
     editable DOM element.
@@ -23268,17 +23268,19 @@
         return new LanguageSupport(swiftLanguage, [swiftCompletion]);
     }
 
-    const textColor = "#272727";
-    const lightBackground = "#21252b";
-    const highlightBackground$1 = "#2c313a";
-    const background$1 = "#282c34";
-    const tooltipBackground$1 = "#353a42";
-    const selection$1 = "#3E4451";
-    const cursor$1 = "#528bff";
+    const textColor$1 = "#272727";
+    const lightBackground$1 = "#f5f5f5";
+    const highlightBackground$1 = "#f3f9ff";
+    const gutterBackground$1 = "#f5f5f5";
+    const hightlightGutterBackground$1 = "#e5f1fe";
+    const background$1 = "#ffffff";
+    const tooltipBackground$1 = "#f5f5f5";
+    const selection$1 = "#d9d9d9";
+    const cursor$1 = "#272727";
 
     const lightTheme = EditorView.theme({
         "&.cm-editor": {
-            color: textColor,
+            color: textColor$1,
             fontSize: '1rem',
             flex: '1 1 auto',
             alignSelf: 'stretch',
@@ -23289,7 +23291,7 @@
             overflow: 'auto',
         },
         "&": {
-            color: textColor,
+            color: textColor$1,
             backgroundColor: background$1
         },
 
@@ -23300,7 +23302,7 @@
         ".cm-cursor, .cm-dropCursor": {borderLeftColor: cursor$1},
         "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {backgroundColor: selection$1},
 
-        ".cm-panels": {backgroundColor: lightBackground, color: textColor},
+        ".cm-panels": {backgroundColor: lightBackground$1, color: textColor$1},
         ".cm-panels.cm-panels-top": {borderBottom: "2px solid black"},
         ".cm-panels.cm-panels-bottom": {borderTop: "2px solid black"},
 
@@ -23321,13 +23323,13 @@
         },
 
         ".cm-gutters": {
-            backgroundColor: background$1,
-            color: "#7a757a",
+            backgroundColor: gutterBackground$1,
+            color: "#999999",
             border: "none"
         },
 
         ".cm-activeLineGutter": {
-            backgroundColor: highlightBackground$1
+            backgroundColor: hightlightGutterBackground$1
         },
 
         ".cm-foldPlaceholder": {
@@ -23351,7 +23353,7 @@
         ".cm-tooltip-autocomplete": {
             "& > ul > li[aria-selected]": {
                 backgroundColor: highlightBackground$1,
-                color: textColor
+                color: textColor$1
             }
         }
     });
@@ -23374,32 +23376,25 @@
       {tag: [tags.special(tags.variableName), tags.macroName], color: "#256"},
       {tag: tags.definition(tags.propertyName), color: "#00c"},
       {tag: tags.comment, color: "#737f8c"},
-      {tag: tags.meta, color: "#7a757a"},
+      {tag: tags.meta, color: "#999999"},
       {tag: tags.invalid, color: "#f00"}
     ]);
 
     const light = [lightTheme, lightHighlightStyle];
 
-    const chalky = "#e5c07b",
-      coral = "#e06c75",
-      cyan = "#56b6c2",
-      invalid = "#ffffff",
-      ivory = "#abb2bf",
-      stone = "#7d8799",
-      malibu = "#61afef",
-      sage = "#98c379",
-      whiskey = "#d19a66",
-      violet = "#c678dd",
-      darkBackground = "#292a30",
-      highlightBackground = "#2c313a",
-      background = "#282c34",
-      tooltipBackground = "#353a42",
-      selection = "#3E4451",
-      cursor = "#528bff";
+    const textColor = "#d9d9d9";
+    const lightBackground = "#0a0a0a";
+    const highlightBackground = "#3f4044";
+    const gutterBackground = "#404040";
+    const hightlightGutterBackground = "#676c73";
+    const background = "#292a2c";
+    const tooltipBackground = "#262626";
+    const selection = "#4b4b4b";
+    const cursor = "#d9d9d9";
 
-    EditorView.theme({
+    const darkTheme = EditorView.theme({
         "&.cm-editor": {
-            color: '#dfdfe0',
+            color: textColor,
             fontSize: '1rem',
             flex: '1 1 auto',
             alignSelf: 'stretch',
@@ -23410,7 +23405,7 @@
             overflow: 'auto',
         },
         "&": {
-            color: ivory,
+            color: textColor,
             backgroundColor: background
         },
 
@@ -23421,7 +23416,7 @@
         ".cm-cursor, .cm-dropCursor": {borderLeftColor: cursor},
         "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {backgroundColor: selection},
 
-        ".cm-panels": {backgroundColor: darkBackground, color: ivory},
+        ".cm-panels": {backgroundColor: lightBackground, color: textColor},
         ".cm-panels.cm-panels-top": {borderBottom: "2px solid black"},
         ".cm-panels.cm-panels-bottom": {borderTop: "2px solid black"},
 
@@ -23442,13 +23437,13 @@
         },
 
         ".cm-gutters": {
-            backgroundColor: background,
-            color: stone,
+            backgroundColor: gutterBackground,
+            color: "#999999",
             border: "none"
         },
 
         ".cm-activeLineGutter": {
-            backgroundColor: highlightBackground
+            backgroundColor: hightlightGutterBackground
         },
 
         ".cm-foldPlaceholder": {
@@ -23472,29 +23467,34 @@
         ".cm-tooltip-autocomplete": {
             "& > ul > li[aria-selected]": {
                 backgroundColor: highlightBackground,
-                color: ivory
+                color: textColor
             }
         }
-    }, {dark: true});
+    });
 
-    HighlightStyle.define([
-        {tag: tags.keyword, color: violet},
-        {tag: [tags.name, tags.deleted, tags.character, tags.propertyName, tags.macroName], color: coral},
-        {tag: [tags.function(tags.variableName), tags.labelName], color: malibu},
-        {tag: [tags.color, tags.constant(tags.name), tags.standard(tags.name)], color: whiskey},
-        {tag: [tags.definition(tags.name), tags.separator], color: ivory},
-        {tag: [tags.typeName, tags.className, tags.number, tags.changed, tags.annotation, tags.modifier, tags.self, tags.namespace], color: chalky},
-        {tag: [tags.operator, tags.operatorKeyword, tags.url, tags.escape, tags.regexp, tags.link, tags.special(tags.string)], color: cyan},
-        {tag: [tags.meta, tags.comment], color: stone},
-        {tag: tags.strong, fontWeight: "bold"},
-        {tag: tags.emphasis, fontStyle: "italic"},
-        {tag: tags.strikethrough, textDecoration: "line-through"},
-        {tag: tags.link, color: stone, textDecoration: "underline"},
-        {tag: tags.heading, fontWeight: "bold", color: coral},
-        {tag: [tags.atom, tags.bool, tags.special(tags.variableName)], color: whiskey },
-        {tag: [tags.processingInstruction, tags.string, tags.inserted], color: sage},
-        {tag: tags.invalid, color: invalid},
+    const darkHighlightStyle = HighlightStyle.define([
+      {tag: tags.link, textDecoration: "underline"},
+      {tag: tags.heading, textDecoration: "underline", fontWeight: "bold"},
+      {tag: tags.emphasis, fontStyle: "italic"},
+      {tag: tags.strong, fontWeight: "bold"},
+      {tag: tags.strikethrough, textDecoration: "line-through"},
+      {tag: tags.keyword, color: "#b800d2"},
+      {tag: [tags.atom, tags.bool, tags.url, tags.contentSeparator, tags.labelName], color: "#6859cf"},
+      {tag: [tags.literal, tags.inserted], color: "#559e81"},
+      {tag: [tags.string, tags.deleted], color: "#ca6666"},
+      {tag: [tags.regexp, tags.escape, tags.special(tags.string)], color: "#f17d4e"},
+      {tag: tags.definition(tags.variableName), color: "#94b9dc"},
+      {tag: tags.local(tags.variableName), color: "#9579d7"},
+      {tag: [tags.typeName, tags.namespace], color: "#6fc8a7"},
+      {tag: tags.className, color: "#69a3ae"},
+      {tag: [tags.special(tags.variableName), tags.macroName], color: "#639bad"},
+      {tag: tags.definition(tags.propertyName), color: "#7171d6"},
+      {tag: tags.comment, color: "#929da9"},
+      {tag: tags.meta, color: "#929da9"},
+      {tag: tags.invalid, color: "#ff8888"}
     ]);
+
+    const dark = [darkTheme, darkHighlightStyle];
 
     let cm = {};
     window.cm = cm;
@@ -23799,8 +23799,6 @@
 
     cm.CreateEditor = function(parentDivId, extensions, content="", editable=true) {
         let parentDiv = document.getElementById(parentDivId);
-        
-        extensions.push(light);
             
         if (editable) {
             extensions.push(lineNumbers());
@@ -23811,15 +23809,43 @@
             extensions.push(EditorView.editable.of(false));
             extensions.push(EditorState.readOnly.of(true));
         }
+        
+        var darkExtensions = [].concat(extensions);
+        var lightExtensions = [].concat(extensions);
+        
+        darkExtensions.push(dark);
+        lightExtensions.push(light);
+        
+        if (window.matchMedia &&  window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            extensions = darkExtensions;
+        } else {
+            extensions = lightExtensions;
+        }
             
-        return new EditorView({
+        let editor = new EditorView({
             state: EditorState.create({
                 doc: Text.of(content.split("\n")),
                 extensions: extensions,
                 tabSize: 4
             }),
             parent: parentDiv
-        })
+        });
+        
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                console.log("SWITCH TO DARK");
+                editor.dispatch({
+                    effects: StateEffect.reconfigure.of(darkExtensions)
+                });
+            } else {
+                console.log("SWITCH TO LIGHT");
+                editor.dispatch({
+                    effects: StateEffect.reconfigure.of(lightExtensions)
+                });
+            }
+        });
+
+        return editor;
     };
 
 })();

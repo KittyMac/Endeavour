@@ -1,26 +1,20 @@
 import {EditorView} from "@codemirror/view"
 import {HighlightStyle, tags as t} from "@codemirror/highlight"
 
-const chalky = "#e5c07b",
-  coral = "#e06c75",
-  cyan = "#56b6c2",
-  invalid = "#ffffff",
-  ivory = "#abb2bf",
-  stone = "#7d8799",
-  malibu = "#61afef",
-  sage = "#98c379",
-  whiskey = "#d19a66",
-  violet = "#c678dd",
-  darkBackground = "#292a30",
-  highlightBackground = "#2c313a",
-  background = "#282c34",
-  tooltipBackground = "#353a42",
-  selection = "#3E4451",
-  cursor = "#528bff"
+
+const textColor = "#d9d9d9"
+const lightBackground = "#0a0a0a"
+const highlightBackground = "#3f4044"
+const gutterBackground = "#404040"
+const hightlightGutterBackground = "#676c73"
+const background = "#292a2c"
+const tooltipBackground = "#262626"
+const selection = "#4b4b4b"
+const cursor = "#d9d9d9"
 
 export const darkTheme = EditorView.theme({
     "&.cm-editor": {
-        color: '#dfdfe0',
+        color: textColor,
         fontSize: '1rem',
         flex: '1 1 auto',
         alignSelf: 'stretch',
@@ -31,7 +25,7 @@ export const darkTheme = EditorView.theme({
         overflow: 'auto',
     },
     "&": {
-        color: ivory,
+        color: textColor,
         backgroundColor: background
     },
 
@@ -42,7 +36,7 @@ export const darkTheme = EditorView.theme({
     ".cm-cursor, .cm-dropCursor": {borderLeftColor: cursor},
     "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {backgroundColor: selection},
 
-    ".cm-panels": {backgroundColor: darkBackground, color: ivory},
+    ".cm-panels": {backgroundColor: lightBackground, color: textColor},
     ".cm-panels.cm-panels-top": {borderBottom: "2px solid black"},
     ".cm-panels.cm-panels-bottom": {borderTop: "2px solid black"},
 
@@ -63,13 +57,13 @@ export const darkTheme = EditorView.theme({
     },
 
     ".cm-gutters": {
-        backgroundColor: background,
-        color: stone,
+        backgroundColor: gutterBackground,
+        color: "#999999",
         border: "none"
     },
 
     ".cm-activeLineGutter": {
-        backgroundColor: highlightBackground
+        backgroundColor: hightlightGutterBackground
     },
 
     ".cm-foldPlaceholder": {
@@ -93,28 +87,31 @@ export const darkTheme = EditorView.theme({
     ".cm-tooltip-autocomplete": {
         "& > ul > li[aria-selected]": {
             backgroundColor: highlightBackground,
-            color: ivory
+            color: textColor
         }
     }
-}, {dark: true})
+})
 
 export const darkHighlightStyle = HighlightStyle.define([
-    {tag: t.keyword, color: violet},
-    {tag: [t.name, t.deleted, t.character, t.propertyName, t.macroName], color: coral},
-    {tag: [t.function(t.variableName), t.labelName], color: malibu},
-    {tag: [t.color, t.constant(t.name), t.standard(t.name)], color: whiskey},
-    {tag: [t.definition(t.name), t.separator], color: ivory},
-    {tag: [t.typeName, t.className, t.number, t.changed, t.annotation, t.modifier, t.self, t.namespace], color: chalky},
-    {tag: [t.operator, t.operatorKeyword, t.url, t.escape, t.regexp, t.link, t.special(t.string)], color: cyan},
-    {tag: [t.meta, t.comment], color: stone},
-    {tag: t.strong, fontWeight: "bold"},
-    {tag: t.emphasis, fontStyle: "italic"},
-    {tag: t.strikethrough, textDecoration: "line-through"},
-    {tag: t.link, color: stone, textDecoration: "underline"},
-    {tag: t.heading, fontWeight: "bold", color: coral},
-    {tag: [t.atom, t.bool, t.special(t.variableName)], color: whiskey },
-    {tag: [t.processingInstruction, t.string, t.inserted], color: sage},
-    {tag: t.invalid, color: invalid},
+  {tag: t.link, textDecoration: "underline"},
+  {tag: t.heading, textDecoration: "underline", fontWeight: "bold"},
+  {tag: t.emphasis, fontStyle: "italic"},
+  {tag: t.strong, fontWeight: "bold"},
+  {tag: t.strikethrough, textDecoration: "line-through"},
+  {tag: t.keyword, color: "#b800d2"},
+  {tag: [t.atom, t.bool, t.url, t.contentSeparator, t.labelName], color: "#6859cf"},
+  {tag: [t.literal, t.inserted], color: "#559e81"},
+  {tag: [t.string, t.deleted], color: "#ca6666"},
+  {tag: [t.regexp, t.escape, t.special(t.string)], color: "#f17d4e"},
+  {tag: t.definition(t.variableName), color: "#94b9dc"},
+  {tag: t.local(t.variableName), color: "#9579d7"},
+  {tag: [t.typeName, t.namespace], color: "#6fc8a7"},
+  {tag: t.className, color: "#69a3ae"},
+  {tag: [t.special(t.variableName), t.macroName], color: "#639bad"},
+  {tag: t.definition(t.propertyName), color: "#7171d6"},
+  {tag: t.comment, color: "#929da9"},
+  {tag: t.meta, color: "#929da9"},
+  {tag: t.invalid, color: "#ff8888"}
 ])
 
 export const dark = [darkTheme, darkHighlightStyle]

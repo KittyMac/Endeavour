@@ -46,11 +46,42 @@
 #define LABEL(STYLE,CONTENT) <label style="DEFAULT()STYLE">CONTENT</label>
 #define ID_LABEL(ID,STYLE,CONTENT) <label id="ID" style="DEFAULT()STYLE">CONTENT</label>
 
-#define FCLEAR() color:rgba(255,255,255,0);
-#define FWHITE() color:white;
-#define FDARKGREY() color:rgba(100,100,100,1);
-#define FGREY() color:rgba(200,200,200,1);
-#define FBLACK() color:rgba(83,84,87,1);
+#define FCLEAR() color:var(--fh-fclear);
+#define FWHITE() color:var(--fh-fwhite);
+#define FDARKGREY() color:var(--fh-fdarkgrey);
+#define FGREY() color:var(--fh-fgrey);
+#define FBLACK() color:var(--fh-fblack);
+#define FRED() color:var(--fh-fred);
+#define FGREEN() color:var(--fh-fgreen);
+#define FBLUE() color:var(--fh-fblue);
+#define FCYAN() color:var(--fh-fcyan);
+#define FYELLOW() color:var(--fh-fyellow);
+
+#define CLEAR() color:var(--fh-clear);
+#define WHITE() color:var(--fh-white);
+#define DARKGREY() color:var(--fh-darkgrey);
+#define GREY() color:var(--fh-grey);
+#define BLACK() color:var(--fh-black);
+#define RED() color:var(--fh-red);
+#define GREEN() color:var(--fh-green);
+#define BLUE() color:var(--fh-blue);
+#define CYAN() color:var(--fh-cyan);
+#define YELLOW() color:var(--fh-yellow);
+
+#define DCLEAR() color:var(--fh-dclear);
+#define DWHITE() color:var(--fh-dwhite);
+#define DDARKGREY() color:var(--fh-ddarkgrey);
+#define DGREY() color:var(--fh-dgrey);
+#define DBLACK() color:var(--fh-dblack);
+#define DRED() color:var(--fh-dred);
+#define DGREEN() color:var(--fh-dgreen);
+#define DBLUE() color:var(--fh-dblue);
+#define DCYAN() color:var(--fh-dcyan);
+#define DYELLOW() color:var(--fh-dyellow);
+
+#define ERRORRED() var(--fh-error-red)
+
+#define MAIN_BACKGROUND() background:var(--fh-main-background)
 
 #define HEADER2(CONTENT) ELEMENT(ROBOTO(2.2)FBLACK(),CONTENT)
 #define HEADER(CONTENT) ELEMENT(ROBOTO(1.2)FBLACK(),CONTENT)
@@ -92,14 +123,14 @@
 #define COLOR(RED,GREEN,BLUE,ALPHA) color:rgba(RED,GREEN,BLUE,ALPHA);
 #define BACKGROUND(RED,GREEN,BLUE,ALPHA) background:rgba(RED,GREEN,BLUE,ALPHA);
 
-#define CLEAR() border:none;background-image:none;background-color:transparent;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;outline:none;-webkit-appearance:none;-webkit-focus-ring-color:none;
+#define CLEAN() border:none;background-image:none;background-color:transparent;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;outline:none;-webkit-appearance:none;-webkit-focus-ring-color:none;
 
 #define OUTLINE(X,RED,GREEN,BLUE,ALPHA) outline:X##rem solid rgba(RED,GREEN,BLUE,ALPHA);
 
 #define BORDER(X,RED,GREEN,BLUE,ALPHA) border:X##rem solid rgba(RED,GREEN,BLUE,ALPHA);
 #define BORDERBOTTOM(X,RED,GREEN,BLUE,ALPHA) border-bottom:X##rem solid rgba(RED,GREEN,BLUE,ALPHA);
 
-#define SHADOW(X,Y,BLUR,SPREAD,RED,GREEN,BLUE,ALPHA) box-shadow: X##rem Y##rem BLUR##rem SPREAD##rem rgba(RED,GREEN,BLUE,ALPHA);
+#define SHADOW(X,Y,BLUR,SPREAD,COLOR) box-shadow: X##rem Y##rem BLUR##rem SPREAD##rem COLOR;
 
 #define GLOW(COLOR) -webkit-filter: drop-shadow(0 0 5px COLOR);filter: drop-shadow(0 0 5px COLOR);
 
@@ -114,22 +145,6 @@
 #define SAFEBOTTOM() env(safe-area-inset-bottom)
 
 #define SAFEALL() padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-
-#define RED() background:rgba(255, 0, 0, 1);
-#define GREEN() background:rgba(0, 255, 0, 1);
-#define BLUE() background:rgba(0, 0, 255, 1);
-#define CYAN() background:rgba(0, 255, 255, 1);
-#define YELLOW() background:rgba(255, 255, 0, 1);
-#define WHITE() background:rgba(255, 255, 255, 1);
-#define BLACK() background:rgba(0, 0, 0, 1);
-
-#define DRED() background:rgba(255, 0, 0, 0.4);
-#define DGREEN() background:rgba(0, 255, 0, 0.4);
-#define DBLUE() background:rgba(0, 0, 255, 0.4);
-#define DCYAN() background:rgba(0, 255, 255, 0.4);
-#define DYELLOW() background:rgba(255, 255, 0, 0.4);
-#define DWHITE() background:rgba(255, 255, 255, 0.4);
-#define DBLACK() background:rgba(0, 0, 0, 0.4);
 
 #define MARGIN(TOP,LEFT,BOTTOM,RIGHT) margin-top:TOP##rem;margin-left:LEFT##rem;margin-bottom:BOTTOM##rem;margin-right:RIGHT##rem;
 #define PADDING(TOP,LEFT,BOTTOM,RIGHT) padding-top:TOP##rem;padding-left:LEFT##rem;padding-bottom:BOTTOM##rem;padding-right:RIGHT##rem;
@@ -242,11 +257,9 @@
 #define VGRADIENT(R1,G1,B1,A1,R2,G2,B2,A2) background:linear-gradient(to bottom, rgba(R1,G1,B1,A1), rgba(R2,G2,B2,A2))
 #define HGRADIENT(R1,G1,B1,A1,R2,G2,B2,A2) background:linear-gradient(to right, rgba(R1,G1,B1,A1), rgba(R2,G2,B2,A2))
 
-#define MAIN_BACKGROUND() BACKGROUND(251,253,254,1)
-
 <!-- (X,Y,BLUR,SPREAD,RED,GREEN,BLUE,ALPHA -->
-#define BOTTOMSHADOW() SHADOW(0,0.5,0.5,0.1,0,0,0,0.1)
-#define STDSHADOW() SHADOW(0,0.5,2.0,0.1,0,0,0,0.1)
+#define BOTTOMSHADOW() SHADOW(0,0.5,0.5,0.1,var(--fh-std-shadow))
+#define STDSHADOW() SHADOW(0,0.5,2.0,0.1,var(--fh-std-shadow))
 #define DIALOG_BACKGROUND()RADIUS(1)WHITE()STDSHADOW()
 
 #define TEXTMIDDLE() vertical-align: middle;
@@ -263,8 +276,6 @@
 #define ITEM_OUTLINE() BORDER(0.2,255,255,255,1)
 
 #define ELLIPSES() border-bottom-style:dashed;border-bottom-width:thin;
-
-#define ERRORRED() rgba(208,116,112,1)
 
 #define CENTER_LOADING() ELEMENT(CENTER()GROW()SELF_STRETCH(),LOADING())
 
