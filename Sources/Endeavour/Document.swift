@@ -5,6 +5,15 @@ import Flynn
 import Hitch
 import Spanker
 
+func test( callback: @escaping (DocumentInfo?, Error?) -> Void ) { }
+
+func test() {
+    let z = [Int: Void]()
+    let x = Int()
+    let y = [[Int]]()
+    print([Int]())
+}
+
 public enum AccessMode {
     case closed
     case `public`

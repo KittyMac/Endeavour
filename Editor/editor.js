@@ -12,7 +12,7 @@ import {searchKeymap, highlightSelectionMatches} from "@codemirror/search"
 import {autocompletion, completionKeymap} from "@codemirror/autocomplete"
 import {commentKeymap} from "@codemirror/comment"
 import {rectangularSelection} from "@codemirror/rectangular-selection"
-import {defaultHighlightStyle} from "@codemirror/highlight"
+import {defaultHighlightStyle, tags, HighlightStyle} from "@codemirror/highlight"
 import {lintKeymap} from "@codemirror/lint"
 import {EditorView} from "@codemirror/view"
 import {indentWithTab} from "@codemirror/commands"
@@ -21,6 +21,9 @@ import {json} from "@codemirror/lang-json"
 import {javascript} from "@codemirror/lang-javascript"
 
 import {swift} from "./index.swift.js"
+
+import {light} from "./light.js"
+//import {dark} from "./dark.js"
 
 let cm = {};
 window.cm = cm;
@@ -133,19 +136,6 @@ cm.minimalSetup = [
     keymap.of([indentWithTab]),
     json()
 ]
-
-const myTheme = EditorView.baseTheme({
-    "&.cm-editor": {
-        fontSize: '1rem',
-        flex: '1 1 auto',
-        alignSelf: 'stretch',
-        minHeight: '0px'
-    },
-    ".cm-scroller": {
-        fontFamily:'Roboto Mono, Courier New, monospace',
-        overflow: 'auto',
-    },
-})
 
 cm.endeavourJsonParse = function(json) {
     try {
@@ -339,7 +329,7 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
 cm.CreateEditor = function(parentDivId, extensions, content="", editable=true) {
     let parentDiv = document.getElementById(parentDivId);
     
-    extensions.push(myTheme);
+    extensions.push(light);
         
     if (editable) {
         extensions.push(lineNumbers());
