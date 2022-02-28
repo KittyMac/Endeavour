@@ -247,12 +247,12 @@ cm.endeavourPullUpdates = function() {
     }
 }
 
-// We pull regardless of how many documents we are connected to
-cm.endeavourPullUpdates();
-
 cm.endeavourExtension = function (serviceJson, statusCallback) {
     let startingDocumentUUID = serviceJson.documentUUID;
     let startingDocumentVersion = serviceJson.version;
+    
+    // We pull regardless of how many documents we are connected to
+    cm.endeavourPullUpdates();
     
     let plugin = ViewPlugin.fromClass(class {
         pushing = false;
