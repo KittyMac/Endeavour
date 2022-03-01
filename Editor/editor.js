@@ -249,7 +249,7 @@ cm.endeavourPullUpdates = function() {
 
 cm.endeavourExtension = function (serviceJson, statusCallback) {
     let startingDocumentUUID = serviceJson.documentUUID;
-    let startingDocumentVersion = serviceJson.version;
+    let startingDocumentVersion = parseInt(serviceJson.version);
     
     // We pull regardless of how many documents we are connected to
     cm.endeavourPullUpdates();
@@ -260,8 +260,7 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
         constructor(view) {
             this.statusCallback = statusCallback;
             this.documentUUID = startingDocumentUUID;
-            this.view = view;
-                        
+            this.view = view;                        
             cm.endeavourDocuments[this.documentUUID] = this;
         }
 
@@ -323,7 +322,7 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
         
         destroy() { cm.endeavourDocuments[this.documentUUID] = undefined; }
     })
-    return [collab({startingDocumentVersion}), plugin]
+    return [collab({startVersion: startingDocumentVersion}), plugin]
 }
 
 cm.CreateEditor = function(parentDivId, extensions, content="", editable=true) {
@@ -362,12 +361,10 @@ cm.CreateEditor = function(parentDivId, extensions, content="", editable=true) {
     
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
         if (event.matches) {
-            console.log("SWITCH TO DARK")
             editor.dispatch({
                 effects: StateEffect.reconfigure.of(darkExtensions)
             });
         } else {
-            console.log("SWITCH TO LIGHT")
             editor.dispatch({
                 effects: StateEffect.reconfigure.of(lightExtensions)
             });

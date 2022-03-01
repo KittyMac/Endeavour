@@ -94,11 +94,13 @@ extension Endeavour {
             returnCallback(getDocumentInfo(), nil)
         }
 
-        private func _beLeave(user: UserUUID) -> (Bool, Error?) {
-            guard accessMode != .closed else { return (true, "document is closed") }
+        private func _beLeave(user: UserUUID,
+                              service: Endeavour.Service) -> (Bool, Error?) {
 
             waitings.removeOne(user)
             peers.removeOne(user)
+
+            subscribedServices.removeAll(service)
 
             if owner == user {
                 accessMode = .closed
@@ -236,10 +238,11 @@ extension Endeavour.Document {
     }
     @discardableResult
     public func beLeave(user: UserUUID,
+                        service: Endeavour.Service,
                         _ sender: Actor,
                         _ callback: @escaping (((Bool, Error?)) -> Void)) -> Self {
         unsafeSend {
-            let result = self._beLeave(user: user)
+            let result = self._beLeave(user: user, service: service)
             sender.unsafeSend { callback(result) }
         }
         return self

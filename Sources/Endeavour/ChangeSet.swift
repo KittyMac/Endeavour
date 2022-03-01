@@ -11,32 +11,10 @@ enum ChangeSet {
     static func apply(document: DocumentContent,
                       changeSet: JsonElement) {
 
-        /*
-         static fromJSON(json: any) {
-               if (!Array.isArray(json)) throw new RangeError("Invalid JSON representation of ChangeSet")
-                   let sections = [], inserted = []
-               for (let i = 0; i < json.length; i++) {
-                   let part = json[i]
-                   if (typeof part == "number") {
-                       sections.push(part, -1)
-                   } else if (!Array.isArray(part) || typeof part[0] != "number" || part.some((e, i) => i && typeof e != "string")) {
-                       throw new RangeError("Invalid JSON representation of ChangeSet")
-                   } else if (part.length == 1) {
-                       sections.push(part[0], 0)
-                   } else {
-                       while (inserted.length < i) inserted.push(Text.empty)
-                           inserted[i] = Text.of(part.slice(1))
-                           sections.push(part[0], inserted[i].length)
-                   }
-               }
-               return new ChangeSet(sections, inserted)
-           }
-         */
-
-        print("==== BEFORE DOCUMENT ====")
-        print(document)
-        print("==== UPDATE ====")
-        print(changeSet.toString())
+        // print("==== BEFORE DOCUMENT ====")
+        // print(document)
+        // print("==== UPDATE ====")
+        // print(changeSet.toString())
 
         var sections: [Int] = []
         var inserted: [Hitch] = []
@@ -82,26 +60,6 @@ enum ChangeSet {
         }
 
         // equivalent to iterChanges
-        /*
-         let inserted = (desc as ChangeSet).inserted
-                 for (let posA = 0, posB = 0, i = 0; i < desc.sections.length;) {
-                     let len = desc.sections[i++], ins = desc.sections[i++]
-                     if (ins < 0) {
-                         posA += len; posB += len
-                     } else {
-                         let endA = posA, endB = posB, text = Text.empty
-                         for (;;) {
-                             endA += len; endB += ins
-                             if (ins && inserted) text = text.append(inserted[(i - 2) >> 1])
-                                 if (individual || i == desc.sections.length || desc.sections[i + 1] < 0) break
-                                     len = desc.sections[i++]; ins = desc.sections[i++]
-                         }
-                         f(posA, endA, posB, endB, text)
-                         posA = endA; posB = endB
-                     }
-                 }
-         */
-
         var posA = 0
         var posB = 0
         var idx = 0
@@ -134,16 +92,13 @@ enum ChangeSet {
 
                 // f(posA, endA, posB, endB, text)
                 document.replace(from: posB, to: posB + (endA - posA), with: text)
-                print("replace from {0} to {1} with {2}" << [posB, posB + (endA - posA), text])
+                //print("replace from {0} to {1} with {2}" << [posB, posB + (endA - posA), text])
 
                 posA = endA
                 posB = endB
             }
         }
 
-        print("==== AFTER DOCUMENT ====")
-        print(document)
-        print("========================")
-
+        //print("============\n\(document)\n============")
     }
 }

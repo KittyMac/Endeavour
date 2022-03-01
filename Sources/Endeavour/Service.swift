@@ -67,6 +67,8 @@ extension Endeavour {
                                              documentUUID: documentInfo.uuid,
                                              service: self)
 
+                self.openDocumentVersions[documentInfo.uuid] = documentInfo.version
+
                 returnCallback(JsonElement(unknown: [
                     "documentUUID": documentInfo.uuid,
                     "version": documentInfo.version
@@ -81,6 +83,7 @@ extension Endeavour {
             }
 
             Endeavour.shared.beLeaveDocument(userUUID: userUUID,
+                                             service: self,
                                              documentUUID: documentUUID,
                                              self) { error in
                 if let error = error {
@@ -112,6 +115,8 @@ extension Endeavour {
                 Endeavour.shared.beSubscribe(userUUID: self.userUUID,
                                              documentUUID: documentUUID,
                                              service: self)
+
+                self.openDocumentVersions[documentInfo.uuid] = documentInfo.version
 
                 returnCallback(JsonElement(unknown: [
                     "documentUUID": documentInfo.uuid,
@@ -150,7 +155,6 @@ extension Endeavour {
         func safePullDocument(_ jsonElement: JsonElement,
                               _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
 
-            openDocumentVersions.removeAll()
             if let documentUUIDs = jsonElement[element: "documentUUIDs"],
                let documentVersions = jsonElement[element: "documentVersions"],
                documentUUIDs.count == documentVersions.count {
@@ -190,9 +194,10 @@ extension Endeavour {
                     // period of time to reconnect otherwise we make them leave all documents they
                     // are connected to
                     if abs(self.longPullLastSendDate.timeIntervalSinceNow) > 10.0 {
-                        print("User self.userUUID disconnected due to inactivity")
+                        print("User \(self.userUUID) disconnected due to inactivity")
                         for documentUUID in self.openDocumentVersions.keys {
                             Endeavour.shared.beLeaveDocument(userUUID: self.userUUID,
+                                                             service: self,
                                                              documentUUID: documentUUID,
                                                              self) { _ in }
                         }

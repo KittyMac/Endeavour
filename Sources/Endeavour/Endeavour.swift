@@ -58,6 +58,7 @@ public class Endeavour: Actor {
     }
 
     private func _beLeaveDocument(userUUID: UserUUID,
+                                  service: Service,
                                   documentUUID: DocumentUUID,
                                   _ returnCallback: @escaping (Error?) -> Void) {
         guard let document = documents[documentUUID] else {
@@ -65,6 +66,7 @@ public class Endeavour: Actor {
         }
 
         document.beLeave(user: userUUID,
+                         service: service,
                          self) { closed, error in
             if closed {
                 self.documents[documentUUID] = nil
@@ -149,11 +151,12 @@ extension Endeavour {
     }
     @discardableResult
     public func beLeaveDocument(userUUID: UserUUID,
+                                service: Service,
                                 documentUUID: DocumentUUID,
                                 _ sender: Actor,
                                 _ callback: @escaping ((Error?) -> Void)) -> Self {
         unsafeSend {
-            self._beLeaveDocument(userUUID: userUUID, documentUUID: documentUUID) { arg0 in
+            self._beLeaveDocument(userUUID: userUUID, service: service, documentUUID: documentUUID) { arg0 in
                 sender.unsafeSend {
                     callback(arg0)
                 }
