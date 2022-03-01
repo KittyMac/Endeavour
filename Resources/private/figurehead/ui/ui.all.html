@@ -2,6 +2,8 @@
 
 #include <../utility/defines.js>
 
+#define VAR(X) var(--fh-##X)
+
 #define ROBOTO(S) font-size:S##rem;font-family:'Roboto';
 #define LATO(S) font-size:S##rem;font-family:'Lato';
 
@@ -46,42 +48,42 @@
 #define LABEL(STYLE,CONTENT) <label style="DEFAULT()STYLE">CONTENT</label>
 #define ID_LABEL(ID,STYLE,CONTENT) <label id="ID" style="DEFAULT()STYLE">CONTENT</label>
 
-#define FCLEAR() color:var(--fh-fclear);
-#define FWHITE() color:var(--fh-fwhite);
-#define FDARKGREY() color:var(--fh-fdarkgrey);
-#define FGREY() color:var(--fh-fgrey);
-#define FBLACK() color:var(--fh-fblack);
-#define FRED() color:var(--fh-fred);
-#define FGREEN() color:var(--fh-fgreen);
-#define FBLUE() color:var(--fh-fblue);
-#define FCYAN() color:var(--fh-fcyan);
-#define FYELLOW() color:var(--fh-fyellow);
+#define FCLEAR() color:VAR(fclear);
+#define FWHITE() color:VAR(fwhite);
+#define FDARKGREY() color:VAR(fdarkgrey);
+#define FGREY() color:VAR(fgrey);
+#define FBLACK() color:VAR(fblack);
+#define FRED() color:VAR(fred);
+#define FGREEN() color:VAR(fgreen);
+#define FBLUE() color:VAR(fblue);
+#define FCYAN() color:VAR(fcyan);
+#define FYELLOW() color:VAR(fyellow);
 
-#define CLEAR() color:var(--fh-clear);
-#define WHITE() color:var(--fh-white);
-#define DARKGREY() color:var(--fh-darkgrey);
-#define GREY() color:var(--fh-grey);
-#define BLACK() color:var(--fh-black);
-#define RED() color:var(--fh-red);
-#define GREEN() color:var(--fh-green);
-#define BLUE() color:var(--fh-blue);
-#define CYAN() color:var(--fh-cyan);
-#define YELLOW() color:var(--fh-yellow);
+#define CLEAR() background:VAR(clear);
+#define WHITE() background:VAR(white);
+#define DARKGREY() background:VAR(darkgrey);
+#define GREY() background:VAR(grey);
+#define BLACK() background:VAR(black);
+#define RED() background:VAR(red);
+#define GREEN() background:VAR(green);
+#define BLUE() background:VAR(blue);
+#define CYAN() background:VAR(cyan);
+#define YELLOW() background:VAR(yellow);
 
-#define DCLEAR() color:var(--fh-dclear);
-#define DWHITE() color:var(--fh-dwhite);
-#define DDARKGREY() color:var(--fh-ddarkgrey);
-#define DGREY() color:var(--fh-dgrey);
-#define DBLACK() color:var(--fh-dblack);
-#define DRED() color:var(--fh-dred);
-#define DGREEN() color:var(--fh-dgreen);
-#define DBLUE() color:var(--fh-dblue);
-#define DCYAN() color:var(--fh-dcyan);
-#define DYELLOW() color:var(--fh-dyellow);
+#define DCLEAR() background:VAR(dclear);
+#define DWHITE() background:VAR(dwhite);
+#define DDARKGREY() background:VAR(ddarkgrey);
+#define DGREY() background:VAR(dgrey);
+#define DBLACK() background:VAR(dblack);
+#define DRED() background:VAR(dred);
+#define DGREEN() background:VAR(dgreen);
+#define DBLUE() background:VAR(dblue);
+#define DCYAN() background:VAR(dcyan);
+#define DYELLOW() background:VAR(dyellow);
 
-#define ERRORRED() var(--fh-error-red)
+#define ERRORRED() VAR(error-red)
 
-#define MAIN_BACKGROUND() background:var(--fh-main-background)
+#define MAIN_BACKGROUND() background:VAR(main-background)
 
 #define HEADER2(CONTENT) ELEMENT(ROBOTO(2.2)FBLACK(),CONTENT)
 #define HEADER(CONTENT) ELEMENT(ROBOTO(1.2)FBLACK(),CONTENT)
@@ -125,10 +127,10 @@
 
 #define CLEAN() border:none;background-image:none;background-color:transparent;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;outline:none;-webkit-appearance:none;-webkit-focus-ring-color:none;
 
-#define OUTLINE(X,RED,GREEN,BLUE,ALPHA) outline:X##rem solid rgba(RED,GREEN,BLUE,ALPHA);
+#define OUTLINE(X,COLOR) outline:X##rem solid COLOR;
 
-#define BORDER(X,RED,GREEN,BLUE,ALPHA) border:X##rem solid rgba(RED,GREEN,BLUE,ALPHA);
-#define BORDERBOTTOM(X,RED,GREEN,BLUE,ALPHA) border-bottom:X##rem solid rgba(RED,GREEN,BLUE,ALPHA);
+#define BORDER(X,COLOR) border:X##rem solid COLOR;
+#define BORDERBOTTOM(X,COLOR) border-bottom:X##rem solid COLOR;
 
 #define SHADOW(X,Y,BLUR,SPREAD,COLOR) box-shadow: X##rem Y##rem BLUR##rem SPREAD##rem COLOR;
 
@@ -258,8 +260,8 @@
 #define HGRADIENT(R1,G1,B1,A1,R2,G2,B2,A2) background:linear-gradient(to right, rgba(R1,G1,B1,A1), rgba(R2,G2,B2,A2))
 
 <!-- (X,Y,BLUR,SPREAD,RED,GREEN,BLUE,ALPHA -->
-#define BOTTOMSHADOW() SHADOW(0,0.5,0.5,0.1,var(--fh-std-shadow))
-#define STDSHADOW() SHADOW(0,0.5,2.0,0.1,var(--fh-std-shadow))
+#define BOTTOMSHADOW() SHADOW(0,0.5,0.5,0.1,VAR(std-shadow))
+#define STDSHADOW() SHADOW(0,0.5,2.0,0.1,VAR(std-shadow))
 #define DIALOG_BACKGROUND()RADIUS(1)WHITE()STDSHADOW()
 
 #define TEXTMIDDLE() vertical-align: middle;
@@ -273,7 +275,7 @@
 #define VSPACE() ELEMENT(GROW()SELF_STRETCH(),)
 #define HSPACE() ELEMENT(GROW()SELF_STRETCH(),)
 
-#define ITEM_OUTLINE() BORDER(0.2,255,255,255,1)
+#define ITEM_OUTLINE() BORDER(0.1,VAR(fgrey))
 
 #define ELLIPSES() border-bottom-style:dashed;border-bottom-width:thin;
 

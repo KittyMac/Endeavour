@@ -15,7 +15,7 @@
         "repositoryURL": "https://github.com/KittyMac/Figurehead.git",
         "state": {
           "branch": "main",
-          "revision": "7668703272c413ac04be1076cdaa67d38efcaa8c",
+          "revision": "d5c0fca2d2d9e6e7d25041890f2ef061affe0813",
           "version": null
         }
       },
@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/KittyMac/Hitch.git",
         "state": {
           "branch": null,
-          "revision": "4602ffd1d01ef974974e649a55991a96ef8e59a3",
-          "version": "0.4.12"
+          "revision": "298e6d9054cab8c692d68e9c9affba5b9686478b",
+          "version": "0.4.15"
         }
       },
       {

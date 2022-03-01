@@ -23,7 +23,7 @@ extension Endeavour {
         private let documentUUID: Hitch
 
         private var history = [Hitch]()
-        private let baseDocument: DocumentContent
+        private var baseDocument = Hitch(capacity: 1024)
 
         private let owner: UserUUID
         private var peers: [UserUUID] = []
@@ -37,7 +37,10 @@ extension Endeavour {
                     content: Hitch?) {
             self.owner = owner
             documentUUID = UUID().uuidHitch
-            baseDocument = content ?? ""
+
+            if let content = content {
+                baseDocument.append(content)
+            }
         }
 
         public init(owner: UserUUID,
@@ -45,13 +48,16 @@ extension Endeavour {
                     content: Hitch?) {
             self.owner = owner
             documentUUID = named ?? UUID().uuidHitch
-            baseDocument = content ?? ""
+
+            if let content = content {
+                baseDocument.append(content)
+            }
         }
 
         private func getDocumentInfo() -> DocumentInfo {
             return DocumentInfo(uuid: documentUUID,
                                 content: baseDocument,
-                                version: 0)
+                                version: history.count)
         }
 
         private func canAdd(user: UserUUID) -> Bool {
@@ -140,6 +146,9 @@ extension Endeavour {
             }
 
             for update in updates.iterValues {
+                ChangeSet.apply(document: baseDocument,
+                                changeSet: update)
+
                 history.append(update.toHitch())
             }
 

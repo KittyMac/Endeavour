@@ -1,9 +1,9 @@
 #define PAMPHLET_PREPROCESSOR
 
-#define BTN_DOWN_SCRIPT() this.style.background='var(--fh-btn-highlight)'
-#define BTN_UP_SCRIPT() this.style.background='var(--fh-btn-background)'
+#define BTN_DOWN_SCRIPT() this.style.background='VAR(btn-highlight)'
+#define BTN_UP_SCRIPT() this.style.background='VAR(btn-background)'
 
-#define BTN_BACKGROUND() background:var(--fh-btn-background);
+#define BTN_BACKGROUND() background:VAR(btn-background);
 
 #define ID_ANY_BUTTON(ID,STYLE,SCRIPT,CONTENT) <div id="ID" style="DEFAULT()STYLE" onclick="SCRIPT" >CONTENT</div>
 #define ANY_BUTTON(STYLE,SCRIPT,CONTENT) <div style="DEFAULT()STYLE" onclick="SCRIPT" >CONTENT</div>
