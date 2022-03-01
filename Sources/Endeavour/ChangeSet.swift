@@ -92,13 +92,13 @@ enum ChangeSet {
 
                 // f(posA, endA, posB, endB, text)
                 document.replace(from: posB, to: posB + (endA - posA), with: text)
-                //print("replace from {0} to {1} with {2}" << [posB, posB + (endA - posA), text])
+                // print("replace from {0} to {1} with {2}" << [posB, posB + (endA - posA), text])
 
                 posA = endA
                 posB = endB
             }
         }
 
-        //print("============\n\(document)\n============")
+        // print("============\n\(document)\n============")
     }
 }

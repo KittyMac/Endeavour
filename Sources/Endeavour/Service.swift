@@ -185,8 +185,11 @@ extension Endeavour {
                 guard let updateJson = updateJson else { return }
 
                 if let longPull = self.longPull {
+
+                    // print("updateJson: \(updateJson)")
+
                     longPull(JsonElement(unknown: ["documentUUID": documentUUID]),
-                                    HttpResponse(json: updateJson))
+                             HttpResponse(json: updateJson))
                     self.longPull = nil
                     self.longPullLastSendDate = Date()
                 } else {
