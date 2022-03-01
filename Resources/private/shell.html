@@ -146,8 +146,8 @@ ID_ELEMENT(document##ID, VSTACK(),
         }
         
         function askJoinDocument() {
-            ask("What document would you like to join?",
-                "enter document uuid here",
+            ask("Enter the document UUID to join",
+                "",
                 ["Cancel", "Join"], 
                 [undefined, function(uuid) {
                     joinDocument(uuid);

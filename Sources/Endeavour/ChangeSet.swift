@@ -5,58 +5,6 @@ import Flynn
 import Hitch
 import Spanker
 
-struct Change {
-    var sections: [Int] = []
-    var inserted: [Hitch] = []
-
-    init(json: JsonElement) {
-        /*
-         if (!Array.isArray(json)) throw new RangeError("Invalid JSON representation of ChangeSet")
-                       let sections = [], inserted = []
-                   for (let i = 0; i < json.length; i++) {
-                       let part = json[i]
-                       if (typeof part == "number") {
-                           sections.push(part, -1)
-                       } else if (!Array.isArray(part) || typeof part[0] != "number" || part.some((e, i) => i && typeof e != "string")) {
-                           throw new RangeError("Invalid JSON representation of ChangeSet")
-                       } else if (part.length == 1) {
-                           sections.push(part[0], 0)
-                       } else {
-                           while (inserted.length < i) inserted.push(Text.empty)
-                               inserted[i] = Text.of(part.slice(1))
-                               sections.push(part[0], inserted[i].length)
-                       }
-                   }
-         */
-        guard json.type == .array else { fatalError("ChangeSet is not an array") }
-
-        for idx in 0..<json.count {
-            guard let part = json[element: idx] else { fatalError("ChangeSet JsonElement is missing") }
-
-            if part.type == .int {
-                sections.append(part.intValue ?? 0)
-                sections.append(-1)
-            } else if part.type == .array {
-                if part.count == 1 {
-                    sections.append(part[int: 0] ?? 0)
-                    sections.append(0)
-                } else {
-                    while inserted.count < idx {
-                        inserted.append(Hitch.empty)
-                    }
-
-                    // TODO: I think this can store multiple strings! We are
-                    // only handling the one now
-                    inserted[idx] = part[hitch: 1] ?? Hitch.empty
-
-                    sections.append(part[int: 0] ?? 0)
-                    sections.append(inserted[idx].count)
-                }
-            }
-        }
-    }
-}
-
 /// Attempt at duplicating the CM6 ChangeSet logic so that the server can keep a
 /// version of the document in sync with the clients
 enum ChangeSet {
@@ -88,7 +36,7 @@ enum ChangeSet {
         print("==== BEFORE DOCUMENT ====")
         print(document)
         print("==== UPDATE ====")
-        print(changeSet)
+        print(changeSet.toString())
 
         var sections: [Int] = []
         var inserted: [Hitch] = []
@@ -110,13 +58,24 @@ enum ChangeSet {
                             inserted.append(Hitch.empty)
                         }
 
-                        // TODO: I think this can store multiple strings! We are
-                        // only handling the one now
-                        let insertion = part[hitch: 1] ?? Hitch.empty
-                        inserted.append(insertion)
+                        var totalCount = 0
+                        for jdx in 1..<part.count {
+                            totalCount += part[hitch: jdx]?.count ?? 0
+                            totalCount += 1
+                        }
+
+                        let combined = Hitch(capacity: totalCount)
+                        for jdx in 1..<part.count {
+                            combined.append(part[hitch: jdx] ?? Hitch.empty)
+                            if jdx > 1 {
+                                combined.append(.newLine)
+                            }
+                        }
+
+                        inserted.append(combined)
 
                         sections.append(part[int: 0] ?? 0)
-                        sections.append(insertion.count)
+                        sections.append(combined.count)
                     }
                 }
             }
