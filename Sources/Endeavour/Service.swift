@@ -22,7 +22,8 @@ extension Endeavour {
 
         public override var unsafeServiceName: Hitch { "EndeavourService" }
 
-        public override func safeHandleRequest(jsonElement: JsonElement,
+        public override func safeHandleRequest(userSession: UserServiceableSession,
+                                               jsonElement: JsonElement,
                                                httpRequest: HttpRequest,
                                                _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
             guard let command = jsonElement[halfhitch: "command"] else {
