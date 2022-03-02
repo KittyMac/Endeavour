@@ -2,6 +2,19 @@
 
 #include <./defines.js>
 
+function isDarkMode() {
+    if (window.matchMedia &&  window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return true;
+    }
+    return false;
+}
+
+function watchDarkMode(callback) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+        callback(event.matches);
+    });
+}
+
 function print(s) {
     console.log(s);
 }
@@ -158,21 +171,6 @@ function parseVec(sector) {
 
 function distanceSq(p0, p1) {
     return (p1.x - p0.x) * (p1.x - p0.x) + (p1.y - p0.y) * (p1.y - p0.y);
-}
-
-function extractTitleFromMarkdown(markdown) {
-    var titleRegex = /#+(.*)/;
-    var results = markdown.match(titleRegex);
-    var title = "Untitled";
-    if (results != undefined && results.length >= 2) {
-        title = results[1];
-        markdown = markdown.replace(titleRegex, "");
-    }
-    return [title, markdown];
-}
-
-function isSmallScreen() {
-    return window.innerHeight < (emToPxValue * 24 * 2);
 }
 
 function allElementsFromPoint(x, y) {
