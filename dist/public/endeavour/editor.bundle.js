@@ -23285,7 +23285,7 @@
             flex: '1 1 auto',
             alignSelf: 'stretch',
             minHeight: '0px',
-            overflow: 'hidden',
+            overflow: 'hidden'
         },
         ".cm-scroller": {
             fontFamily:'Roboto Mono, Courier New, monospace',
@@ -23399,7 +23399,8 @@
             fontSize: '1rem',
             flex: '1 1 auto',
             alignSelf: 'stretch',
-            minHeight: '0px'
+            minHeight: '0px',
+            overflow: 'hidden'
         },
         ".cm-scroller": {
             fontFamily:'Roboto Mono, Courier New, monospace',
