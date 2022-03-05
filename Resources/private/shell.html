@@ -108,6 +108,12 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
         InitFigurehead();
         
         function handleCreateDocument(xhttp, serviceJson) {
+            if (xhttp.readyState == 4 && xhttp.status != 200) {
+                let error = xhttp.responseText || "An unknown error occured";
+                alert(error);
+                return;
+            }
+            
             let documentUUID = serviceJson.documentUUID;
             let documentID = `document${documentUUID}`
             let editorID = `editor${documentUUID}`
@@ -125,7 +131,7 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
             
             let documentStatus = function(status) {
                 let ignoreErrors = [
-                    //"Version mismatch"
+                    "Version mismatch"
                 ];
                                 
                 let displayText = `Document ${status.documentUUID}`;

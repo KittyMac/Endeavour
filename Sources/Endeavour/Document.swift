@@ -85,9 +85,10 @@ extension Endeavour {
         private func _beAdd(peer: UserUUID,
                             _ returnCallback: @escaping (DocumentInfo?, Endeavour.Document?, Error?) -> Void) {
             guard accessMode != .closed else { return returnCallback(nil, nil, "document is closed") }
-            if canAdd(user: peer) {
-                peers.append(peer)
+            guard canAdd(user: peer) else {
+                return returnCallback(nil, nil, "You are already a peer of this document")
             }
+            peers.append(peer)
             returnCallback(getDocumentInfo(), self, nil)
         }
 
@@ -98,9 +99,10 @@ extension Endeavour {
                 // public documents have no waiting list, you can join as a peer immediately
                 return _beAdd(peer: waiting, returnCallback)
             }
-            if canAdd(user: waiting) {
-                waitings.append(waiting)
+            guard canAdd(user: waiting) else {
+                return returnCallback(nil, nil, "You are already waiting to join this document")
             }
+            waitings.append(waiting)
             returnCallback(getDocumentInfo(), self, nil)
         }
 
