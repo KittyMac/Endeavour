@@ -15,6 +15,7 @@ class CodeMirrorDocument {
     var document = chitch16_init_capacity(1024)
 
     func set(document string: String) {
+        document.count = 0
         chitch16_concat_string(&document, string)
     }
 

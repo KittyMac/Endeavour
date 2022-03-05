@@ -46,3 +46,11 @@ endeavour.save = function(documentUUID, callback) {
         "documentUUID": documentUUID
     }, callback);
 }
+
+endeavour.revert = function(documentUUID, callback) {
+    endeavour.send({
+        "service": "EndeavourService",
+        "command": "revert",
+        "documentUUID": documentUUID
+    }, callback);
+}

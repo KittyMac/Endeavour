@@ -23614,9 +23614,11 @@
         try {
             return JSON.parse(json);
         } catch (error) {
-            return {};
+            return json;
         }
     };
+
+    cm.endeavourSendErrorCount = 0;
 
     cm.endeavourSend = function(command, documentUUID) {
         let xhttp = new XMLHttpRequest();
@@ -23631,10 +23633,14 @@
                 }
                 
                 if (this.status != 200) {
+                    cm.endeavourSendErrorCount += 1;
+                    
                     if (plugin != undefined) {
                         plugin.didError(xhttp.responseText);
                     }
                 } else {
+                    cm.endeavourSendErrorCount = 0;
+                    
                     let contentJson = cm.endeavourJsonParse(xhttp.responseText);                
                     switch (command.command) {
                     case "pull":
@@ -23645,7 +23651,12 @@
                         break;
                     }
                 }
-            
+                
+                if (cm.endeavourSendErrorCount > 50) {
+                    alert("Too many errors; please refresh the page.");
+                    return;
+                }
+                
                 switch (command.command) {
                 case "pull":
                     cm.endeavourIsPulling = false;
@@ -23778,24 +23789,28 @@
                             
                 // Full document refresh:
                 if (serviceJson.command == "save") {
-                    let state = this.view.state;
                     
-                    // Horrible hack...
-                    state.update({
+                    // Suppress our code from sharing this change with the server
+                    cm.endeavourIsPushing = true;
+                    this.view.dispatch({
                         changes: {
                             from: 0,
-                            to: state.doc.length,
-                            insert: contentJson.textResponse
+                            to: this.view.state.doc.length,
+                            insert: contentJson
                         }
                     });
                     
-                    for (let idx = 0; idx < state.values.length; idx++) {
-                        let value = state.values[idx];
+                    // Horrible hack to reset our version history
+                    for (let idx = 0; idx < this.view.state.values.length; idx++) {
+                        let value = this.view.state.values[idx];
                         if (value?.constructor?.name == "CollabState") {
+                            print(value);
                             value.version = 0;
-                            value.unconfirmed = [];
+                            value.unconfirmed.length = 0;
                         }
-                    }                
+                    }
+                    
+                    cm.endeavourIsPushing = false;
                 }
                 
                 
@@ -23855,7 +23870,7 @@
         darkExtensions.push(dark);
         lightExtensions.push(light);
         
-        if (window.matchMedia &&  window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        if (isDarkMode()) {
             extensions = darkExtensions;
         } else {
             extensions = lightExtensions;
@@ -23869,7 +23884,7 @@
             }),
             parent: parentDiv
         });
-        
+                
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
             if (event.matches) {
                 editor.dispatch({

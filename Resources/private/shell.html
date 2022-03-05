@@ -16,6 +16,7 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
     ELEMENT(HSTACK()MIDDLE()PADDING(0.5,1,0.5,1)MARGIN(0,0,0,-0.125),
         ID_ELEMENT(header##ID,LATO(1)FBLACK()START()BOTTOM(),Creating new document...)
         HSPACE()
+        ID_BUTTON(revert##ID,MINWIDTH(4)PADDING(0,1,0,1),Revert,revertDocument('ID'))
         ID_BUTTON(save##ID,MINWIDTH(4)PADDING(0,1,0,1),Save,saveDocument('ID'))
         ID_BUTTON(leave##ID,MINWIDTH(4)PADDING(0,1,0,1),Leave,leaveDocument('ID'))
     )
@@ -100,7 +101,7 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
         
     )
         
-    ID_ELEMENT(alertsContainer,FULLSCREEN()ABSOLUTE()BACKGROUND(0,0,0,0.5)CENTER()CLIPS()HIDE(),)
+    ID_ELEMENT(alertsContainer,FULLSCREEN()FIXED()BACKGROUND(0,0,0,0.5)CENTER()CLIPS()HIDE(),)
     
     <script src="public/endeavour/editor.bundle.js"></script>
     
@@ -119,6 +120,7 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
             let editorID = `editor${documentUUID}`
             let headerID = `header${documentUUID}`
             let saveID = `save${documentUUID}`
+            let revertID = `revert${documentUUID}`
                             
             let html = `EDITOR(${documentUUID})`
             insertHtml(documents, html);
@@ -128,6 +130,9 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
             
             let documentSave = document.getElementById(saveID);
             disableDiv(documentSave);
+            
+            let documentRevert = document.getElementById(revertID);
+            disableDiv(documentRevert);
             
             let documentStatus = function(status) {
                 let ignoreErrors = [
@@ -167,8 +172,10 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
                 // no changes and the save button should be disabled
                 if (status.version == 0) {
                     disableDiv(documentSave);
+                    disableDiv(documentRevert);
                 } else {
                     enableDiv(documentSave);
+                    enableDiv(documentRevert);
                 }
             }
 
@@ -203,6 +210,16 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
         
         function saveDocument(documentUUID) {
             endeavour.save(documentUUID, function(xhttp, serviceJson) {
+                if (xhttp.readyState == 4 && xhttp.status != 200) {
+                    let error = xhttp.responseText || "An unknown error occured";
+                    alert(error);
+                    return;
+                }
+            });
+        }
+        
+        function revertDocument(documentUUID) {
+            endeavour.revert(documentUUID, function(xhttp, serviceJson) {
                 if (xhttp.readyState == 4 && xhttp.status != 200) {
                     let error = xhttp.responseText || "An unknown error occured";
                     alert(error);

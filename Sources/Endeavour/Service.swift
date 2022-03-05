@@ -42,6 +42,8 @@ extension Endeavour {
                 safeJoinDocument(jsonElement, returnCallback)
             case "save":
                 safeSaveDocument(jsonElement, returnCallback)
+            case "revert":
+                safeRevertDocument(jsonElement, returnCallback)
             case "push":
                 safePushToDocument(jsonElement, returnCallback)
             case "pull":
@@ -141,6 +143,27 @@ extension Endeavour {
             document.beSave(peer: userUUID,
                             version: version,
                             self) { error in
+                if let error = error {
+                    return returnCallback(jsonElement, HttpResponse(error: error))
+                }
+
+                returnCallback(JsonElement(unknown: [
+                    "documentUUID": documentUUID
+                ]), nil)
+            }
+        }
+
+        func safeRevertDocument(_ jsonElement: JsonElement,
+                                _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
+            guard let documentUUID = jsonElement[hitch: "documentUUID"],
+                  let version = openDocumentVersions[documentUUID],
+                  let document = openDocuments[documentUUID] else {
+                return returnCallback(jsonElement, HttpStaticResponse.badRequest)
+            }
+
+            document.beRevert(peer: userUUID,
+                              version: version,
+                              self) { error in
                 if let error = error {
                     return returnCallback(jsonElement, HttpResponse(error: error))
                 }

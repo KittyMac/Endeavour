@@ -126,8 +126,8 @@ public extension EndeavourPamphlet.Private.Endeavour {
 }
 
 private let uncompressedEndeavourJs = ###"""
-let endeavour={send:function(e,n){send(e,(function(e){let o=e.getResponseHeader("Service-Response");if(null!=o){let d=JSON.parse(o);n(e,d)}else n(e,void 0)}))},new:function(e){endeavour.send({service:"EndeavourService",command:"new"},e)},join:function(e,n){endeavour.send({service:"EndeavourService",command:"join",documentUUID:e},n)},leave:function(e,n){endeavour.send({service:"EndeavourService",command:"leave",documentUUID:e},n)},save:function(e,n){endeavour.send({service:"EndeavourService",command:"save",documentUUID:e},n)}};
+let endeavour={send:function(e,n){send(e,(function(e){let o=e.getResponseHeader("Service-Response");if(null!=o){let d=JSON.parse(o);n(e,d)}else n(e,void 0)}))},new:function(e){endeavour.send({service:"EndeavourService",command:"new"},e)},join:function(e,n){endeavour.send({service:"EndeavourService",command:"join",documentUUID:e},n)},leave:function(e,n){endeavour.send({service:"EndeavourService",command:"leave",documentUUID:e},n)},save:function(e,n){endeavour.send({service:"EndeavourService",command:"save",documentUUID:e},n)},revert:function(e,n){endeavour.send({service:"EndeavourService",command:"revert",documentUUID:e},n)}};
 
 """###
-private let compressedEndeavourJs = Data(base64Encoded:"H4sIAAAAAAACA62PwWrDMBBE7/kKRycJVNOzjW8ppD200JAPMNYkqMi7wbLdQ9C/d+02bQnJJeQ2zDLzZgP6DORQjzx01TGKLnYDNb1n0rBkZkuU/nPNMUiKK+R79O+IB6aINWqHTqsNutE3eDj5ypR+p2kIYVnxd9JVL5u31/xQdxGaTTmBnEkIEdmkR/YuezTJmGQJn8V/8u/WfN4l62ZcoZ5Oh58ByjbctrW8o6RDJQtp+2BPZ+/dUjjVKOu4GVpQv90+rwrIVAEEieAOhLnnMiLehxCvAVK5+ALqdMuoFQIAAA==")!
+private let compressedEndeavourJs = Data(base64Encoded:"H4sIAAAAAAACA62PwWrDMBBE7/0KVycJVJOzjW8tpD20kJAPMNakqMjaIMnuIejfs3aStpT0UnwbZpl5sw6pgDdoRxpCc4ysq/3gu2TJS2ivZouV/HbV0XGKGpTvSBvEA/mINVqDIMUWYbQdHq6+ULXdSz84d9/QOWmal+3ba3loQ4QkVU8gozJcRDHpkawpViorlbXHZ/WT/LW1nHfxuhlXiafr4TJA6I76vuV3BHeIrMFtH2T9r/f+UzjVCG2oG3r4tNs9P1bgqQxwHMEChLnnNiIuQ4h/AgJGhLQA4lx0E5LruxOoINPMegIAAA==")!
 

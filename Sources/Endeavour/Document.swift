@@ -19,6 +19,7 @@ public struct DocumentInfo {
 
 public protocol PersistableDocument {
     func save(documentInfo: DocumentInfo) -> Error?
+    func revert(content: inout Hitch, documentInfo: DocumentInfo) -> Error?
 }
 
 extension Endeavour {
@@ -182,7 +183,7 @@ extension Endeavour {
                 return "Version mismatch ({0} != {1})" << [version, history.count]
             }
             guard let persistableDocument = persistableDocument else {
-                return "Document does not support saving"
+                return "Document does not support persistent storage"
             }
 
             // "save" the document by:
@@ -191,6 +192,38 @@ extension Endeavour {
             if let error = persistableDocument.save(documentInfo: getDocumentInfo()) {
                 return error
             }
+
+            // 3. clear the update history
+            history.removeAll()
+
+            // 4. tell all clients something changed
+            for service in subscribedServices {
+                service.beDocumentDidSave(document: self,
+                                          documentInfo: getDocumentInfo())
+            }
+
+            return nil
+        }
+
+        private func _beRevert(peer: UserUUID,
+                               version: Int) -> Error? {
+            guard accessMode != .closed else { return "document is closed" }
+            guard owner == peer || peers.contains(peer) else { return "You are not authorized as a peer of this document" }
+            guard version == history.count else {
+                return "Version mismatch ({0} != {1})" << [version, history.count]
+            }
+            guard let persistableDocument = persistableDocument else {
+                return "Document does not support persistent storage"
+            }
+
+            // all the delegate to reset the content of the document
+            var content = utf16Document.hitch()
+            if let error = persistableDocument.revert(content: &content,
+                                                      documentInfo: getDocumentInfo()) {
+                return error
+            }
+
+            utf16Document.set(document: content.description)
 
             // 3. clear the update history
             history.removeAll()
@@ -346,6 +379,17 @@ extension Endeavour.Document {
                        _ callback: @escaping ((Error?) -> Void)) -> Self {
         unsafeSend {
             let result = self._beSave(peer: peer, version: version)
+            sender.unsafeSend { callback(result) }
+        }
+        return self
+    }
+    @discardableResult
+    public func beRevert(peer: UserUUID,
+                         version: Int,
+                         _ sender: Actor,
+                         _ callback: @escaping ((Error?) -> Void)) -> Self {
+        unsafeSend {
+            let result = self._beRevert(peer: peer, version: version)
             sender.unsafeSend { callback(result) }
         }
         return self

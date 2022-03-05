@@ -57,11 +57,22 @@ func handleStaticRequest(config: ServerConfig,
 struct PersistDocument: PersistableDocument {
     func save(documentInfo: DocumentInfo) -> Error? {
         do {
-            let path = "/tmp/endeavour.\(documentInfo.uuid).\(documentInfo.version).swift"
+            let path = "/tmp/endeavour.\(documentInfo.uuid).swift"
             try documentInfo.content.description.write(toFile: path, atomically: true, encoding: .utf8)
             return nil
         } catch {
             return "Failed to save document to persistant storage"
+        }
+    }
+
+    func revert(content: inout Hitch,
+                documentInfo: DocumentInfo) -> Error? {
+        let path = "/tmp/endeavour.\(documentInfo.uuid).swift"
+        do {
+            content = Hitch(string: try String(contentsOfFile: path))
+            return nil
+        } catch {
+            return "Failed to revert document to previously saved version"
         }
     }
 }
