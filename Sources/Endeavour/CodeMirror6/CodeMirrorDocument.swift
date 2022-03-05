@@ -6,23 +6,38 @@ import Hitch
 import Spanker
 
 /// Attempt at duplicating the CM6 ChangeSet logic so that the server can keep a
-/// version of the document in sync with the clients
-enum ChangeSet {
-    static func apply(document: DocumentContent,
-                      changeSet: JsonElement) {
+/// version of the document in sync with the clients.
+///
+/// CodeMirror text documents works as follows:
+/// document offsets are 0 indexed by counting utf16 code units, new lines are always
+/// one code unit (fine unless line separator is configured to something > 1 utf16 code unit)
+class CodeMirrorDocument {
+    var document = chitch16_init_capacity(1024)
+
+    func set(document string: String) {
+        chitch16_concat_string(&document, string)
+    }
+
+    func hitch() -> Hitch {
+        return Hitch(string: document.description())
+    }
+
+    func apply(changeSet: JsonElement) {
 
         // print("==== BEFORE DOCUMENT ====")
-        // print(document)
+        // print(document.description())
         // print("==== UPDATE ====")
         // print(changeSet.toString())
 
         var sections: [Int] = []
-        var inserted: [Hitch] = []
+        var inserted: [CHitch16] = []
 
         // equiavlent to .fromJSON()
         changeSet.query(forEach: "$..changes") { changes in
             for idx in 0..<changes.count {
-                guard let part = changes[element: idx] else { fatalError("ChangeSet JsonElement is missing") }
+                guard let part = changes[element: idx] else {
+                    fatalError("ChangeSet JsonElement is missing")
+                }
 
                 if part.type == .int {
                     sections.append(part.intValue ?? 0)
@@ -33,7 +48,7 @@ enum ChangeSet {
                         sections.append(0)
                     } else {
                         while inserted.count < idx {
-                            inserted.append(Hitch.empty)
+                            inserted.append(chitch16_empty())
                         }
 
                         var totalCount = 0
@@ -42,11 +57,13 @@ enum ChangeSet {
                             totalCount += 1
                         }
 
-                        let combined = Hitch(capacity: totalCount)
+                        var combined = CHitch16()
                         for jdx in 1..<part.count {
-                            combined.append(part[hitch: jdx] ?? Hitch.empty)
-                            if jdx > 1 {
-                                combined.append(.newLine)
+                            if let string = part[string: jdx] {
+                                if jdx > 1 {
+                                    chitch16_concat_char(&combined, 10)
+                                }
+                                chitch16_concat_string(&combined, string)
                             }
                         }
 
@@ -63,26 +80,34 @@ enum ChangeSet {
         var posA = 0
         var posB = 0
         var idx = 0
-        let individual = false
         while idx < sections.count-1 {
             var len = sections[idx+0]
             var ins = sections[idx+1]
             idx += 2
 
             if ins < 0 {
+
+                // confirm the document length...
+                // if len != document.count {
+                //    fatalError()
+                // }
+
                 posA += len
                 posB += len
             } else {
                 var endA = posA
                 var endB = posB
-                var text = Hitch()
+                var text = chitch16_empty()
                 while true {
                     endA += len
                     endB += ins
                     if ins > 0 {
-                        text = text.append(inserted[(idx - 2) >> 1])
+                        let toInsert = inserted[(idx - 2) >> 1]
+                        if let raw = toInsert.universalData {
+                            chitch16_concat(&text, raw, toInsert.count)
+                        }
                     }
-                    if individual || idx == sections.count || sections[idx + 1] < 0 {
+                    if idx == sections.count || sections[idx + 1] < 0 {
                         break
                     }
                     len = sections[idx+0]
@@ -91,14 +116,19 @@ enum ChangeSet {
                 }
 
                 // f(posA, endA, posB, endB, text)
-                document.replace(from: posB, to: posB + (endA - posA), with: text)
-                // print("replace from {0} to {1} with {2}" << [posB, posB + (endA - posA), text])
+                chitch16_replace(&document,
+                                posB,
+                                posB + (endA - posA),
+                                text)
+                // print("replace from {0} to {1} with {2}" << [posB, posB + (endA - posA), text.description()])
 
                 posA = endA
                 posB = endB
             }
         }
 
-        // print("============\n\(document)\n============")
+        // TODO: counts are messed up if 🍎 is used
+
+        // print("============\n\(document.description())\n============")
     }
 }

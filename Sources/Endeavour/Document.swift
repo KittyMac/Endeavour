@@ -27,7 +27,8 @@ extension Endeavour {
         private let documentUUID: Hitch
 
         private var history = [Hitch]()
-        private var baseDocument = Hitch(capacity: 1024)
+
+        private var utf16Document = CodeMirrorDocument()
 
         private var persistableDocument: PersistableDocument?
 
@@ -45,7 +46,7 @@ extension Endeavour {
             documentUUID = UUID().uuidHitch
 
             if let content = content {
-                baseDocument.append(content)
+                utf16Document.set(document: content.description)
             }
         }
 
@@ -56,13 +57,13 @@ extension Endeavour {
             documentUUID = named ?? UUID().uuidHitch
 
             if let content = content {
-                baseDocument.append(content)
+                utf16Document.set(document: content.description)
             }
         }
 
         private func getDocumentInfo() -> DocumentInfo {
             return DocumentInfo(uuid: documentUUID,
-                                content: baseDocument,
+                                content: utf16Document.hitch(),
                                 version: history.count)
         }
 
@@ -160,9 +161,7 @@ extension Endeavour {
             }
 
             for update in updates.iterValues {
-                ChangeSet.apply(document: baseDocument,
-                                changeSet: update)
-
+                utf16Document.apply(changeSet: update)
                 history.append(update.toHitch())
             }
 

@@ -78,7 +78,7 @@ public enum EndeavourApp {
                                        named: "SwiftSample",
                                        content: swiftSample,
                                        Flynn.any) { documentInfo, document, error in
-            guard let documentInfo = documentInfo,
+            guard let _ = documentInfo,
                   let document = document else {
                 fatalError(error?.description ?? "failed to create SwiftSample")
             }
@@ -89,7 +89,7 @@ public enum EndeavourApp {
         let config = ServerConfig(address: address,
                                   port: Int(httpPort),
                                   requestTimeout: 30.0,
-                                  maxRequestInBytes: 65536)
+                                  maxRequestInBytes: 1024 * 1024 * 15)
 
         Server<WebUserSession>(config: config,
                                staticStorageHandler: handleStaticRequest).run()

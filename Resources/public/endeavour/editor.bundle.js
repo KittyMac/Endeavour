@@ -23622,45 +23622,38 @@
         let xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (this.readyState == 4) {
+                let plugin = undefined;
                 
                 let serviceResponse = xhttp.getResponseHeader("Service-Response");
                 let serviceJson = cm.endeavourJsonParse(serviceResponse);
-            
-                if (documentUUID == undefined) {
-                    documentUUID = serviceJson.documentUUID;
+                if (serviceJson != undefined) {
+                    plugin = cm.endeavourDocuments[serviceJson.documentUUID];
                 }
-            
-                let plugin = cm.endeavourDocuments[documentUUID];
-                try {
-                    if (this.status != 200) {
-                        plugin.didError(xhttp.responseText);
-                    } else {                
-                        let contentJson = cm.endeavourJsonParse(xhttp.responseText);                
-                        switch (command.command) {
-                        case "pull":
-                            plugin.didPull(serviceJson, contentJson);
-                            break;
-                        case "push":
-                            plugin.didPush(serviceJson, contentJson);
-                            break;
-                        }
-                    }
                 
+                if (this.status != 200) {
+                    if (plugin != undefined) {
+                        plugin.didError(xhttp.responseText);
+                    }
+                } else {
+                    let contentJson = cm.endeavourJsonParse(xhttp.responseText);                
                     switch (command.command) {
                     case "pull":
-                        cm.endeavourIsPulling = false;
-                        cm.endeavourPullUpdates();
+                        plugin.didPull(serviceJson, contentJson);
                         break;
                     case "push":
-                        cm.endeavourIsPushing = false;
+                        plugin.didPush(serviceJson, contentJson);
                         break;
                     }
-                } catch (error) {
-                    if (plugin != undefined) {
-                        plugin.didError(error);
-                    } else {
-                        print(`Uncaught error: ${error}`);
-                    }
+                }
+            
+                switch (command.command) {
+                case "pull":
+                    cm.endeavourIsPulling = false;
+                    cm.endeavourPullUpdates();
+                    break;
+                case "push":
+                    cm.endeavourIsPushing = false;
+                    break;
                 }
             }
         };

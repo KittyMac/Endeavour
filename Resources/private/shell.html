@@ -142,6 +142,7 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
                     FOREACH(ignoreError,ignoreErrors) {
                         if (errorText.includes(ignoreError)) {
                             errorText = undefined;
+                            break;
                         }
                     }
                 }
@@ -202,16 +203,11 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
         
         function saveDocument(documentUUID) {
             endeavour.save(documentUUID, function(xhttp, serviceJson) {
-                print(xhttp)
-                print(serviceJson)
-                //let documentID = `document${documentUUID}`
-                //let myDocument = document.getElementById(documentID);
-                //let fromHeight = myDocument.clientHeight;
-                //Laba.animate(myDocument, "^50f0", function(item,t) {
-                //    item.style.height = lerp(fromHeight,0,t) + "px";
-                //}, function() {
-                //    removeFromParent(myDocument);
-                //});
+                if (xhttp.readyState == 4 && xhttp.status != 200) {
+                    let error = xhttp.responseText || "An unknown error occured";
+                    alert(error);
+                    return;
+                }
             });
         }
         
