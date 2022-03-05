@@ -55,13 +55,13 @@ func handleStaticRequest(config: ServerConfig,
 }
 
 struct PersistDocument: PersistableDocument {
-    func save(documentInfo: DocumentInfo) -> Bool {
+    func save(documentInfo: DocumentInfo) -> Error? {
         do {
             let path = "/tmp/endeavour.\(documentInfo.uuid).\(documentInfo.version).swift"
             try documentInfo.content.description.write(toFile: path, atomically: true, encoding: .utf8)
-            return true
+            return nil
         } catch {
-            return false
+            return "Failed to save document to persistant storage"
         }
     }
 }

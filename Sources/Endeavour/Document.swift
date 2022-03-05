@@ -18,7 +18,7 @@ public struct DocumentInfo {
 }
 
 public protocol PersistableDocument {
-    func save(documentInfo: DocumentInfo) -> Bool
+    func save(documentInfo: DocumentInfo) -> Error?
 }
 
 extension Endeavour {
@@ -187,9 +187,9 @@ extension Endeavour {
 
             // "save" the document by:
             // 1. tell some other thing that the document wants to be saved
-            // 2. other thing persists the document successfully
-            guard persistableDocument.save(documentInfo: getDocumentInfo()) else {
-                return "Save document failed"
+            // 2. other thing persists the document, returns nil on success and error if not
+            if let error = persistableDocument.save(documentInfo: getDocumentInfo()) {
+                return error
             }
 
             // 3. clear the update history
@@ -239,7 +239,6 @@ extension Endeavour {
                 }
                 combined.append(.closeBrace)
 
-                print("combined \(combined)")
                 return combined.halfhitch()
             }
 
