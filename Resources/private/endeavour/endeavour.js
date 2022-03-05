@@ -38,3 +38,11 @@ endeavour.leave = function(documentUUID, callback) {
         "documentUUID": documentUUID
     }, callback);
 }
+
+endeavour.save = function(documentUUID, callback) {
+    endeavour.send({
+        "service": "EndeavourService",
+        "command": "save",
+        "documentUUID": documentUUID
+    }, callback);
+}

@@ -12,9 +12,13 @@ public enum AccessMode {
 }
 
 public struct DocumentInfo {
-    let uuid: DocumentUUID
-    let content: DocumentContent
-    let version: DocumentVersion
+    public let uuid: DocumentUUID
+    public let content: DocumentContent
+    public let version: DocumentVersion
+}
+
+public protocol PersistableDocument {
+    func save(documentInfo: DocumentInfo) -> Bool
 }
 
 extension Endeavour {
@@ -24,6 +28,8 @@ extension Endeavour {
 
         private var history = [Hitch]()
         private var baseDocument = Hitch(capacity: 1024)
+
+        private var persistableDocument: PersistableDocument?
 
         private let owner: UserUUID
         private var peers: [UserUUID] = []
@@ -72,18 +78,22 @@ extension Endeavour {
             return owner == user || peers.contains(user)
         }
 
+        private func _beSetPersistableDocument(persistableDocument: PersistableDocument) {
+            self.persistableDocument = persistableDocument
+        }
+
         private func _beAdd(peer: UserUUID,
-                            _ returnCallback: @escaping (DocumentInfo?, Error?) -> Void) {
-            guard accessMode != .closed else { return returnCallback(nil, "document is closed") }
+                            _ returnCallback: @escaping (DocumentInfo?, Endeavour.Document?, Error?) -> Void) {
+            guard accessMode != .closed else { return returnCallback(nil, nil, "document is closed") }
             if canAdd(user: peer) {
                 peers.append(peer)
             }
-            returnCallback(getDocumentInfo(), nil)
+            returnCallback(getDocumentInfo(), self, nil)
         }
 
         private func _beAdd(waiting: UserUUID,
-                            _ returnCallback: @escaping (DocumentInfo?, Error?) -> Void) {
-            guard accessMode != .closed else { return returnCallback(nil, "document is closed") }
+                            _ returnCallback: @escaping (DocumentInfo?, Endeavour.Document?, Error?) -> Void) {
+            guard accessMode != .closed else { return returnCallback(nil, nil, "document is closed") }
             guard accessMode == .private else {
                 // public documents have no waiting list, you can join as a peer immediately
                 return _beAdd(peer: waiting, returnCallback)
@@ -91,7 +101,7 @@ extension Endeavour {
             if canAdd(user: waiting) {
                 waitings.append(waiting)
             }
-            returnCallback(getDocumentInfo(), nil)
+            returnCallback(getDocumentInfo(), self, nil)
         }
 
         private func _beLeave(user: UserUUID,
@@ -163,6 +173,36 @@ extension Endeavour {
             return nil
         }
 
+        private func _beSave(peer: UserUUID,
+                             version: Int) -> Error? {
+            guard accessMode != .closed else { return "document is closed" }
+            guard owner == peer || peers.contains(peer) else { return "You are not authorized as a peer of this document" }
+            guard version == history.count else {
+                return "Version mismatch ({0} != {1})" << [version, history.count]
+            }
+            guard let persistableDocument = persistableDocument else {
+                return "Document does not support saving"
+            }
+
+            // "save" the document by:
+            // 1. tell some other thing that the document wants to be saved
+            // 2. other thing persists the document successfully
+            guard persistableDocument.save(documentInfo: getDocumentInfo()) else {
+                return "Save document failed"
+            }
+
+            // 3. clear the update history
+            history.removeAll()
+
+            // 4. tell all clients something changed
+            for service in subscribedServices {
+                service.beDocumentDidSave(document: self,
+                                          documentInfo: getDocumentInfo())
+            }
+
+            return nil
+        }
+
         private func _beSubscribe(peer: UserUUID,
                                   service: Endeavour.Service) {
             guard accessMode != .closed else { return }
@@ -197,6 +237,8 @@ extension Endeavour {
                     combined.count = combined.count - 1
                 }
                 combined.append(.closeBrace)
+
+                print("combined \(combined)")
                 return combined.halfhitch()
             }
 
@@ -211,13 +253,18 @@ extension Endeavour {
 extension Endeavour.Document {
 
     @discardableResult
+    public func beSetPersistableDocument(persistableDocument: PersistableDocument) -> Self {
+        unsafeSend { self._beSetPersistableDocument(persistableDocument: persistableDocument) }
+        return self
+    }
+    @discardableResult
     public func beAdd(peer: UserUUID,
                       _ sender: Actor,
-                      _ callback: @escaping ((DocumentInfo?, Error?) -> Void)) -> Self {
+                      _ callback: @escaping ((DocumentInfo?, Endeavour.Document?, Error?) -> Void)) -> Self {
         unsafeSend {
-            self._beAdd(peer: peer) { arg0, arg1 in
+            self._beAdd(peer: peer) { arg0, arg1, arg2 in
                 sender.unsafeSend {
-                    callback(arg0, arg1)
+                    callback(arg0, arg1, arg2)
                 }
             }
         }
@@ -226,11 +273,11 @@ extension Endeavour.Document {
     @discardableResult
     public func beAdd(waiting: UserUUID,
                       _ sender: Actor,
-                      _ callback: @escaping ((DocumentInfo?, Error?) -> Void)) -> Self {
+                      _ callback: @escaping ((DocumentInfo?, Endeavour.Document?, Error?) -> Void)) -> Self {
         unsafeSend {
-            self._beAdd(waiting: waiting) { arg0, arg1 in
+            self._beAdd(waiting: waiting) { arg0, arg1, arg2 in
                 sender.unsafeSend {
-                    callback(arg0, arg1)
+                    callback(arg0, arg1, arg2)
                 }
             }
         }
@@ -288,6 +335,17 @@ extension Endeavour.Document {
                           _ callback: @escaping ((Error?) -> Void)) -> Self {
         unsafeSend {
             let result = self._bePublish(peer: peer, version: version, updates: updates)
+            sender.unsafeSend { callback(result) }
+        }
+        return self
+    }
+    @discardableResult
+    public func beSave(peer: UserUUID,
+                       version: Int,
+                       _ sender: Actor,
+                       _ callback: @escaping ((Error?) -> Void)) -> Self {
+        unsafeSend {
+            let result = self._beSave(peer: peer, version: version)
             sender.unsafeSend { callback(result) }
         }
         return self

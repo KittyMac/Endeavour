@@ -126,8 +126,8 @@ public extension EndeavourPamphlet.Private.Endeavour {
 }
 
 private let uncompressedEndeavourJs = ###"""
-let endeavour={send:function(e,n){send(e,(function(e){let o=e.getResponseHeader("Service-Response");if(null!=o){let d=JSON.parse(o);n(e,d)}else n(e,void 0)}))},new:function(e){endeavour.send({service:"EndeavourService",command:"new"},e)},join:function(e,n){endeavour.send({service:"EndeavourService",command:"join",documentUUID:e},n)},leave:function(e,n){endeavour.send({service:"EndeavourService",command:"leave",documentUUID:e},n)}};
+let endeavour={send:function(e,n){send(e,(function(e){let o=e.getResponseHeader("Service-Response");if(null!=o){let d=JSON.parse(o);n(e,d)}else n(e,void 0)}))},new:function(e){endeavour.send({service:"EndeavourService",command:"new"},e)},join:function(e,n){endeavour.send({service:"EndeavourService",command:"join",documentUUID:e},n)},leave:function(e,n){endeavour.send({service:"EndeavourService",command:"leave",documentUUID:e},n)},save:function(e,n){endeavour.send({service:"EndeavourService",command:"save",documentUUID:e},n)}};
 
 """###
-private let compressedEndeavourJs = Data(base64Encoded:"H4sIAAAAAAACA62PwWrDMBBE7/0KRycJVNOzjW8NpD000JAPMNYkqMi7wbKdQ9C/d+02TQg5hd6GWWbebECfgRzqkYeuOkXRxW6gpvdMGpbMbInSF9ecgqS4Qr5H/4l4YIpYoXbotNqgG32D57OvTOl3moYQFhX/JF31vll/5Ie6i9BsygnkTEKIyCY9snfZi0nGJEs4Ftfkv635vEvWzbhCLc+H3wHKNty2tbyjpEMlC2n7Yk837z1SONUo67gZWlC/3b69FpCpAggSwT8Q5p67iFQ+fQO7FKJ7tAEAAA==")!
+private let compressedEndeavourJs = Data(base64Encoded:"H4sIAAAAAAACA62PwWrDMBBE7/kKRycJVNOzjW8ppD200JAPMNYkqMi7wbLdQ9C/d+02bQnJJeQ2zDLzZgP6DORQjzx01TGKLnYDNb1n0rBkZkuU/nPNMUiKK+R79O+IB6aINWqHTqsNutE3eDj5ypR+p2kIYVnxd9JVL5u31/xQdxGaTTmBnEkIEdmkR/YuezTJmGQJn8V/8u/WfN4l62ZcoZ5Oh58ByjbctrW8o6RDJQtp+2BPZ+/dUjjVKOu4GVpQv90+rwrIVAEEieAOhLnnMiLehxCvAVK5+ALqdMuoFQIAAA==")!
 

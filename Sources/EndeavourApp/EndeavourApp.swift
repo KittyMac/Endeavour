@@ -12,7 +12,8 @@ let cacheMaxAge = 5
 let cacheMaxAge = 3600
 #endif
 
-func handleStaticRequest(_ httpRequest: HttpRequest) -> HttpResponse? {
+func handleStaticRequest(config: ServerConfig,
+                         httpRequest: HttpRequest) -> HttpResponse? {
     if let url = httpRequest.url {
 
         if url.contains("private/") {
@@ -53,6 +54,18 @@ func handleStaticRequest(_ httpRequest: HttpRequest) -> HttpResponse? {
     return nil
 }
 
+struct PersistDocument: PersistableDocument {
+    func save(documentInfo: DocumentInfo) -> Bool {
+        do {
+            let path = "/tmp/endeavour.\(documentInfo.uuid).\(documentInfo.version).swift"
+            try documentInfo.content.description.write(toFile: path, atomically: true, encoding: .utf8)
+            return true
+        } catch {
+            return false
+        }
+    }
+}
+
 public enum EndeavourApp {
 
     public static func http(_ address: String,
@@ -64,10 +77,13 @@ public enum EndeavourApp {
         Endeavour.shared.beNewDocument(userUUID: ownerUUID,
                                        named: "SwiftSample",
                                        content: swiftSample,
-                                       Flynn.any) { _, error in
-            if let error = error {
-                fatalError(error.description)
+                                       Flynn.any) { documentInfo, document, error in
+            guard let documentInfo = documentInfo,
+                  let document = document else {
+                fatalError(error?.description ?? "failed to create SwiftSample")
             }
+
+            document.beSetPersistableDocument(persistableDocument: PersistDocument())
         }
 
         let config = ServerConfig(address: address,

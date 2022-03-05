@@ -23622,6 +23622,7 @@
         let xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (this.readyState == 4) {
+                
                 let serviceResponse = xhttp.getResponseHeader("Service-Response");
                 let serviceJson = cm.endeavourJsonParse(serviceResponse);
             
@@ -23630,7 +23631,6 @@
                 }
             
                 let plugin = cm.endeavourDocuments[documentUUID];
-                
                 try {
                     if (this.status != 200) {
                         plugin.didError(xhttp.responseText);
@@ -23735,6 +23735,12 @@
                 this.documentUUID = startingDocumentUUID;
                 this.view = view;                        
                 cm.endeavourDocuments[this.documentUUID] = this;
+                
+                statusCallback({
+                    documentUUID: this.documentUUID,
+                    version: this.documentVersion(),
+                    clientId: this.clientID()
+                });
             }
 
             update(update) {
@@ -23773,23 +23779,62 @@
             }
             
             didPull(serviceJson, contentJson) {
-                let changes = contentJson.map(function(x) {
-                    return {
-                        changes: ChangeSet.fromJSON(x.changes),
-                        clientID: x.clientID
-                    };
-                });
                 
-                this.view.dispatch(receiveUpdates(this.view.state, changes));
+                // Pulls can return multiple different things. Detect what it is
+                // and do the appropriate thing:
+                            
+                // Full document refresh:
+                if (serviceJson.command == "save") {
+                    let state = this.view.state;
+                    
+                    // Horrible hack...
+                    state.update({
+                        changes: {
+                            from: 0,
+                            to: state.doc.length,
+                            insert: contentJson.textResponse
+                        }
+                    });
+                    
+                    for (let idx = 0; idx < state.values.length; idx++) {
+                        let value = state.values[idx];
+                        if (value?.constructor?.name == "CollabState") {
+                            value.version = 0;
+                            value.unconfirmed = [];
+                        }
+                    }                
+                }
+                
+                
+                // Partial document updates:
+                if (serviceJson.command == "update") {
+                    let changes = contentJson.map(function(x) {
+                        return {
+                            changes: ChangeSet.fromJSON(x.changes),
+                            clientID: x.clientID
+                        };
+                    });
+                    this.view.dispatch(receiveUpdates(this.view.state, changes));
+                }
+                
                 
                 if (statusCallback != undefined) {
-                    statusCallback(`Document ${this.documentUUID}`, false);
+                    statusCallback({
+                        documentUUID: this.documentUUID,
+                        version: this.documentVersion(),
+                        clientId: this.clientID()
+                    });
                 }
             }
             
             didError(errorResponse) {
                 if (statusCallback != undefined) {
-                    statusCallback(errorResponse, true);
+                    statusCallback({
+                        documentUUID: this.documentUUID,
+                        version: this.documentVersion(),
+                        clientId: this.clientID(),
+                        error: errorResponse
+                    });
                 }
             }
             

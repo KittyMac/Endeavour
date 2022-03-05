@@ -3,16 +3,24 @@
 #include <./figurehead/figurehead.html>
 #include <./endeavour/endeavour.html>
 
+#define HEADERBORDERINT(X,COLOR) border-top:X##rem solid COLOR;border-left:X##rem solid COLOR;border-right:X##rem solid COLOR;
+#define HEADERBORDER() HEADERBORDERINT(0.1,VAR(item-outline))
+
+#define EDITORBORDERINT(X,COLOR) border-top:X##rem solid COLOR;
+#define EDITORBORDER() EDITORBORDERINT(0.1,VAR(item-outline))
+
+#define DOCUMENTBORDER() BORDER(0.15,VAR(item-outline))
+
 #macro EDITOR(ID)
-ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50),
-    ELEMENT(HSTACK()BETWEEN()MARGIN(1,1,0,1),
+ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENTBORDER()CLIPS()RADIUS(0.75)WHITE(),
+    ELEMENT(HSTACK()MIDDLE()PADDING(0.5,1,0.5,1)MARGIN(0,0,0,-0.125),
         ID_ELEMENT(header##ID,LATO(1)FBLACK()START()BOTTOM(),Creating new document...)
-        ANY_BUTTON(AROUND()BOTTOM()SIZEALL(2,2)CLICKABLE(),leaveDocument('ID'),
-            IMAGE(SIZEALL(1,1),public/close.svg)
-        )
+        HSPACE()
+        ID_BUTTON(save##ID,MINWIDTH(4)PADDING(0,1,0,1),Save,saveDocument('ID'))
+        ID_BUTTON(leave##ID,MINWIDTH(4)PADDING(0,1,0,1),Leave,leaveDocument('ID'))
     )
-    ELEMENT(VSTACK()GROW()STRETCH()MINHEIGHT(10)STDSHADOW()MARGIN(0.5,1,1,1)BACKGROUND(255,255,255,1),
-        ID_ELEMENT(editor##ID,ITEM_OUTLINE()GROW()PCTWIDTH(100)CLIPS(),)
+    ELEMENT(VSTACK()GROW()STRETCH()MINHEIGHT(10)BACKGROUND(255,255,255,1),
+        ID_ELEMENT(editor##ID,EDITORBORDER()GROW()PCTWIDTH(100)CLIPS(),)
     )
 )
 #endmacro
@@ -104,6 +112,7 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50),
             let documentID = `document${documentUUID}`
             let editorID = `editor${documentUUID}`
             let headerID = `header${documentUUID}`
+            let saveID = `save${documentUUID}`
                             
             let html = `EDITOR(${documentUUID})`
             insertHtml(documents, html);
@@ -111,28 +120,48 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50),
             let documentHeader = document.getElementById(headerID);
             documentHeader.innerText = `Document ${documentUUID}`;
             
-            let documentStatus = function(status, isError) {
-                let ignoreStatuses = [
+            let documentSave = document.getElementById(saveID);
+            disableDiv(documentSave);
+            
+            let documentStatus = function(status) {
+                let ignoreErrors = [
                     //"Version mismatch"
                 ];
-                
-                if (isError) {
-                    FOREACH(ignoreStatus,ignoreStatuses) {
-                        if (status.includes(ignoreStatus)) {
-                            status = undefined;
+                                
+                let displayText = `Document ${status.documentUUID}`;
+                let isError = false;
+                                
+                let errorText = status.error;
+                if (errorText != undefined) {
+                    FOREACH(ignoreError,ignoreErrors) {
+                        if (errorText.includes(ignoreError)) {
+                            errorText = undefined;
                         }
                     }
                 }
                 
-                if (status != undefined && documentHeader.innerText != status) {
-                    print(status);
-                    documentHeader.innerText = status;
+                if (errorText != undefined) {
+                    displayText = errorText;
+                    isError = true;
+                }
+                
+                if (displayText != undefined && documentHeader.innerText != displayText) {
+                    print(displayText);
+                    documentHeader.innerText = displayText;
                     
                     if (isError) {
                         documentHeader.style.color = `rgba(214,62,87,1)`;
                     } else {
                         documentHeader.style.color = `rgba(83,84,87,1)`;
                     }
+                }
+                
+                // If the version of the document is 0 then there have been
+                // no changes and the save button should be disabled
+                if (status.version == 0) {
+                    disableDiv(documentSave);
+                } else {
+                    enableDiv(documentSave);
                 }
             }
 
@@ -149,9 +178,7 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50),
             ask("Enter the document UUID to join",
                 "",
                 ["Cancel", "Join"], 
-                [undefined, function(uuid) {
-                    joinDocument(uuid);
-                }]);
+                [undefined, joinDocument]);
         }
         
         function leaveDocument(documentUUID) {
@@ -164,6 +191,21 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50),
                 }, function() {
                     removeFromParent(myDocument);
                 });
+            });
+        }
+        
+        function saveDocument(documentUUID) {
+            endeavour.save(documentUUID, function(xhttp, serviceJson) {
+                print(xhttp)
+                print(serviceJson)
+                //let documentID = `document${documentUUID}`
+                //let myDocument = document.getElementById(documentID);
+                //let fromHeight = myDocument.clientHeight;
+                //Laba.animate(myDocument, "^50f0", function(item,t) {
+                //    item.style.height = lerp(fromHeight,0,t) + "px";
+                //}, function() {
+                //    removeFromParent(myDocument);
+                //});
             });
         }
         
