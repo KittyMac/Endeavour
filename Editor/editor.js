@@ -168,13 +168,13 @@ cm.endeavourSend = function(command, documentUUID) {
             } else {
                 cm.endeavourSendErrorCount = 0;
                 
-                let contentJson = cm.endeavourJsonParse(xhttp.responseText)                
+                let contentJson = cm.endeavourJsonParse(xhttp.responseText);
                 switch (command.command) {
                 case "pull":
-                    plugin.didPull(serviceJson, contentJson);
+                    plugin.didPull(serviceJson, contentJson, xhttp.responseText);
                     break;
                 case "push":
-                    plugin.didPush(serviceJson, contentJson);
+                    plugin.didPush(serviceJson, contentJson, xhttp.responseText);
                     break;
                 }
             }
@@ -303,13 +303,13 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
             cm.endeavourPushUpdates(this.documentUUID, this.documentVersion(), updates);
         }
         
-        didPush(serviceJson, contentJson) {
+        didPush(serviceJson, contentJson, contentText) {
             if (sendableUpdates(this.view.state).length) {
                 setTimeout(() => this.push(), 100)
             }
         }
         
-        didPull(serviceJson, contentJson) {
+        didPull(serviceJson, contentJson, contentText) {
             
             // Pulls can return multiple different things. Detect what it is
             // and do the appropriate thing:
@@ -323,7 +323,7 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                     changes: {
                         from: 0,
                         to: this.view.state.doc.length,
-                        insert: contentJson
+                        insert: contentText
                     }
                 });
                 
