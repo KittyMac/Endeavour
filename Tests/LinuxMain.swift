@@ -1,7 +1,9 @@
 import XCTest
 
-import ScrapeServerTests
+@testable import EndeavourTests
 
-var tests = [XCTestCaseEntry]()
-tests += ScrapeServerTests.allTests()
-XCTMain(tests)
+XCTMain([
+    testCase(EndeavourAppTests.allTests),
+    testCase(EndeavourTests.allTests),
+    testCase(EndeavourServerTests.allTests)
+])

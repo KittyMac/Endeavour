@@ -53,15 +53,6 @@ let package = Package(
             exclude: [
                 "Resources"
             ]
-        ),
-        .testTarget(
-            name: "EndeavourAppTests",
-            dependencies: [
-                "EndeavourApp"
-            ],
-            exclude: [
-                "Resources"
-            ]
         )
     ]
 )

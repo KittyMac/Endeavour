@@ -39,7 +39,7 @@ RUN wget -qO- $SWIFTURL | tar -xvz -C swift
 
 
 # 2. build our swift program
-WORKDIR /root/PICAROONTEMPLATE
+WORKDIR /root/EndeavourApp
 COPY ./Makefile ./Makefile
 COPY ./Package.swift ./Package.swift
 COPY ./meta ./meta
@@ -47,6 +47,7 @@ COPY ./Sources ./Sources
 COPY ./Tests ./Tests
 
 RUN swift package update
+RUN swift test
 RUN swift build --configuration release
 
 # 3. Now that we have our program built, we create slim version which just includes the swift runtime
@@ -55,6 +56,8 @@ ARG TARGETPLATFORM
 ARG TARGETOS
 ARG TARGETARCH
 ARG TARGETVARIANT
+
+EXPOSE 8080
 
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true && apt-get -q update && \
     apt-get -q install -y \
@@ -78,4 +81,5 @@ ENV SWIFTSLIMURL="http://www.chimerasw.com/swift/swiftslim-5.3-$TARGETARCH$TARGE
 RUN mkdir -p swift
 RUN wget -qO- $SWIFTSLIMURL | tar -xvz -C swift
 
-COPY --from=builder /root/PICAROONTEMPLATE/.build/release/PICAROONTEMPLATE .
+COPY --from=builder /root/EndeavourApp/.build/release/EndeavourApp .
+

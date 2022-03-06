@@ -32,7 +32,6 @@ pamphlet:
 xcode: pamphlet preprocess
 	swift package generate-xcodeproj
 	meta/addBuildPhase Endeavour.xcodeproj/project.pbxproj "Endeavour::Endeavour" 'export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:$$PATH; cd $${SRCROOT}; ./meta/CombinedBuildPhases.sh'
-	#meta/addBuildPhase Endeavour.xcodeproj/project.pbxproj "Endeavour::Pamphlet" 'export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:$$PATH; cd $${SRCROOT}; ./meta/CombinedBuildPhases.sh'
 	sleep 2
 	open Endeavour.xcodeproj
 
@@ -42,7 +41,15 @@ docker:
 	-docker buildx use cluster
 	-docker buildx inspect --bootstrap
 	-docker login
-	docker buildx build --platform linux/amd64,linux/arm64/v8 --push -t kittymac/endeavour .
+	#docker buildx build --platform linux/amd64,linux/arm64/v8 --push -t kittymac/endeavour .
+	docker buildx build --platform linux/amd64 --push -t kittymac/endeavour .
+
+docker-local:
+	docker run --publish published=8080,target=8080,mode=host kittymac/endeavour:latest ./EndeavourApp http
+#docker run --publish published=8080,target=8080,mode=host kittymac/endeavour:latest swift test
+# docker exec --name kittymac/endeavour:latest -it bash
+#docker exec kittymac/endeavour:latest -t bash
+# docker exec -it kittymac/endeavour:latest sh
 
 docker-service-log:
 	-ssh rjbowli@192.168.1.200 "docker service logs --follow endeavour-http"
