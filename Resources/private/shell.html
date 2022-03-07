@@ -175,12 +175,14 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
                 
                 // If the version of the document is 0 then there have been
                 // no changes and the save button should be disabled
-                if (documentStatus.version == 0) {
-                    disableDiv(documentSave);
-                    disableDiv(documentRevert);
-                } else {
-                    enableDiv(documentSave);
-                    enableDiv(documentRevert);
+                if (documentSave != undefined && documentRevert != undefined) {
+                    if (documentStatus.version == 0) {
+                        disableDiv(documentSave);
+                        disableDiv(documentRevert);
+                    } else {
+                        enableDiv(documentSave);
+                        enableDiv(documentRevert);
+                    }
                 }
             }
 

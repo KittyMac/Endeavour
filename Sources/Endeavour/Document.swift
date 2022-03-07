@@ -1,3 +1,5 @@
+// swiftlint:disable weak_delegate
+
 import Foundation
 import ArgumentParser
 import Picaroon
@@ -30,13 +32,19 @@ public struct DocumentInfo {
     }
 }
 
-public protocol PersistableDocument {
-    func save(documentInfo: DocumentInfo) -> Error?
-    func revert(content: inout Hitch, documentInfo: DocumentInfo) -> Error?
-}
-
-public protocol AuthorizableDocument {
-    func authorized(observer: UserUUID) -> UserAccessMode
+public protocol Documentable: Actor {
+    @discardableResult
+    func beSave(documentInfo: DocumentInfo,
+                _ sender: Actor,
+                _ callback: @escaping ((Error?) -> Void)) -> Self
+    @discardableResult
+    func beRevert(documentInfo: DocumentInfo,
+                  _ sender: Actor,
+                  _ callback: @escaping ((DocumentContent?, Error?) -> Void)) -> Self
+    @discardableResult
+    func beAuthorize(user: UserUUID,
+                     _ sender: Actor,
+                     _ callback: @escaping ((UserAccessMode) -> Void)) -> Self
 }
 
 extension Endeavour {
@@ -48,8 +56,7 @@ extension Endeavour {
 
         private var utf16Document = CodeMirrorDocument()
 
-        private var persistableDocument: PersistableDocument?
-        private var authorizableDocument: AuthorizableDocument?
+        private var delegate: Documentable?
 
         private let owner: UserUUID
         private var peers = Set<UserUUID>()
@@ -80,11 +87,15 @@ extension Endeavour {
             }
         }
 
+        private func _beSetDelegate(delegate: Documentable) {
+            self.delegate = delegate
+        }
+
         private func getDocumentInfo(user: UserUUID) -> DocumentInfo {
             return DocumentInfo(uuid: documentUUID,
                                 content: utf16Document.hitch(),
                                 version: history.count,
-                                canSave: persistableDocument != nil && canWrite(user: user),
+                                canSave: delegate != nil && canWrite(user: user),
                                 canRead: canRead(user: user),
                                 canWrite: canWrite(user: user))
         }
@@ -97,29 +108,26 @@ extension Endeavour {
             return owner == user || peers.contains(user)
         }
 
-        private func _beSetPersistableDocument(persistableDocument: PersistableDocument) {
-            self.persistableDocument = persistableDocument
-        }
-
-        private func _beSetAuthorizableDocument(authorizableDocument: AuthorizableDocument) {
-            self.authorizableDocument = authorizableDocument
-        }
-
         private func _beAdd(user: UserUUID,
                             _ returnCallback: @escaping (DocumentInfo?, Endeavour.Document?, Error?) -> Void) {
             guard closed == false else { return returnCallback(nil, nil, "document is closed") }
             if user != owner {
-                if let authorizableDocument = authorizableDocument {
-                    switch authorizableDocument.authorized(observer: user) {
-                    case .observer:
-                        observers.insert(user)
-                        break
-                    case .peer:
-                        peers.insert(user)
-                        break
-                    default:
-                        return returnCallback(nil, nil, "You are not authorized to access this document")
+                if let delegate = delegate {
+                    delegate.beAuthorize(user: user, self) { accessMode in
+                        switch accessMode {
+                        case .observer:
+                            self.observers.insert(user)
+                            break
+                        case .peer:
+                            self.peers.insert(user)
+                            break
+                        default:
+                            return returnCallback(nil, nil, "You are not authorized to access this document")
+                        }
+                        returnCallback(self.getDocumentInfo(user: user), self, nil)
+                        return
                     }
+                    return
                 } else {
                     peers.insert(user)
                 }
@@ -195,65 +203,71 @@ extension Endeavour {
         }
 
         private func _beSave(peer: UserUUID,
-                             version: Int) -> Error? {
-            guard closed == false else { return "document is closed" }
-            guard owner == peer || peers.contains(peer) else { return "You are not authorized as a peer of this document" }
+                             version: Int,
+                             _ returnCallback: @escaping ((Error?) -> Void)) {
+            guard closed == false else { return returnCallback("document is closed") }
+            guard owner == peer || peers.contains(peer) else { return returnCallback("You are not authorized as a peer of this document") }
             guard version == history.count else {
-                return "Version mismatch ({0} != {1})" << [version, history.count]
+                return returnCallback("Version mismatch ({0} != {1})" << [version, history.count])
             }
-            guard let persistableDocument = persistableDocument else {
-                return "Document does not support persistent storage"
+            guard let delegate = delegate else {
+                return returnCallback("Document does not support persistent storage")
             }
 
             // "save" the document by:
             // 1. tell some other thing that the document wants to be saved
             // 2. other thing persists the document, returns nil on success and error if not
-            if let error = persistableDocument.save(documentInfo: getDocumentInfo(user: peer)) {
-                return error
+            delegate.beSave(documentInfo: getDocumentInfo(user: peer), self) { error in
+                if let error = error {
+                    return returnCallback(error)
+                }
+
+                // 3. clear the update history
+                self.history.removeAll()
+
+                // 4. tell all clients something changed
+                for service in self.subscribedServices {
+                    service.beDocumentDidSave(document: self,
+                                              documentInfo: self.getDocumentInfo(user: peer))
+                }
+                returnCallback(nil)
             }
-
-            // 3. clear the update history
-            history.removeAll()
-
-            // 4. tell all clients something changed
-            for service in subscribedServices {
-                service.beDocumentDidSave(document: self,
-                                          documentInfo: getDocumentInfo(user: peer))
-            }
-
-            return nil
         }
 
         private func _beRevert(peer: UserUUID,
-                               version: Int) -> Error? {
-            guard closed == false else { return "document is closed" }
-            guard owner == peer || peers.contains(peer) else { return "You are not authorized as a peer of this document" }
+                               version: Int,
+                               _ returnCallback: @escaping ((Error?) -> Void)) {
+            guard closed == false else { return returnCallback("document is closed") }
+            guard owner == peer || peers.contains(peer) else { return returnCallback("You are not authorized as a peer of this document") }
             guard version == history.count else {
-                return "Version mismatch ({0} != {1})" << [version, history.count]
+                return returnCallback("Version mismatch ({0} != {1})" << [version, history.count])
             }
-            guard let persistableDocument = persistableDocument else {
-                return "Document does not support persistent storage"
+            guard let delegate = delegate else {
+                return returnCallback("Document does not support persistent storage")
             }
 
             // all the delegate to reset the content of the document
-            var content = utf16Document.hitch()
-            if let error = persistableDocument.revert(content: &content,
-                                                      documentInfo: getDocumentInfo(user: peer)) {
-                return error
+            delegate.beRevert(documentInfo: getDocumentInfo(user: peer), self) { content, error in
+                guard let content = content else {
+                    return returnCallback("Reverted content was nil")
+                }
+                if let error = error {
+                    return returnCallback(error)
+                }
+
+                self.utf16Document.set(document: content.description)
+
+                // 3. clear the update history
+                self.history.removeAll()
+
+                // 4. tell all clients something changed
+                for service in self.subscribedServices {
+                    service.beDocumentDidSave(document: self,
+                                              documentInfo: self.getDocumentInfo(user: peer))
+                }
+
+                return returnCallback(nil)
             }
-
-            utf16Document.set(document: content.description)
-
-            // 3. clear the update history
-            history.removeAll()
-
-            // 4. tell all clients something changed
-            for service in subscribedServices {
-                service.beDocumentDidSave(document: self,
-                                          documentInfo: getDocumentInfo(user: peer))
-            }
-
-            return nil
         }
 
         private func _beSubscribe(peer: UserUUID,
@@ -305,13 +319,8 @@ extension Endeavour {
 extension Endeavour.Document {
 
     @discardableResult
-    public func beSetPersistableDocument(persistableDocument: PersistableDocument) -> Self {
-        unsafeSend { self._beSetPersistableDocument(persistableDocument: persistableDocument) }
-        return self
-    }
-    @discardableResult
-    public func beSetAuthorizableDocument(authorizableDocument: AuthorizableDocument) -> Self {
-        unsafeSend { self._beSetAuthorizableDocument(authorizableDocument: authorizableDocument) }
+    public func beSetDelegate(delegate: Documentable) -> Self {
+        unsafeSend { self._beSetDelegate(delegate: delegate) }
         return self
     }
     @discardableResult
@@ -389,8 +398,11 @@ extension Endeavour.Document {
                        _ sender: Actor,
                        _ callback: @escaping ((Error?) -> Void)) -> Self {
         unsafeSend {
-            let result = self._beSave(peer: peer, version: version)
-            sender.unsafeSend { callback(result) }
+            self._beSave(peer: peer, version: version) { arg0 in
+                sender.unsafeSend {
+                    callback(arg0)
+                }
+            }
         }
         return self
     }
@@ -400,8 +412,11 @@ extension Endeavour.Document {
                          _ sender: Actor,
                          _ callback: @escaping ((Error?) -> Void)) -> Self {
         unsafeSend {
-            let result = self._beRevert(peer: peer, version: version)
-            sender.unsafeSend { callback(result) }
+            self._beRevert(peer: peer, version: version) { arg0 in
+                sender.unsafeSend {
+                    callback(arg0)
+                }
+            }
         }
         return self
     }
