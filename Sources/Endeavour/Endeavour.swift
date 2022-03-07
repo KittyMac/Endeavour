@@ -46,13 +46,15 @@ public class Endeavour: Actor {
         }
     }
 
-    private func _beJoinDocument(userUUID: UserUUID,
+    private func _beJoinDocument(userSession: UserServiceableSession,
+                                 userUUID: UserUUID,
                                  documentUUID: DocumentUUID,
                                  _ returnCallback: @escaping (DocumentInfo?, Document?, Error?) -> Void) {
         guard let document = documents[documentUUID] else {
             return returnCallback(nil, nil, "The document does not exist")
         }
-        document.beAdd(user: userUUID,
+        document.beAdd(userSession: userSession,
+                       user: userUUID,
                        self,
                        returnCallback)
     }
@@ -111,12 +113,13 @@ extension Endeavour {
         return self
     }
     @discardableResult
-    public func beJoinDocument(userUUID: UserUUID,
+    public func beJoinDocument(userSession: UserServiceableSession,
+                               userUUID: UserUUID,
                                documentUUID: DocumentUUID,
                                _ sender: Actor,
                                _ callback: @escaping ((DocumentInfo?, Document?, Error?) -> Void)) -> Self {
         unsafeSend {
-            self._beJoinDocument(userUUID: userUUID, documentUUID: documentUUID) { arg0, arg1, arg2 in
+            self._beJoinDocument(userSession: userSession, userUUID: userUUID, documentUUID: documentUUID) { arg0, arg1, arg2 in
                 sender.unsafeSend {
                     callback(arg0, arg1, arg2)
                 }

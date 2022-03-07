@@ -42,7 +42,8 @@ public protocol Documentable: Actor {
                   _ sender: Actor,
                   _ callback: @escaping ((DocumentContent?, Error?) -> Void)) -> Self
     @discardableResult
-    func beAuthorize(user: UserUUID,
+    func beAuthorize(userSession: UserServiceableSession,
+                     user: UserUUID,
                      _ sender: Actor,
                      _ callback: @escaping ((UserAccessMode) -> Void)) -> Self
 }
@@ -108,12 +109,15 @@ extension Endeavour {
             return owner == user || peers.contains(user)
         }
 
-        private func _beAdd(user: UserUUID,
+        private func _beAdd(userSession: UserServiceableSession,
+                            user: UserUUID,
                             _ returnCallback: @escaping (DocumentInfo?, Endeavour.Document?, Error?) -> Void) {
             guard closed == false else { return returnCallback(nil, nil, "document is closed") }
             if user != owner {
                 if let delegate = delegate {
-                    delegate.beAuthorize(user: user, self) { accessMode in
+                    delegate.beAuthorize(userSession: userSession,
+                                         user: user,
+                                         self) { accessMode in
                         switch accessMode {
                         case .observer:
                             self.observers.insert(user)
@@ -324,11 +328,12 @@ extension Endeavour.Document {
         return self
     }
     @discardableResult
-    public func beAdd(user: UserUUID,
+    public func beAdd(userSession: UserServiceableSession,
+                      user: UserUUID,
                       _ sender: Actor,
                       _ callback: @escaping ((DocumentInfo?, Endeavour.Document?, Error?) -> Void)) -> Self {
         unsafeSend {
-            self._beAdd(user: user) { arg0, arg1, arg2 in
+            self._beAdd(userSession: userSession, user: user) { arg0, arg1, arg2 in
                 sender.unsafeSend {
                     callback(arg0, arg1, arg2)
                 }

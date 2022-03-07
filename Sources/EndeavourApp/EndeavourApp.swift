@@ -76,7 +76,8 @@ class DocumentsDelegate: Actor, Documentable {
         }
     }
 
-    private func _beAuthorize(user: UserUUID) -> UserAccessMode {
+    private func _beAuthorize(userSession: UserServiceableSession,
+                              user: UserUUID) -> UserAccessMode {
         return .peer
     }
 }
@@ -439,11 +440,12 @@ extension DocumentsDelegate {
         return self
     }
     @discardableResult
-    public func beAuthorize(user: UserUUID,
+    public func beAuthorize(userSession: UserServiceableSession,
+                            user: UserUUID,
                             _ sender: Actor,
                             _ callback: @escaping ((UserAccessMode) -> Void)) -> Self {
         unsafeSend {
-            let result = self._beAuthorize(user: user)
+            let result = self._beAuthorize(userSession: userSession, user: user)
             sender.unsafeSend { callback(result) }
         }
         return self

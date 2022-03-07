@@ -35,25 +35,26 @@ extension Endeavour {
 
             switch command {
             case "new":
-                safeNewDocument(jsonElement, returnCallback)
+                safeNewDocument(userSession, jsonElement, returnCallback)
             case "leave":
-                safeLeaveDocument(jsonElement, returnCallback)
+                safeLeaveDocument(userSession, jsonElement, returnCallback)
             case "join":
-                safeJoinDocument(jsonElement, returnCallback)
+                safeJoinDocument(userSession, jsonElement, returnCallback)
             case "save":
-                safeSaveDocument(jsonElement, returnCallback)
+                safeSaveDocument(userSession, jsonElement, returnCallback)
             case "revert":
-                safeRevertDocument(jsonElement, returnCallback)
+                safeRevertDocument(userSession, jsonElement, returnCallback)
             case "push":
-                safePushToDocument(jsonElement, returnCallback)
+                safePushToDocument(userSession, jsonElement, returnCallback)
             case "pull":
-                safePullDocument(jsonElement, returnCallback)
+                safePullDocument(userSession, jsonElement, returnCallback)
             default:
                 return returnCallback(jsonElement, HttpResponse(error: "unknown command"))
             }
         }
 
-        func safeNewDocument(_ jsonElement: JsonElement,
+        func safeNewDocument(_ userSession: UserServiceableSession,
+                             _ jsonElement: JsonElement,
                              _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
             let content: Hitch? = jsonElement[hitch: "content"]
             let name: Hitch? = jsonElement[hitch: "name"]
@@ -82,7 +83,8 @@ extension Endeavour {
             }
         }
 
-        func safeLeaveDocument(_ jsonElement: JsonElement,
+        func safeLeaveDocument(_ userSession: UserServiceableSession,
+                               _ jsonElement: JsonElement,
                                _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
             guard let documentUUID = jsonElement[hitch: "documentUUID"] else {
                 return returnCallback(jsonElement,
@@ -104,14 +106,16 @@ extension Endeavour {
             }
         }
 
-        func safeJoinDocument(_ jsonElement: JsonElement,
+        func safeJoinDocument(_ userSession: UserServiceableSession,
+                              _ jsonElement: JsonElement,
                                _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
             guard let documentUUID = jsonElement[hitch: "documentUUID"] else {
                 return returnCallback(jsonElement,
                                       HttpStaticResponse.badRequest)
             }
 
-            Endeavour.shared.beJoinDocument(userUUID: userUUID,
+            Endeavour.shared.beJoinDocument(userSession: userSession,
+                                            userUUID: userUUID,
                                             documentUUID: documentUUID,
                                             self) { documentInfo, document, error in
                 if let error = error {
@@ -135,7 +139,8 @@ extension Endeavour {
             }
         }
 
-        func safeSaveDocument(_ jsonElement: JsonElement,
+        func safeSaveDocument(_ userSession: UserServiceableSession,
+                              _ jsonElement: JsonElement,
                               _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
             guard let documentUUID = jsonElement[hitch: "documentUUID"],
                   let version = openDocumentVersions[documentUUID],
@@ -158,7 +163,8 @@ extension Endeavour {
             }
         }
 
-        func safeRevertDocument(_ jsonElement: JsonElement,
+        func safeRevertDocument(_ userSession: UserServiceableSession,
+                                _ jsonElement: JsonElement,
                                 _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
             guard let documentUUID = jsonElement[hitch: "documentUUID"],
                   let version = openDocumentVersions[documentUUID],
@@ -181,7 +187,8 @@ extension Endeavour {
             }
         }
 
-        func safePushToDocument(_ jsonElement: JsonElement,
+        func safePushToDocument(_ userSession: UserServiceableSession,
+                                _ jsonElement: JsonElement,
                                 _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
             guard let documentUUID = jsonElement[hitch: "documentUUID"],
                   let version = jsonElement[int: "version"],
@@ -206,7 +213,8 @@ extension Endeavour {
             }
         }
 
-        func safePullDocument(_ jsonElement: JsonElement,
+        func safePullDocument(_ userSession: UserServiceableSession,
+                              _ jsonElement: JsonElement,
                               _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
 
             if let documentUUIDs = jsonElement[element: "documentUUIDs"],
