@@ -113,6 +113,10 @@ extension Endeavour {
                             user: UserUUID,
                             _ returnCallback: @escaping (DocumentInfo?, Endeavour.Document?, Error?) -> Void) {
             guard closed == false else { return returnCallback(nil, nil, "document is closed") }
+
+            observers.remove(user)
+            peers.remove(user)
+
             if user != owner {
                 if let delegate = delegate {
                     delegate.beAuthorize(userSession: userSession,

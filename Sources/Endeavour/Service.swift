@@ -23,6 +23,22 @@ extension Endeavour {
 
         public override var unsafeServiceName: Hitch { "EndeavourService" }
 
+        public override func safeHandleShutdown(_ returnCallback: @escaping () -> Void) {
+            var documentsToLeave = openDocumentVersions.count
+
+            for documentUUID in openDocumentVersions.keys {
+                Endeavour.shared.beLeaveDocument(userUUID: self.userUUID,
+                                                 service: self,
+                                                 documentUUID: documentUUID,
+                                                 self) { _ in
+                    documentsToLeave -= 1
+                    if documentsToLeave <= 0 {
+                        returnCallback()
+                    }
+                }
+            }
+        }
+
         public override func safeHandleRequest(userSession: UserServiceableSession,
                                                jsonElement: JsonElement,
                                                httpRequest: HttpRequest,
@@ -247,12 +263,8 @@ extension Endeavour {
                 // period of time to reconnect otherwise we make them leave all documents they
                 // are connected to
                 if abs(self.longPullLastSendDate.timeIntervalSinceNow) > 10.0 {
-                    print("User \(self.userUUID) disconnected due to inactivity")
-                    for documentUUID in self.openDocumentVersions.keys {
-                        Endeavour.shared.beLeaveDocument(userUUID: self.userUUID,
-                                                         service: self,
-                                                         documentUUID: documentUUID,
-                                                         self) { _ in }
+                    safeHandleShutdown {
+                        print("User \(self.userUUID) disconnected due to inactivity")
                     }
                 }
             }
