@@ -77,6 +77,12 @@ struct PersistDocument: PersistableDocument {
     }
 }
 
+struct AutherizeDocument: AuthorizableDocument {
+    func authorized(observer: UserUUID) -> UserAccessMode {
+        return .observer
+    }
+}
+
 public enum EndeavourApp {
 
     public static func http(_ address: String,
@@ -95,6 +101,7 @@ public enum EndeavourApp {
             }
 
             document.beSetPersistableDocument(persistableDocument: PersistDocument())
+            document.beSetAuthorizableDocument(authorizableDocument: AutherizeDocument())
         }
 
         let config = ServerConfig(address: address,

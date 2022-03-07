@@ -5,12 +5,6 @@ import Flynn
 import Hitch
 import Spanker
 
-public enum DocumentAccessMode {
-    case closed
-    case `public`
-    case `private`
-}
-
 public enum UserAccessMode {
     case none
     case peer
@@ -21,6 +15,19 @@ public struct DocumentInfo {
     public let uuid: DocumentUUID
     public let content: DocumentContent
     public let version: DocumentVersion
+    public let canSave: Bool
+    public let canRead: Bool
+    public let canWrite: Bool
+
+    func jsonElement() -> JsonElement {
+        return JsonElement(unknown: [
+            "documentUUID": uuid,
+            "version": version,
+            "canSave": canSave,
+            "canRead": canRead,
+            "canWrite": canWrite
+        ])
+    }
 }
 
 public protocol PersistableDocument {
@@ -48,7 +55,7 @@ extension Endeavour {
         private var peers = Set<UserUUID>()
         private var observers = Set<UserUUID>()
 
-        private var accessMode = DocumentAccessMode.public
+        private var closed = false
 
         private var subscribedServices = [Service]()
 
@@ -73,10 +80,13 @@ extension Endeavour {
             }
         }
 
-        private func getDocumentInfo() -> DocumentInfo {
+        private func getDocumentInfo(user: UserUUID) -> DocumentInfo {
             return DocumentInfo(uuid: documentUUID,
                                 content: utf16Document.hitch(),
-                                version: history.count)
+                                version: history.count,
+                                canSave: persistableDocument != nil && canWrite(user: user),
+                                canRead: canRead(user: user),
+                                canWrite: canWrite(user: user))
         }
 
         private func canRead(user: UserUUID) -> Bool {
@@ -97,7 +107,7 @@ extension Endeavour {
 
         private func _beAdd(user: UserUUID,
                             _ returnCallback: @escaping (DocumentInfo?, Endeavour.Document?, Error?) -> Void) {
-            guard accessMode != .closed else { return returnCallback(nil, nil, "document is closed") }
+            guard closed == false else { return returnCallback(nil, nil, "document is closed") }
             if user != owner {
                 if let authorizableDocument = authorizableDocument {
                     switch authorizableDocument.authorized(observer: user) {
@@ -114,7 +124,7 @@ extension Endeavour {
                     peers.insert(user)
                 }
             }
-            returnCallback(getDocumentInfo(), self, nil)
+            returnCallback(getDocumentInfo(user: user), self, nil)
         }
 
         private func _beLeave(user: UserUUID,
@@ -126,7 +136,7 @@ extension Endeavour {
             subscribedServices.removeAll(service)
 
             if owner == user {
-                accessMode = .closed
+                closed = true
 
                 peers.removeAll()
                 observers.removeAll()
@@ -143,28 +153,28 @@ extension Endeavour {
         }
 
         private func _beAuthorize(peer: UserUUID) -> Error? {
-            guard accessMode != .closed else { return "document is closed" }
+            guard closed == false else { return "document is closed" }
             guard peers.contains(peer) else { return "You are not authorized as a peer of this document" }
             return nil
         }
 
         private func _beAuthorize(owner: UserUUID) -> Error? {
-            guard accessMode != .closed else { return "document is closed" }
+            guard closed == false else { return "document is closed" }
             guard self.owner == owner else { return "You are not authorized as an owner of this document" }
             return nil
         }
 
         private func _beGetInfo(user: UserUUID,
                                 _ returnCallback: (DocumentInfo?, Error?) -> Void) {
-            guard accessMode != .closed else { return returnCallback(nil, "document is closed") }
+            guard closed == false else { return returnCallback(nil, "document is closed") }
             guard canRead(user: user) else { return returnCallback(nil, "You are not authorized to access this document") }
-            returnCallback(getDocumentInfo(), nil)
+            returnCallback(getDocumentInfo(user: user), nil)
         }
 
         private func _bePublish(peer: UserUUID,
                                 version: Int,
                                 updates: JsonElement) -> Error? {
-            guard accessMode != .closed else { return "document is closed" }
+            guard closed == false else { return "document is closed" }
             guard owner == peer || peers.contains(peer) else { return "You are not authorized as a peer of this document" }
             guard version == history.count else {
                 return "Version mismatch ({0} != {1})" << [version, history.count]
@@ -186,7 +196,7 @@ extension Endeavour {
 
         private func _beSave(peer: UserUUID,
                              version: Int) -> Error? {
-            guard accessMode != .closed else { return "document is closed" }
+            guard closed == false else { return "document is closed" }
             guard owner == peer || peers.contains(peer) else { return "You are not authorized as a peer of this document" }
             guard version == history.count else {
                 return "Version mismatch ({0} != {1})" << [version, history.count]
@@ -198,7 +208,7 @@ extension Endeavour {
             // "save" the document by:
             // 1. tell some other thing that the document wants to be saved
             // 2. other thing persists the document, returns nil on success and error if not
-            if let error = persistableDocument.save(documentInfo: getDocumentInfo()) {
+            if let error = persistableDocument.save(documentInfo: getDocumentInfo(user: peer)) {
                 return error
             }
 
@@ -208,7 +218,7 @@ extension Endeavour {
             // 4. tell all clients something changed
             for service in subscribedServices {
                 service.beDocumentDidSave(document: self,
-                                          documentInfo: getDocumentInfo())
+                                          documentInfo: getDocumentInfo(user: peer))
             }
 
             return nil
@@ -216,7 +226,7 @@ extension Endeavour {
 
         private func _beRevert(peer: UserUUID,
                                version: Int) -> Error? {
-            guard accessMode != .closed else { return "document is closed" }
+            guard closed == false else { return "document is closed" }
             guard owner == peer || peers.contains(peer) else { return "You are not authorized as a peer of this document" }
             guard version == history.count else {
                 return "Version mismatch ({0} != {1})" << [version, history.count]
@@ -228,7 +238,7 @@ extension Endeavour {
             // all the delegate to reset the content of the document
             var content = utf16Document.hitch()
             if let error = persistableDocument.revert(content: &content,
-                                                      documentInfo: getDocumentInfo()) {
+                                                      documentInfo: getDocumentInfo(user: peer)) {
                 return error
             }
 
@@ -240,7 +250,7 @@ extension Endeavour {
             // 4. tell all clients something changed
             for service in subscribedServices {
                 service.beDocumentDidSave(document: self,
-                                          documentInfo: getDocumentInfo())
+                                          documentInfo: getDocumentInfo(user: peer))
             }
 
             return nil
@@ -248,7 +258,7 @@ extension Endeavour {
 
         private func _beSubscribe(peer: UserUUID,
                                   service: Endeavour.Service) {
-            guard accessMode != .closed else { return }
+            guard closed == false else { return }
             guard owner == peer || peers.contains(peer) else {
                return
             }
@@ -263,7 +273,7 @@ extension Endeavour {
 
         private func _beGetUpdates(peer: UserUUID,
                                    version: DocumentVersion) -> HalfHitch? {
-            guard accessMode != .closed else { return nil }
+            guard closed == false else { return nil }
             guard owner == peer || peers.contains(peer) else {
                return nil
             }

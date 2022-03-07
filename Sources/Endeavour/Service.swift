@@ -63,11 +63,13 @@ extension Endeavour {
                                            content: content,
                                            self) { documentInfo, document, error in
                 if let error = error {
-                    return returnCallback(jsonElement, HttpResponse(error: error))
+                    return returnCallback(jsonElement,
+                                          HttpResponse(error: error))
                 }
                 guard let documentInfo = documentInfo,
                       let document = document else {
-                    return returnCallback(jsonElement, HttpResponse(error: "document is nil"))
+                    return returnCallback(jsonElement,
+                                          HttpResponse(error: "document is nil"))
                 }
 
                 document.beSubscribe(peer: self.userUUID, service: self)
@@ -75,17 +77,16 @@ extension Endeavour {
                 self.openDocumentVersions[documentInfo.uuid] = documentInfo.version
                 self.openDocuments[documentInfo.uuid] = document
 
-                returnCallback(JsonElement(unknown: [
-                    "documentUUID": documentInfo.uuid,
-                    "version": documentInfo.version
-                ]), HttpResponse(text: documentInfo.content))
+                returnCallback(documentInfo.jsonElement(),
+                               HttpResponse(text: documentInfo.content))
             }
         }
 
         func safeLeaveDocument(_ jsonElement: JsonElement,
                                _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
             guard let documentUUID = jsonElement[hitch: "documentUUID"] else {
-                return returnCallback(jsonElement, HttpStaticResponse.badRequest)
+                return returnCallback(jsonElement,
+                                      HttpStaticResponse.badRequest)
             }
 
             Endeavour.shared.beLeaveDocument(userUUID: userUUID,
@@ -93,7 +94,8 @@ extension Endeavour {
                                              documentUUID: documentUUID,
                                              self) { error in
                 if let error = error {
-                    return returnCallback(jsonElement, HttpResponse(error: error))
+                    return returnCallback(jsonElement,
+                                          HttpResponse(error: error))
                 }
 
                 returnCallback(JsonElement(unknown: [
@@ -105,18 +107,21 @@ extension Endeavour {
         func safeJoinDocument(_ jsonElement: JsonElement,
                                _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
             guard let documentUUID = jsonElement[hitch: "documentUUID"] else {
-                return returnCallback(jsonElement, HttpStaticResponse.badRequest)
+                return returnCallback(jsonElement,
+                                      HttpStaticResponse.badRequest)
             }
 
             Endeavour.shared.beJoinDocument(userUUID: userUUID,
                                             documentUUID: documentUUID,
                                             self) { documentInfo, document, error in
                 if let error = error {
-                    return returnCallback(jsonElement, HttpResponse(error: error))
+                    return returnCallback(jsonElement,
+                                          HttpResponse(error: error))
                 }
                 guard let documentInfo = documentInfo,
                       let document = document else {
-                    return returnCallback(jsonElement, HttpResponse(error: "document is nil"))
+                    return returnCallback(jsonElement,
+                                          HttpResponse(error: "document is nil"))
                 }
 
                 document.beSubscribe(peer: self.userUUID,
@@ -125,10 +130,8 @@ extension Endeavour {
                 self.openDocumentVersions[documentInfo.uuid] = documentInfo.version
                 self.openDocuments[documentInfo.uuid] = document
 
-                returnCallback(JsonElement(unknown: [
-                    "documentUUID": documentInfo.uuid,
-                    "version": documentInfo.version
-                ]), HttpResponse(text: documentInfo.content))
+                returnCallback(documentInfo.jsonElement(),
+                               HttpResponse(text: documentInfo.content))
             }
         }
 
@@ -137,14 +140,16 @@ extension Endeavour {
             guard let documentUUID = jsonElement[hitch: "documentUUID"],
                   let version = openDocumentVersions[documentUUID],
                   let document = openDocuments[documentUUID] else {
-                return returnCallback(jsonElement, HttpStaticResponse.badRequest)
+                return returnCallback(jsonElement,
+                                      HttpStaticResponse.badRequest)
             }
 
             document.beSave(peer: userUUID,
                             version: version,
                             self) { error in
                 if let error = error {
-                    return returnCallback(jsonElement, HttpResponse(error: error))
+                    return returnCallback(jsonElement,
+                                          HttpResponse(error: error))
                 }
 
                 returnCallback(JsonElement(unknown: [
@@ -158,14 +163,16 @@ extension Endeavour {
             guard let documentUUID = jsonElement[hitch: "documentUUID"],
                   let version = openDocumentVersions[documentUUID],
                   let document = openDocuments[documentUUID] else {
-                return returnCallback(jsonElement, HttpStaticResponse.badRequest)
+                return returnCallback(jsonElement,
+                                      HttpStaticResponse.badRequest)
             }
 
             document.beRevert(peer: userUUID,
                               version: version,
                               self) { error in
                 if let error = error {
-                    return returnCallback(jsonElement, HttpResponse(error: error))
+                    return returnCallback(jsonElement,
+                                          HttpResponse(error: error))
                 }
 
                 returnCallback(JsonElement(unknown: [
@@ -180,7 +187,8 @@ extension Endeavour {
                   let version = jsonElement[int: "version"],
                   let updates = jsonElement[element: "updates"],
                   let document = openDocuments[documentUUID] else {
-                return returnCallback(jsonElement, HttpStaticResponse.badRequest)
+                return returnCallback(jsonElement,
+                                      HttpStaticResponse.badRequest)
             }
 
             document.bePublish(peer: userUUID,
@@ -188,7 +196,8 @@ extension Endeavour {
                                updates: updates,
                                self) { error in
                 if let error = error {
-                    return returnCallback(jsonElement, HttpResponse(error: error))
+                    return returnCallback(jsonElement,
+                                          HttpResponse(error: error))
                 }
 
                 returnCallback(JsonElement(unknown: [

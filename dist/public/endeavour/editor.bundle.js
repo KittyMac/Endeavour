@@ -23740,11 +23740,14 @@
                 this.view = view;                        
                 cm.endeavourDocuments[this.documentUUID] = this;
                 
-                statusCallback({
-                    documentUUID: this.documentUUID,
-                    version: this.documentVersion(),
-                    clientId: this.clientID()
-                });
+                statusCallback(
+                    serviceJson,
+                    {
+                        documentUUID: this.documentUUID,
+                        version: this.documentVersion(),
+                        clientId: this.clientID()
+                    }
+                );
             }
 
             update(update) {
@@ -23827,22 +23830,28 @@
                 
                 
                 if (statusCallback != undefined) {
-                    statusCallback({
-                        documentUUID: this.documentUUID,
-                        version: this.documentVersion(),
-                        clientId: this.clientID()
-                    });
+                    statusCallback(
+                        serviceJson,
+                        {
+                            documentUUID: this.documentUUID,
+                            version: this.documentVersion(),
+                            clientId: this.clientID()
+                        }
+                    );
                 }
             }
             
             didError(errorResponse) {
                 if (statusCallback != undefined) {
-                    statusCallback({
-                        documentUUID: this.documentUUID,
-                        version: this.documentVersion(),
-                        clientId: this.clientID(),
-                        error: errorResponse
-                    });
+                    statusCallback(
+                        serviceJson,
+                        {
+                            documentUUID: this.documentUUID,
+                            version: this.documentVersion(),
+                            clientId: this.clientID(),
+                            error: errorResponse
+                        }
+                    );
                 }
             }
             

@@ -129,20 +129,25 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
             documentHeader.innerText = `Document ${documentUUID}`;
             
             let documentSave = document.getElementById(saveID);
-            disableDiv(documentSave);
-            
             let documentRevert = document.getElementById(revertID);
-            disableDiv(documentRevert);
+            if (serviceJson.canSave == 1) {
+                disableDiv(documentRevert);
+                disableDiv(documentSave);
+            } else {
+                removeFromParent(documentRevert);
+                removeFromParent(documentSave);
+            }
             
-            let documentStatus = function(status) {
+            
+            let documentStatusUpdate = function(documentInfo, documentStatus) {
                 let ignoreErrors = [
                     "Version mismatch"
                 ];
-                                
-                let displayText = `Document ${status.documentUUID}`;
+                                                
+                let displayText = `Document ${documentStatus.documentUUID}`;
                 let isError = false;
                                 
-                let errorText = status.error;
+                let errorText = documentStatus.error;
                 if (errorText != undefined) {
                     FOREACH(ignoreError,ignoreErrors) {
                         if (errorText.includes(ignoreError)) {
@@ -170,7 +175,7 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
                 
                 // If the version of the document is 0 then there have been
                 // no changes and the save button should be disabled
-                if (status.version == 0) {
+                if (documentStatus.version == 0) {
                     disableDiv(documentSave);
                     disableDiv(documentRevert);
                 } else {
@@ -181,8 +186,8 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
 
             let editor = cm.CreateEditor(editorID, [
                 cm.swiftSetup,
-                cm.endeavourExtension(serviceJson, documentStatus)
-            ], xhttp.responseText, true);
+                cm.endeavourExtension(serviceJson, documentStatusUpdate)
+            ], xhttp.responseText, serviceJson.canWrite == 1);
             
             let myDocument = document.getElementById(documentID);
             Laba.animate(myDocument, "!<200!f")
