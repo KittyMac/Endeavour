@@ -14,7 +14,7 @@ extension Endeavour {
             lhs.userUUID == rhs.userUUID
         }
 
-        private let userUUID: UserUUID = UUID().uuidHitch
+        private var userUUID: UserUUID = UUID().uuidHitch
 
         private var longPullLastSendDate = Date()
         private var longPull: SubscribeLongPull?
@@ -31,7 +31,7 @@ extension Endeavour {
                 return returnCallback(jsonElement, HttpStaticResponse.badRequest)
             }
 
-            // print(jsonElement)
+            userUUID = userSession.unsafeSessionUUID
 
             switch command {
             case "new":
