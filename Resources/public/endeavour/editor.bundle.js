@@ -23620,6 +23620,20 @@
 
     cm.endeavourSendErrorCount = 0;
 
+    cm.broadcastStatus = function(documentUUID, command, message) {
+        let allDocumentUUIDs = [];
+        if (documentUUID != undefined) {
+            allDocumentUUIDs.push(documentUUID);
+        }
+        if (command.documentUUIDs != undefined) {
+            allDocumentUUIDs = allDocumentUUIDs.concat(command.documentUUIDs);
+        }
+        
+        allDocumentUUIDs.forEach(function(documentUUID) {
+            cm.endeavourDocuments[documentUUID]?.didError(message);
+        });
+    };
+
     cm.endeavourSend = function(command, documentUUID) {
         let xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
@@ -23652,8 +23666,9 @@
                     }
                 }
                 
-                if (cm.endeavourSendErrorCount > 50) {
-                    alert("Too many errors; please refresh the page.");
+                if (cm.endeavourSendErrorCount > 6) {
+                    cm.broadcastStatus(documentUUID, command, "Disconnected from server");
+                    cm.endeavourIsPulling = false;
                     return;
                 }
                 
