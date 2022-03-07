@@ -52,7 +52,7 @@ public class Endeavour: Actor {
         guard let document = documents[documentUUID] else {
             return returnCallback(nil, nil, "The document does not exist")
         }
-        document.beAdd(waiting: userUUID,
+        document.beAdd(user: userUUID,
                        self,
                        returnCallback)
     }

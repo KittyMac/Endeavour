@@ -5,10 +5,16 @@ import Flynn
 import Hitch
 import Spanker
 
-public enum AccessMode {
+public enum DocumentAccessMode {
     case closed
     case `public`
     case `private`
+}
+
+public enum UserAccessMode {
+    case none
+    case peer
+    case observer
 }
 
 public struct DocumentInfo {
@@ -22,6 +28,10 @@ public protocol PersistableDocument {
     func revert(content: inout Hitch, documentInfo: DocumentInfo) -> Error?
 }
 
+public protocol AuthorizableDocument {
+    func authorized(observer: UserUUID) -> UserAccessMode
+}
+
 extension Endeavour {
     public class Document: Actor {
 
@@ -32,12 +42,13 @@ extension Endeavour {
         private var utf16Document = CodeMirrorDocument()
 
         private var persistableDocument: PersistableDocument?
+        private var authorizableDocument: AuthorizableDocument?
 
         private let owner: UserUUID
-        private var peers: [UserUUID] = []
-        private var waitings: [UserUUID] = []
+        private var peers = Set<UserUUID>()
+        private var observers = Set<UserUUID>()
 
-        private var accessMode = AccessMode.public
+        private var accessMode = DocumentAccessMode.public
 
         private var subscribedServices = [Service]()
 
@@ -68,10 +79,6 @@ extension Endeavour {
                                 version: history.count)
         }
 
-        private func canAdd(user: UserUUID) -> Bool {
-            return owner != user && peers.contains(user) == false && waitings.contains(user) == false
-        }
-
         private func canRead(user: UserUUID) -> Bool {
             return owner == user || peers.contains(user)
         }
@@ -84,35 +91,37 @@ extension Endeavour {
             self.persistableDocument = persistableDocument
         }
 
-        private func _beAdd(peer: UserUUID,
-                            _ returnCallback: @escaping (DocumentInfo?, Endeavour.Document?, Error?) -> Void) {
-            guard accessMode != .closed else { return returnCallback(nil, nil, "document is closed") }
-            guard canAdd(user: peer) else {
-                return returnCallback(nil, nil, "You are already a peer of this document")
-            }
-            peers.append(peer)
-            returnCallback(getDocumentInfo(), self, nil)
+        private func _beSetAuthorizableDocument(authorizableDocument: AuthorizableDocument) {
+            self.authorizableDocument = authorizableDocument
         }
 
-        private func _beAdd(waiting: UserUUID,
+        private func _beAdd(user: UserUUID,
                             _ returnCallback: @escaping (DocumentInfo?, Endeavour.Document?, Error?) -> Void) {
             guard accessMode != .closed else { return returnCallback(nil, nil, "document is closed") }
-            guard accessMode == .private else {
-                // public documents have no waiting list, you can join as a peer immediately
-                return _beAdd(peer: waiting, returnCallback)
+            if user != owner {
+                if let authorizableDocument = authorizableDocument {
+                    switch authorizableDocument.authorized(observer: user) {
+                    case .observer:
+                        observers.insert(user)
+                        break
+                    case .peer:
+                        peers.insert(user)
+                        break
+                    default:
+                        return returnCallback(nil, nil, "You are not authorized to access this document")
+                    }
+                } else {
+                    peers.insert(user)
+                }
             }
-            guard canAdd(user: waiting) else {
-                return returnCallback(nil, nil, "You are already waiting to join this document")
-            }
-            waitings.append(waiting)
             returnCallback(getDocumentInfo(), self, nil)
         }
 
         private func _beLeave(user: UserUUID,
                               service: Endeavour.Service) -> (Bool, Error?) {
 
-            waitings.removeOne(user)
-            peers.removeOne(user)
+            observers.remove(user)
+            peers.remove(user)
 
             subscribedServices.removeAll(service)
 
@@ -120,7 +129,7 @@ extension Endeavour {
                 accessMode = .closed
 
                 peers.removeAll()
-                waitings.removeAll()
+                observers.removeAll()
 
                 for service in subscribedServices {
                     service.beDocumentDidClose(documentUUID: documentUUID)
@@ -291,24 +300,16 @@ extension Endeavour.Document {
         return self
     }
     @discardableResult
-    public func beAdd(peer: UserUUID,
-                      _ sender: Actor,
-                      _ callback: @escaping ((DocumentInfo?, Endeavour.Document?, Error?) -> Void)) -> Self {
-        unsafeSend {
-            self._beAdd(peer: peer) { arg0, arg1, arg2 in
-                sender.unsafeSend {
-                    callback(arg0, arg1, arg2)
-                }
-            }
-        }
+    public func beSetAuthorizableDocument(authorizableDocument: AuthorizableDocument) -> Self {
+        unsafeSend { self._beSetAuthorizableDocument(authorizableDocument: authorizableDocument) }
         return self
     }
     @discardableResult
-    public func beAdd(waiting: UserUUID,
+    public func beAdd(user: UserUUID,
                       _ sender: Actor,
                       _ callback: @escaping ((DocumentInfo?, Endeavour.Document?, Error?) -> Void)) -> Self {
         unsafeSend {
-            self._beAdd(waiting: waiting) { arg0, arg1, arg2 in
+            self._beAdd(user: user) { arg0, arg1, arg2 in
                 sender.unsafeSend {
                     callback(arg0, arg1, arg2)
                 }

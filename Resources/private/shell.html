@@ -210,10 +210,14 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
         
         function saveDocument(documentUUID) {
             endeavour.save(documentUUID, function(xhttp, serviceJson) {
-                if (xhttp.readyState == 4 && xhttp.status != 200) {
-                    let error = xhttp.responseText || "An unknown error occured";
-                    alert(error);
-                    return;
+                if (xhttp.readyState == 4) {
+                    if (xhttp.status != 200) {
+                        let error = xhttp.responseText || "An unknown error occured";
+                        alert(error);
+                        return;
+                    } else {
+                        alert("Save completed")
+                    }
                 }
             });
         }
