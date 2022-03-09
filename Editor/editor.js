@@ -1,6 +1,6 @@
 import {Update, receiveUpdates, sendableUpdates, collab, getSyncedVersion, getClientID} from "@codemirror/collab"
-import {ViewPlugin, keymap, highlightSpecialChars, drawSelection, highlightActiveLine, dropCursor} from "@codemirror/view"
-import {ChangeSet, Text, EditorState, StateEffect} from "@codemirror/state"
+import {Decoration, ViewPlugin, keymap, highlightSpecialChars, drawSelection, highlightActiveLine, dropCursor} from "@codemirror/view"
+import {ChangeSet, Text, EditorState, StateEffect, SelectionRange} from "@codemirror/state"
 import {history, historyKeymap} from "@codemirror/history"
 import {foldGutter, foldKeymap} from "@codemirror/fold"
 import {indentOnInput, indentUnit} from "@codemirror/language"
@@ -16,6 +16,7 @@ import {defaultHighlightStyle, tags, HighlightStyle} from "@codemirror/highlight
 import {lintKeymap} from "@codemirror/lint"
 import {EditorView} from "@codemirror/view"
 import {indentWithTab} from "@codemirror/commands"
+import {RangeSetBuilder} from "@codemirror/rangeset"
 
 import {json} from "@codemirror/lang-json"
 import {javascript} from "@codemirror/lang-javascript"
@@ -24,6 +25,7 @@ import {swift} from "./index.swift.js"
 
 import {light} from "./light.js"
 import {dark} from "./dark.js"
+import {newPeerDecoration, peerWidgetBaseTheme} from "./peerWidget.js"
 
 let cm = {};
 window.cm = cm;
@@ -180,16 +182,10 @@ cm.endeavourSend = function(command, documentUUID) {
                     plugin.didError(xhttp.responseText);
                 }
             } else {
-                cm.endeavourSendErrorCount = 0;
-                
+                cm.endeavourSendErrorCount = 0;                
                 let contentJson = cm.endeavourJsonParse(xhttp.responseText);
-                switch (command.command) {
-                case "pull":
+                if (command.command != undefined) {
                     plugin.didPull(serviceJson, contentJson, xhttp.responseText);
-                    break;
-                case "push":
-                    plugin.didPush(serviceJson, contentJson, xhttp.responseText);
-                    break;
                 }
             }
             
@@ -205,6 +201,9 @@ cm.endeavourSend = function(command, documentUUID) {
                 cm.endeavourPullUpdates();
                 break;
             case "push":
+                cm.endeavourIsPushing = false;
+                break;
+            case "cursors":
                 cm.endeavourIsPushing = false;
                 break;
             }
@@ -228,17 +227,34 @@ cm.endeavourSend = function(command, documentUUID) {
 cm.endeavourDocuments = {};
 
 cm.endeavourIsPushing = false;
-cm.endeavourPushUpdates = function(documentUUID, version, updates) {
+cm.endeavourPushUpdates = function(plugin, updates) {
     if (cm.endeavourIsPushing == false) {
         let msg = {
             service: "EndeavourService",
             command: "push",
-            documentUUID: documentUUID,
-            version: version,
+            documentUUID: plugin.documentUUID,
+            version: plugin.documentVersion(),
             updates: updates
         };
         cm.endeavourIsPushing = true;
-        cm.endeavourSend(msg, documentUUID);
+        cm.endeavourSend(msg, plugin.documentUUID);
+    }
+}
+
+cm.endeavourPushCursors = function(plugin, ranges) {
+    if (cm.endeavourIsPushing == false) {
+        let msg = {
+            service: "EndeavourService",
+            command: "cursors",
+            documentUUID: plugin.documentUUID,
+            cursors: {
+                clientId: plugin.clientID(),
+                ranges: ranges
+            }
+        };
+                    
+        cm.endeavourIsPushing = true;
+        cm.endeavourSend(msg, plugin.documentUUID);
     }
 }
 
@@ -279,7 +295,8 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
         constructor(view) {
             this.statusCallback = statusCallback;
             this.documentUUID = startingDocumentUUID;
-            this.view = view;                        
+            this.view = view;
+            this.peers = {};
             cm.endeavourDocuments[this.documentUUID] = this;
             
             statusCallback(
@@ -290,11 +307,16 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                     clientId: this.clientID()
                 }
             );
+            
+            this.decorations = this.getDeco(view);
         }
 
         update(update) {
             if (update.docChanged) {
                 this.push();
+            }
+            if (update.docChanged || update.selectionSet) {
+                cm.endeavourPushCursors(this, update.state.selection.ranges);
             }
         }
         
@@ -318,7 +340,7 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                 };
             });
             
-            cm.endeavourPushUpdates(this.documentUUID, this.documentVersion(), updates);
+            cm.endeavourPushUpdates(this, updates);
         }
         
         didPush(serviceJson, contentJson, contentText) {
@@ -331,7 +353,14 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
             
             // Pulls can return multiple different things. Detect what it is
             // and do the appropriate thing:
-                        
+            
+            if (serviceJson.command == "cursors") {
+                // peers updated their cursor positions
+                this.peers = cm.endeavourJsonParse(contentText);
+                this.decorations = this.getDeco(this.view);
+                this.view.update([]);
+            }
+            
             // Full document refresh:
             if (serviceJson.command == "save") {
                 
@@ -349,7 +378,6 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                 for (let idx = 0; idx < this.view.state.values.length; idx++) {
                     let value = this.view.state.values[idx];
                     if (value?.constructor?.name == "CollabState") {
-                        print(value);
                         value.version = 0;
                         value.unconfirmed.length = 0;
                     }
@@ -397,9 +425,138 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
             }
         }
         
+        getDeco(view) {
+            // Note: go through all visible lines, match again all peer selection
+            // ranges, and add the appropriate decorations.
+            let ranges = [];
+            
+            let peerIndex = 0;
+            for (const [clientId, peer] of Object.entries(this.peers)) {
+                let peerDeco = newPeerDecoration(peerIndex, peer.clientId);
+                let selectionDeco = Decoration.mark({
+                    class: `cm-peerSelection${peerIndex}`
+                });
+                let lineDeco = Decoration.line({
+                    class: `cm-peerSelection${peerIndex}`
+                })
+                
+                peer.ranges.forEach(function(range) {
+                    range = SelectionRange.fromJSON(range)
+                    if (range.value == undefined) {
+                        range.value = {};
+                    }
+                    if (range.value.startSide == undefined) {
+                        range.value.startSide = 0;
+                    }
+                    ranges.push({
+                        peerIndex: peerIndex,
+                        peer: peerDeco,
+                        selection: selectionDeco,
+                        line: lineDeco,
+                        range: range
+                    });
+                })
+                
+                peerIndex += 1;
+            }
+            
+            ranges.sort(function(a, b) {
+                return a.range.from - b.range.from || a.range.value.startSide - b.range.value.startSide;
+            });
+            
+            let decorations = [];
+            let firstForPeer = [];
+            
+            // Ranges should be added in sorted (by from and value.startSide) order
+            for (let {from, to} of view.visibleRanges) {
+                for (let pos = from; pos <= to;) {
+                    let line = view.state.doc.lineAt(pos);
+                    
+                    ranges.forEach(function(peerRange) {
+                        let peerFrom = peerRange.range.from;
+                        let peerTo = peerRange.range.to;
+                        
+                        if (peerFrom >= line.from &&
+                            peerFrom <= line.to &&
+                            firstForPeer.includes(peerRange.peerIndex) == false) {
+                            firstForPeer.push(peerRange.peerIndex);
+                            decorations.push({
+                                from: peerFrom,
+                                to: peerFrom,
+                                value: peerRange.peer,
+                                //label: "cursor",
+                                //line: line.number
+                            })
+                        }
+                        
+                        let lhs = -1;
+                        let rhs = -1;
+                        
+                        if (peerFrom >= line.from && peerFrom <= line.to) {
+                            lhs = peerFrom;
+                        }
+                        if (peerTo >= line.from && peerTo <= line.to) {
+                            rhs = peerTo;
+                        }
+                        
+                        if (lhs != -1 && rhs != -1) {
+                            // We're fully inside this line
+                            decorations.push({
+                                from: lhs,
+                                to: rhs,
+                                value: peerRange.selection,
+                                //label: "selection-inside",
+                                //line: line.number
+                            });
+                        } else if (lhs == -1 && rhs != -1) {
+                            // We overlap this line from the left
+                            decorations.push({
+                                from: line.from,
+                                to: rhs,
+                                value: peerRange.selection,
+                                //label: "overlap-left",
+                                //line: line.number
+                            })
+                        } else if (lhs != -1 && rhs == -1) {
+                            // We overlap this line from the right
+                            decorations.push({
+                                from: lhs,
+                                to: line.to,
+                                value: peerRange.selection,
+                                //label: "overlap-right",
+                                //line: line.number
+                            })
+                        } else if (peerFrom < line.from && peerTo > line.to) {
+                            // the line is fully inside the selection
+                            decorations.push({
+                                from: line.from,
+                                to: line.from,
+                                value: peerRange.line,
+                                //label: "line-inside",
+                                //line: line.number
+                            })
+                        }
+                    });
+                
+                    pos = line.to + 1
+                }
+            }
+            
+            //print(decorations)
+            
+            return Decoration.set(decorations, true);
+        }
+        
         destroy() { cm.endeavourDocuments[this.documentUUID] = undefined; }
+    }, {
+        decorations: v => v.decorations
     });
-    return [collab({startVersion: startingDocumentVersion}), plugin]
+    
+    return [
+        collab({startVersion: startingDocumentVersion}),
+        peerWidgetBaseTheme,
+        plugin
+    ];
 }
 
 cm.CreateEditor = function(parentDivId, extensions, content="", editable=true) {

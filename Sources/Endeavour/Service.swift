@@ -62,6 +62,8 @@ extension Endeavour {
                 safeRevertDocument(userSession, jsonElement, returnCallback)
             case "push":
                 safePushToDocument(userSession, jsonElement, returnCallback)
+            case "cursors":
+                safeCursorToDocument(userSession, jsonElement, returnCallback)
             case "pull":
                 safePullDocument(userSession, jsonElement, returnCallback)
             default:
@@ -229,6 +231,30 @@ extension Endeavour {
             }
         }
 
+        func safeCursorToDocument(_ userSession: UserServiceableSession,
+                                  _ jsonElement: JsonElement,
+                                  _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
+            guard let documentUUID = jsonElement[hitch: "documentUUID"],
+                  let cursors = jsonElement[element: "cursors"],
+                  let document = openDocuments[documentUUID] else {
+                return returnCallback(jsonElement,
+                                      HttpStaticResponse.badRequest)
+            }
+
+            document.bePublish(peer: userUUID,
+                               cursors: cursors,
+                               self) { error in
+                if let error = error {
+                    return returnCallback(jsonElement,
+                                          HttpResponse(error: error))
+                }
+
+                returnCallback(JsonElement(unknown: [
+                    "documentUUID": documentUUID
+                ]), nil)
+            }
+        }
+
         func safePullDocument(_ userSession: UserServiceableSession,
                               _ jsonElement: JsonElement,
                               _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
@@ -309,6 +335,15 @@ extension Endeavour {
             self.longPull?(JsonElement(unknown: ["documentUUID": documentUUID]),
                            HttpResponse(error: "Document was closed by the owner"))
         }
+
+        private func _beDocumentDidUpdateCursors(documentUUID: DocumentUUID,
+                                                 cursorsJson: Hitch) {
+            self.sendToLongPull(serviceResponse: JsonElement(unknown: [
+                "documentUUID": documentUUID,
+                "command": "cursors"
+            ]),
+            httpResponse: HttpResponse(json: cursorsJson))
+        }
     }
 }
 
@@ -333,6 +368,12 @@ extension Endeavour.Service {
     @discardableResult
     public func beDocumentDidClose(documentUUID: DocumentUUID) -> Self {
         unsafeSend { self._beDocumentDidClose(documentUUID: documentUUID) }
+        return self
+    }
+    @discardableResult
+    public func beDocumentDidUpdateCursors(documentUUID: DocumentUUID,
+                                           cursorsJson: Hitch) -> Self {
+        unsafeSend { self._beDocumentDidUpdateCursors(documentUUID: documentUUID, cursorsJson: cursorsJson) }
         return self
     }
 

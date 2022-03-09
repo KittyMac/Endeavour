@@ -54,8 +54,9 @@ extension Endeavour {
         private let documentUUID: Hitch
 
         private var history = [Hitch]()
-
         private var utf16Document = CodeMirrorDocument()
+
+        private var peerCursors = JsonElement(unknown: [:])
 
         private var delegate: Documentable?
 
@@ -148,6 +149,7 @@ extension Endeavour {
 
             observers.remove(user)
             peers.remove(user)
+            peerCursors.remove(key: user.halfhitch())
 
             subscribedServices.removeAll(service)
 
@@ -205,6 +207,22 @@ extension Endeavour {
                 service.beDocumentDidUpdate(document: self,
                                             documentUUID: documentUUID,
                                             documentVersion: history.count)
+            }
+
+            return nil
+        }
+
+        private func _bePublish(peer: UserUUID,
+                                cursors: JsonElement) -> Error? {
+            guard closed == false else { return "document is closed" }
+            guard owner == peer || peers.contains(peer) else { return "You are not authorized as a peer of this document" }
+
+            peerCursors.set(key: peer.halfhitch(), value: cursors)
+
+            let cursorsJson = peerCursors.toHitch()
+            for service in subscribedServices {
+                service.beDocumentDidUpdateCursors(documentUUID: documentUUID,
+                                                   cursorsJson: cursorsJson)
             }
 
             return nil
@@ -397,6 +415,17 @@ extension Endeavour.Document {
                           _ callback: @escaping ((Error?) -> Void)) -> Self {
         unsafeSend {
             let result = self._bePublish(peer: peer, version: version, updates: updates)
+            sender.unsafeSend { callback(result) }
+        }
+        return self
+    }
+    @discardableResult
+    public func bePublish(peer: UserUUID,
+                          cursors: JsonElement,
+                          _ sender: Actor,
+                          _ callback: @escaping ((Error?) -> Void)) -> Self {
+        unsafeSend {
+            let result = self._bePublish(peer: peer, cursors: cursors)
             sender.unsafeSend { callback(result) }
         }
         return self
