@@ -7,6 +7,27 @@ import Flynn
 import Hitch
 import Spanker
 
+public class DocumentUser {
+    var userUUID: UserUUID
+    var name: Hitch?
+    var clientID: Hitch?
+    var peerIdx: Int = -1
+
+    init(userUUID: UserUUID,
+         name: Hitch?) {
+        self.userUUID = userUUID
+        self.name = name
+    }
+
+    func info() -> JsonElement {
+        return JsonElement(unknown: [
+            "clientID": clientID ?? NSNull(),
+            "name": name ?? NSNull(),
+            "peerIdx": peerIdx
+        ])
+    }
+}
+
 public enum UserAccessMode {
     case none
     case peer
@@ -45,7 +66,7 @@ public protocol Documentable: Actor {
     func beAuthorize(userSession: UserServiceableSession,
                      user: UserUUID,
                      _ sender: Actor,
-                     _ callback: @escaping ((UserAccessMode) -> Void)) -> Self
+                     _ callback: @escaping ((UserAccessMode, Hitch?) -> Void)) -> Self
 }
 
 extension Endeavour {
@@ -60,9 +81,9 @@ extension Endeavour {
 
         private var delegate: Documentable?
 
-        private let owner: UserUUID
-        private var peers = Set<UserUUID>()
-        private var observers = Set<UserUUID>()
+        private let owner: DocumentUser
+        private var peers = [UserUUID: DocumentUser]()
+        private var observers = [UserUUID: DocumentUser]()
 
         private var closed = false
 
@@ -70,7 +91,8 @@ extension Endeavour {
 
         public init(owner: UserUUID,
                     content: Hitch?) {
-            self.owner = owner
+            self.owner = DocumentUser(userUUID: owner,
+                                      name: nil)
             documentUUID = UUID().uuidHitch
 
             if let content = content {
@@ -81,7 +103,8 @@ extension Endeavour {
         public init(owner: UserUUID,
                     named: Hitch?,
                     content: Hitch?) {
-            self.owner = owner
+            self.owner = DocumentUser(userUUID: owner,
+                                      name: nil)
             documentUUID = named ?? UUID().uuidHitch
 
             if let content = content {
@@ -89,8 +112,74 @@ extension Endeavour {
             }
         }
 
-        private func _beSetDelegate(delegate: Documentable) {
+        private func updateUsers(userUUID: UserUUID,
+                                 clientID: Hitch?) {
+            // Set the clientID for this user. Also ensure all peers have a unique peerIdx
+            if owner.peerIdx < 0 {
+                owner.peerIdx = 0
+            }
+            if owner.userUUID == userUUID {
+                owner.clientID = clientID
+            } else {
+                for peer in peers.values where peer.userUUID == userUUID {
+                    peer.clientID = clientID
+                    break
+                }
+            }
+
+            // owner is always 0
+            var validPeerIdx = [0, 1, 2, 3, 4, 5, 6, 7]
+
+            validPeerIdx.removeOne(owner.peerIdx)
+            for peer in peers.values {
+                validPeerIdx.removeOne(peer.peerIdx)
+            }
+
+            for peer in peers.values where peer.peerIdx < 0 {
+                if let peerIdx = validPeerIdx.randomElement() {
+                    peer.peerIdx = peerIdx
+                    validPeerIdx.removeOne(peerIdx)
+                }
+            }
+        }
+
+        private func peersInfo() -> JsonElement {
+            let peersInfo = JsonElement(unknown: [])
+            for other in peers.values {
+                peersInfo.append(value: other.info())
+            }
+
+            peersInfo.append(value: owner.info())
+
+            return peersInfo
+        }
+
+        private func broadcastPeers() {
+            let json = JsonElement(unknown: [
+                "peers": peersInfo(),
+                "cursors": peerCursors.values
+            ]).toHitch()
+            for service in subscribedServices {
+                service.beDocumentDidUpdateCursors(documentUUID: documentUUID,
+                                                   cursorsJson: json)
+            }
+        }
+
+        private func _beSetDelegate(userSession: UserServiceableSession,
+                                    delegate: Documentable) {
             self.delegate = delegate
+
+            delegate.beAuthorize(userSession: userSession,
+                                 user: owner.userUUID,
+                                 self) { _, userName in
+                self.owner.name = userName
+            }
+        }
+
+        private func _beSetDelegate(ownerName: Hitch?,
+                                    delegate: Documentable) {
+            self.delegate = delegate
+            self.owner.name = ownerName
         }
 
         private func getDocumentInfo(user: UserUUID) -> DocumentInfo {
@@ -103,11 +192,11 @@ extension Endeavour {
         }
 
         private func canRead(user: UserUUID) -> Bool {
-            return owner == user || peers.contains(user)
+            return owner.userUUID == user || peers[user] != nil
         }
 
         private func canWrite(user: UserUUID) -> Bool {
-            return owner == user || peers.contains(user)
+            return owner.userUUID == user || peers[user] != nil
         }
 
         private func _beAdd(userSession: UserServiceableSession,
@@ -115,45 +204,49 @@ extension Endeavour {
                             _ returnCallback: @escaping (DocumentInfo?, Endeavour.Document?, Error?) -> Void) {
             guard closed == false else { return returnCallback(nil, nil, "document is closed") }
 
-            observers.remove(user)
-            peers.remove(user)
+            observers[user] = nil
+            peers[user] = nil
 
-            if user != owner {
+            if user != owner.userUUID {
                 if let delegate = delegate {
                     delegate.beAuthorize(userSession: userSession,
                                          user: user,
-                                         self) { accessMode in
+                                         self) { accessMode, userName in
                         switch accessMode {
                         case .observer:
-                            self.observers.insert(user)
+                            self.observers[user] = DocumentUser(userUUID: user, name: userName)
                             break
                         case .peer:
-                            self.peers.insert(user)
+                            self.peers[user] = DocumentUser(userUUID: user, name: userName)
                             break
                         default:
                             return returnCallback(nil, nil, "You are not authorized to access this document")
                         }
                         returnCallback(self.getDocumentInfo(user: user), self, nil)
+
+                        self.broadcastPeers()
                         return
                     }
                     return
                 } else {
-                    peers.insert(user)
+                    self.peers[user] = DocumentUser(userUUID: user, name: nil)
                 }
             }
             returnCallback(getDocumentInfo(user: user), self, nil)
+
+            broadcastPeers()
         }
 
         private func _beLeave(user: UserUUID,
                               service: Endeavour.Service) -> (Bool, Error?) {
 
-            observers.remove(user)
-            peers.remove(user)
+            observers[user] = nil
+            peers[user] = nil
             peerCursors.remove(key: user.halfhitch())
 
             subscribedServices.removeAll(service)
 
-            if owner == user {
+            if owner.userUUID == user {
                 closed = true
 
                 peers.removeAll()
@@ -164,6 +257,7 @@ extension Endeavour {
                 }
 
                 subscribedServices.removeAll()
+                self.broadcastPeers()
 
                 return (true, nil)
             }
@@ -172,13 +266,13 @@ extension Endeavour {
 
         private func _beAuthorize(peer: UserUUID) -> Error? {
             guard closed == false else { return "document is closed" }
-            guard peers.contains(peer) else { return "You are not authorized as a peer of this document" }
+            guard peers[peer] != nil else { return "You are not authorized as a peer of this document" }
             return nil
         }
 
         private func _beAuthorize(owner: UserUUID) -> Error? {
             guard closed == false else { return "document is closed" }
-            guard self.owner == owner else { return "You are not authorized as an owner of this document" }
+            guard self.owner.userUUID == owner else { return "You are not authorized as an owner of this document" }
             return nil
         }
 
@@ -190,39 +284,35 @@ extension Endeavour {
         }
 
         private func _bePublish(peer: UserUUID,
+                                clientID: Hitch?,
                                 version: Int,
-                                updates: JsonElement) -> Error? {
+                                updates: JsonElement?,
+                                cursors: JsonElement?) -> Error? {
             guard closed == false else { return "document is closed" }
-            guard owner == peer || peers.contains(peer) else { return "You are not authorized as a peer of this document" }
-            guard version == history.count else {
-                return "Version mismatch ({0} != {1})" << [version, history.count]
+            guard owner.userUUID == peer || peers[peer] != nil else { return "You are not authorized as a peer of this document" }
+
+            updateUsers(userUUID: peer,
+                        clientID: clientID)
+
+            if let updates = updates {
+                guard version == history.count else {
+                    return "Version mismatch ({0} != {1})" << [version, history.count]
+                }
+                for update in updates.iterValues {
+                    utf16Document.apply(changeSet: update)
+                    history.append(update.toHitch())
+                }
+                for service in subscribedServices {
+                    service.beDocumentDidUpdate(document: self,
+                                                documentUUID: documentUUID,
+                                                documentVersion: history.count)
+                }
             }
 
-            for update in updates.iterValues {
-                utf16Document.apply(changeSet: update)
-                history.append(update.toHitch())
-            }
-
-            for service in subscribedServices {
-                service.beDocumentDidUpdate(document: self,
-                                            documentUUID: documentUUID,
-                                            documentVersion: history.count)
-            }
-
-            return nil
-        }
-
-        private func _bePublish(peer: UserUUID,
-                                cursors: JsonElement) -> Error? {
-            guard closed == false else { return "document is closed" }
-            guard owner == peer || peers.contains(peer) else { return "You are not authorized as a peer of this document" }
-
-            peerCursors.set(key: peer.halfhitch(), value: cursors)
-
-            let cursorsJson = peerCursors.toHitch()
-            for service in subscribedServices {
-                service.beDocumentDidUpdateCursors(documentUUID: documentUUID,
-                                                   cursorsJson: cursorsJson)
+            if let cursors = cursors {
+                peerCursors.set(key: peer.halfhitch(),
+                                value: cursors)
+                broadcastPeers()
             }
 
             return nil
@@ -232,7 +322,7 @@ extension Endeavour {
                              version: Int,
                              _ returnCallback: @escaping ((Error?) -> Void)) {
             guard closed == false else { return returnCallback("document is closed") }
-            guard owner == peer || peers.contains(peer) else { return returnCallback("You are not authorized as a peer of this document") }
+            guard owner.userUUID == peer || peers[peer] != nil else { return returnCallback("You are not authorized as a peer of this document") }
             guard version == history.count else {
                 return returnCallback("Version mismatch ({0} != {1})" << [version, history.count])
             }
@@ -264,7 +354,7 @@ extension Endeavour {
                                version: Int,
                                _ returnCallback: @escaping ((Error?) -> Void)) {
             guard closed == false else { return returnCallback("document is closed") }
-            guard owner == peer || peers.contains(peer) else { return returnCallback("You are not authorized as a peer of this document") }
+            guard owner.userUUID == peer || peers[peer] != nil else { return returnCallback("You are not authorized as a peer of this document") }
             guard version == history.count else {
                 return returnCallback("Version mismatch ({0} != {1})" << [version, history.count])
             }
@@ -299,7 +389,7 @@ extension Endeavour {
         private func _beSubscribe(peer: UserUUID,
                                   service: Endeavour.Service) {
             guard closed == false else { return }
-            guard owner == peer || peers.contains(peer) else {
+            guard owner.userUUID == peer || peers[peer] != nil else {
                return
             }
 
@@ -314,7 +404,7 @@ extension Endeavour {
         private func _beGetUpdates(peer: UserUUID,
                                    version: DocumentVersion) -> HalfHitch? {
             guard closed == false else { return nil }
-            guard owner == peer || peers.contains(peer) else {
+            guard owner.userUUID == peer || peers[peer] != nil else {
                return nil
             }
 
@@ -345,8 +435,15 @@ extension Endeavour {
 extension Endeavour.Document {
 
     @discardableResult
-    public func beSetDelegate(delegate: Documentable) -> Self {
-        unsafeSend { self._beSetDelegate(delegate: delegate) }
+    public func beSetDelegate(userSession: UserServiceableSession,
+                              delegate: Documentable) -> Self {
+        unsafeSend { self._beSetDelegate(userSession: userSession, delegate: delegate) }
+        return self
+    }
+    @discardableResult
+    public func beSetDelegate(ownerName: Hitch?,
+                              delegate: Documentable) -> Self {
+        unsafeSend { self._beSetDelegate(ownerName: ownerName, delegate: delegate) }
         return self
     }
     @discardableResult
@@ -409,23 +506,14 @@ extension Endeavour.Document {
     }
     @discardableResult
     public func bePublish(peer: UserUUID,
+                          clientID: Hitch?,
                           version: Int,
-                          updates: JsonElement,
+                          updates: JsonElement?,
+                          cursors: JsonElement?,
                           _ sender: Actor,
                           _ callback: @escaping ((Error?) -> Void)) -> Self {
         unsafeSend {
-            let result = self._bePublish(peer: peer, version: version, updates: updates)
-            sender.unsafeSend { callback(result) }
-        }
-        return self
-    }
-    @discardableResult
-    public func bePublish(peer: UserUUID,
-                          cursors: JsonElement,
-                          _ sender: Actor,
-                          _ callback: @escaping ((Error?) -> Void)) -> Self {
-        unsafeSend {
-            let result = self._bePublish(peer: peer, cursors: cursors)
+            let result = self._bePublish(peer: peer, clientID: clientID, version: version, updates: updates, cursors: cursors)
             sender.unsafeSend { callback(result) }
         }
         return self

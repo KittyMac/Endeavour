@@ -16,8 +16,10 @@ extension Endeavour {
 
         private var userUUID: UserUUID = UUID().uuidHitch
 
+        private var longPullQueue: [(JsonElement?, HttpResponse?)] = []
         private var longPullLastSendDate = Date()
         private var longPull: SubscribeLongPull?
+
         private var openDocumentVersions: [DocumentUUID: DocumentVersion] = [:]
         private var openDocuments: [DocumentUUID: Document] = [:]
 
@@ -47,6 +49,8 @@ extension Endeavour {
                 return returnCallback(jsonElement, HttpStaticResponse.badRequest)
             }
 
+            print(jsonElement.toHitch())
+
             userUUID = userSession.unsafeSessionUUID
 
             switch command {
@@ -62,8 +66,6 @@ extension Endeavour {
                 safeRevertDocument(userSession, jsonElement, returnCallback)
             case "push":
                 safePushToDocument(userSession, jsonElement, returnCallback)
-            case "cursors":
-                safeCursorToDocument(userSession, jsonElement, returnCallback)
             case "pull":
                 safePullDocument(userSession, jsonElement, returnCallback)
             default:
@@ -209,46 +211,23 @@ extension Endeavour {
                                 _ jsonElement: JsonElement,
                                 _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
             guard let documentUUID = jsonElement[hitch: "documentUUID"],
+                  let clientID = jsonElement[hitch: "clientID"],
                   let version = jsonElement[int: "version"],
-                  let updates = jsonElement[element: "updates"],
                   let document = openDocuments[documentUUID] else {
                 return returnCallback(jsonElement,
                                       HttpStaticResponse.badRequest)
             }
 
             document.bePublish(peer: userUUID,
+                               clientID: clientID,
                                version: version,
-                               updates: updates,
+                               updates: jsonElement[element: "updates"],
+                               cursors: jsonElement[element: "cursors"],
                                self) { error in
                 if let error = error {
                     return returnCallback(jsonElement,
                                           HttpResponse(error: error))
                 }
-
-                returnCallback(JsonElement(unknown: [
-                    "documentUUID": documentUUID
-                ]), nil)
-            }
-        }
-
-        func safeCursorToDocument(_ userSession: UserServiceableSession,
-                                  _ jsonElement: JsonElement,
-                                  _ returnCallback: @escaping (JsonElement?, HttpResponse?) -> Void) {
-            guard let documentUUID = jsonElement[hitch: "documentUUID"],
-                  let cursors = jsonElement[element: "cursors"],
-                  let document = openDocuments[documentUUID] else {
-                return returnCallback(jsonElement,
-                                      HttpStaticResponse.badRequest)
-            }
-
-            document.bePublish(peer: userUUID,
-                               cursors: cursors,
-                               self) { error in
-                if let error = error {
-                    return returnCallback(jsonElement,
-                                          HttpResponse(error: error))
-                }
-
                 returnCallback(JsonElement(unknown: [
                     "documentUUID": documentUUID
                 ]), nil)
@@ -275,16 +254,17 @@ extension Endeavour {
             }
 
             longPull = returnCallback
+            handleLongPullQueue()
         }
 
-        private func sendToLongPull(serviceResponse: JsonElement,
-                                    httpResponse: HttpResponse) {
-            if let longPull = self.longPull {
-                longPull(serviceResponse,
-                         httpResponse)
-                self.longPull = nil
-                self.longPullLastSendDate = Date()
-            } else {
+        private func queueForLongPull(serviceResponse: JsonElement,
+                                      httpResponse: HttpResponse) {
+            longPullQueue.append((serviceResponse, httpResponse))
+            handleLongPullQueue()
+        }
+
+        private func handleLongPullQueue() {
+            guard let longPull = longPull else {
                 // We might be sending to someone who no longer exists.  We give them a short
                 // period of time to reconnect otherwise we make them leave all documents they
                 // are connected to
@@ -293,7 +273,14 @@ extension Endeavour {
                         print("User \(self.userUUID) disconnected due to inactivity")
                     }
                 }
+                return
             }
+            guard longPullQueue.count > 0 else { return }
+
+            let next = longPullQueue.removeFirst()
+            longPull(next.0, next.1)
+            self.longPull = nil
+            self.longPullLastSendDate = Date()
         }
 
         private func _beDocumentDidSave(document: Endeavour.Document,
@@ -307,8 +294,8 @@ extension Endeavour {
                 "command": "save"
             ])
 
-            self.sendToLongPull(serviceResponse: serviceResponse,
-                                httpResponse: HttpResponse(text: documentInfo.content))
+            self.queueForLongPull(serviceResponse: serviceResponse,
+                                  httpResponse: HttpResponse(text: documentInfo.content))
         }
 
         private func _beDocumentDidUpdate(document: Endeavour.Document,
@@ -322,7 +309,7 @@ extension Endeavour {
                                   self) { updateJson in
                 guard let updateJson = updateJson else { return }
 
-                self.sendToLongPull(serviceResponse: JsonElement(unknown: [
+                self.queueForLongPull(serviceResponse: JsonElement(unknown: [
                     "documentUUID": documentUUID,
                     "command": "update"
                 ]),
@@ -338,7 +325,7 @@ extension Endeavour {
 
         private func _beDocumentDidUpdateCursors(documentUUID: DocumentUUID,
                                                  cursorsJson: Hitch) {
-            self.sendToLongPull(serviceResponse: JsonElement(unknown: [
+            self.queueForLongPull(serviceResponse: JsonElement(unknown: [
                 "documentUUID": documentUUID,
                 "command": "cursors"
             ]),

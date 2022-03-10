@@ -144,9 +144,28 @@ function runAllScriptsIn(div) {
     }
 }
 
-function prettyDate(d) {
-    // https://stackoverflow.com/questions/3552461/how-to-format-a-javascript-date
-    return new Date(d).toLocaleDateString("en-US");
+
+function prettyDate(time, natural=true){
+    if (natural == false) {
+        return new Date(time).toLocaleDateString("en-US");
+    }
+    
+    let diff = (new Date() - new Date(time)) / 1000;
+    let day_diff = Math.floor(diff / (60 * 60 * 24));
+        
+	if ( isNaN(day_diff) || day_diff < 0 || day_diff >= 31 ) {
+        return new Date(time).toLocaleDateString("en-US");
+	}
+			
+	return day_diff == 0 && (
+			diff < 60 && "just now" ||
+			diff < 120 && "1 minute ago" ||
+			diff < 3600 && Math.floor( diff / 60 ) + " minutes ago" ||
+			diff < 7200 && "1 hour ago" ||
+			diff < 86400 && Math.floor( diff / 3600 ) + " hours ago") ||
+		day_diff == 1 && "Yesterday" ||
+		day_diff < 7 && day_diff + " days ago" ||
+		day_diff < 31 && Math.ceil( day_diff / 7 ) + " weeks ago";
 }
 
 function lerp(a, b, t) {

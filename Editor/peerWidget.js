@@ -57,10 +57,11 @@ export const peerWidgetBaseTheme = EditorView.baseTheme({
 
 class PeerWidget extends WidgetType {
     
-    constructor (peerdIdx, name) {
+    constructor (peerInfo) {
         super()
-        this.color = peerColors[peerdIdx].color
-        this.name = name
+        this.peerInfo = peerInfo;
+        this.color = peerColors[peerInfo.peerIdx].color;
+        this.name = peerInfo.name || peerInfo.clientID;
     }
     
     toDOM() {

@@ -184,8 +184,13 @@ cm.endeavourSend = function(command, documentUUID) {
             } else {
                 cm.endeavourSendErrorCount = 0;                
                 let contentJson = cm.endeavourJsonParse(xhttp.responseText);
-                if (command.command != undefined) {
+                switch (command.command) {
+                case "pull":
                     plugin.didPull(serviceJson, contentJson, xhttp.responseText);
+                    break;
+                case "push":
+                    plugin.didPush(serviceJson, contentJson, xhttp.responseText);
+                    break;
                 }
             }
             
@@ -201,8 +206,6 @@ cm.endeavourSend = function(command, documentUUID) {
                 cm.endeavourPullUpdates();
                 break;
             case "push":
-                cm.endeavourIsPushing = false;
-                break;
             case "cursors":
                 cm.endeavourIsPushing = false;
                 break;
@@ -227,34 +230,28 @@ cm.endeavourSend = function(command, documentUUID) {
 cm.endeavourDocuments = {};
 
 cm.endeavourIsPushing = false;
-cm.endeavourPushUpdates = function(plugin, updates) {
+cm.endeavourPushUpdates = function(plugin, docUpdates, docRanges) {
     if (cm.endeavourIsPushing == false) {
         let msg = {
             service: "EndeavourService",
             command: "push",
             documentUUID: plugin.documentUUID,
-            version: plugin.documentVersion(),
-            updates: updates
+            clientID: plugin.clientID(),
+            version: plugin.documentVersion()
         };
-        cm.endeavourIsPushing = true;
-        cm.endeavourSend(msg, plugin.documentUUID);
-    }
-}
-
-cm.endeavourPushCursors = function(plugin, ranges) {
-    if (cm.endeavourIsPushing == false) {
-        let msg = {
-            service: "EndeavourService",
-            command: "cursors",
-            documentUUID: plugin.documentUUID,
-            cursors: {
-                clientId: plugin.clientID(),
-                ranges: ranges
-            }
-        };
-                    
-        cm.endeavourIsPushing = true;
-        cm.endeavourSend(msg, plugin.documentUUID);
+        if (docUpdates.length > 0) {
+            msg.updates = docUpdates;
+        }
+        if (docRanges != undefined) {
+            msg.cursors = {
+                clientID: plugin.clientID(),
+                ranges: docRanges
+            };
+        }
+        if (msg.cursors || msg.updates) {
+            cm.endeavourIsPushing = true;
+            cm.endeavourSend(msg, plugin.documentUUID);
+        }
     }
 }
 
@@ -296,7 +293,8 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
             this.statusCallback = statusCallback;
             this.documentUUID = startingDocumentUUID;
             this.view = view;
-            this.peers = {};
+            this.peers = [];
+            this.cursors = [];
             cm.endeavourDocuments[this.documentUUID] = this;
             
             statusCallback(
@@ -304,7 +302,7 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                 {
                     documentUUID: this.documentUUID,
                     version: this.documentVersion(),
-                    clientId: this.clientID()
+                    clientID: this.clientID()
                 }
             );
             
@@ -312,11 +310,15 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
         }
 
         update(update) {
-            if (update.docChanged) {
-                this.push();
-            }
-            if (update.docChanged || update.selectionSet) {
-                cm.endeavourPushCursors(this, update.state.selection.ranges);
+            if (update == undefined || update.docChanged || update.selectionSet) {
+                let docUpdates = sendableUpdates(this.view.state).map(function(x) {
+                    return {
+                        changes: x.changes.toJSON(),
+                        clientID: x.clientID
+                    };
+                });
+                
+                cm.endeavourPushUpdates(this, docUpdates, update?.state?.selection?.ranges);
             }
         }
         
@@ -327,25 +329,10 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
         clientID() {
             return getClientID(this.view.state);
         }
-        
-        push() {
-            let updates = sendableUpdates(this.view.state)
-            if (updates.length == 0) {
-                return
-            }
-            updates = updates.map(function(x) {
-                return {
-                    changes: x.changes.toJSON(),
-                    clientID: x.clientID
-                };
-            });
-            
-            cm.endeavourPushUpdates(this, updates);
-        }
-        
+                
         didPush(serviceJson, contentJson, contentText) {
             if (sendableUpdates(this.view.state).length) {
-                setTimeout(() => this.push(), 100)
+                setTimeout(() => this.update(undefined), 100)
             }
         }
         
@@ -353,12 +340,16 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
             
             // Pulls can return multiple different things. Detect what it is
             // and do the appropriate thing:
-            
+                        
             if (serviceJson.command == "cursors") {
                 // peers updated their cursor positions
-                this.peers = cm.endeavourJsonParse(contentText);
+                let json = cm.endeavourJsonParse(contentText);
+                this.peers = json.peers;
+                this.cursors = json.cursors;
                 this.decorations = this.getDeco(this.view);
-                this.view.update([]);
+                
+                this.view.dispatch({});
+                //this.view.update([]);
             }
             
             // Full document refresh:
@@ -386,7 +377,6 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                 cm.endeavourIsPushing = false;
             }
             
-            
             // Partial document updates:
             if (serviceJson.command == "update") {
                 let changes = contentJson.map(function(x) {
@@ -398,14 +388,13 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                 this.view.dispatch(receiveUpdates(this.view.state, changes));
             }
             
-            
             if (statusCallback != undefined) {
                 statusCallback(
                     serviceJson,
                     {
                         documentUUID: this.documentUUID,
                         version: this.documentVersion(),
-                        clientId: this.clientID()
+                        clientID: this.clientID()
                     }
                 );
             }
@@ -418,7 +407,7 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                     {
                         documentUUID: this.documentUUID,
                         version: this.documentVersion(),
-                        clientId: this.clientID(),
+                        clientID: this.clientID(),
                         error: errorResponse
                     }
                 );
@@ -429,36 +418,47 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
             // Note: go through all visible lines, match again all peer selection
             // ranges, and add the appropriate decorations.
             let ranges = [];
+            let localThis = this;
             
-            let peerIndex = 0;
-            for (const [clientId, peer] of Object.entries(this.peers)) {
-                let peerDeco = newPeerDecoration(peerIndex, peer.clientId);
+            this.cursors.forEach(function(peer) {
+                let peerInfo = undefined;
+                localThis.peers.forEach(function(otherPeerInfo) {
+                    if (otherPeerInfo.clientID == peer.clientID) {
+                        peerInfo = otherPeerInfo;
+                    }
+                });
+                
+                if (peerInfo == undefined) {
+                    return;
+                }
+                    
+                let peerDeco = newPeerDecoration(peerInfo);
                 let selectionDeco = Decoration.mark({
-                    class: `cm-peerSelection${peerIndex}`
+                    class: `cm-peerSelection${peerInfo.peerIdx}`
                 });
                 let lineDeco = Decoration.line({
-                    class: `cm-peerSelection${peerIndex}`
+                    class: `cm-peerSelection${peerInfo.peerIdx}`
                 })
                 
-                peer.ranges.forEach(function(range) {
-                    range = SelectionRange.fromJSON(range)
-                    if (range.value == undefined) {
-                        range.value = {};
-                    }
-                    if (range.value.startSide == undefined) {
-                        range.value.startSide = 0;
-                    }
-                    ranges.push({
-                        peerIndex: peerIndex,
-                        peer: peerDeco,
-                        selection: selectionDeco,
-                        line: lineDeco,
-                        range: range
-                    });
-                })
-                
-                peerIndex += 1;
-            }
+                if (peer.ranges != undefined) {
+                    peer.ranges.forEach(function(range) {
+                        range = SelectionRange.fromJSON(range)
+                        if (range.value == undefined) {
+                            range.value = {};
+                        }
+                        if (range.value.startSide == undefined) {
+                            range.value.startSide = 0;
+                        }
+                        ranges.push({
+                            peerInfo: peerInfo,
+                            peer: peerDeco,
+                            selection: selectionDeco,
+                            line: lineDeco,
+                            range: range
+                        });
+                    })
+                }
+            });
             
             ranges.sort(function(a, b) {
                 return a.range.from - b.range.from || a.range.value.startSide - b.range.value.startSide;
@@ -478,8 +478,8 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                         
                         if (peerFrom >= line.from &&
                             peerFrom <= line.to &&
-                            firstForPeer.includes(peerRange.peerIndex) == false) {
-                            firstForPeer.push(peerRange.peerIndex);
+                            firstForPeer.includes(peerRange.peerInfo.peerIdx) == false) {
+                            firstForPeer.push(peerRange.peerInfo.peerIdx);
                             decorations.push({
                                 from: peerFrom,
                                 to: peerFrom,

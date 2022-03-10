@@ -77,8 +77,21 @@ class DocumentsDelegate: Actor, Documentable {
     }
 
     private func _beAuthorize(userSession: UserServiceableSession,
-                              user: UserUUID) -> UserAccessMode {
-        return .peer
+                              user: UserUUID,
+                              _ returnCallback: @escaping (UserAccessMode, Hitch?) -> Void) {
+        let randomNames: [Hitch] = [
+            "Jack",
+            "Jill",
+            "Humpty",
+            "Dumpty",
+            "Alice",
+            "Rabbit",
+            "Hatter",
+            "Mouse",
+            "Cheshire"
+        ]
+
+        returnCallback(.peer, randomNames.randomElement())
     }
 }
 
@@ -98,7 +111,8 @@ public enum EndeavourApp {
                 fatalError(error?.description ?? "failed to create SwiftSample")
             }
 
-            document.beSetDelegate(delegate: DocumentsDelegate())
+            document.beSetDelegate(ownerName: "Endeavour",
+                                   delegate: DocumentsDelegate())
         }
 
         let config = ServerConfig(address: address,
@@ -443,10 +457,13 @@ extension DocumentsDelegate {
     public func beAuthorize(userSession: UserServiceableSession,
                             user: UserUUID,
                             _ sender: Actor,
-                            _ callback: @escaping ((UserAccessMode) -> Void)) -> Self {
+                            _ callback: @escaping ((UserAccessMode, Hitch?) -> Void)) -> Self {
         unsafeSend {
-            let result = self._beAuthorize(userSession: userSession, user: user)
-            sender.unsafeSend { callback(result) }
+            self._beAuthorize(userSession: userSession, user: user) { arg0, arg1 in
+                sender.unsafeSend {
+                    callback(arg0, arg1)
+                }
+            }
         }
         return self
     }
