@@ -17,8 +17,9 @@ extension Endeavour {
         private var userUUID: UserUUID = UUID().uuidHitch
 
         private var longPullQueue: [(JsonElement?, HttpResponse?)] = []
-        private var longPullLastSendDate = Date()
         private var longPull: SubscribeLongPull?
+
+        private var lastActivityDate = Date()
 
         private var openDocumentVersions: [DocumentUUID: DocumentVersion] = [:]
         private var openDocuments: [DocumentUUID: Document] = [:]
@@ -49,7 +50,8 @@ extension Endeavour {
                 return returnCallback(jsonElement, HttpStaticResponse.badRequest)
             }
 
-            print(jsonElement.toHitch())
+            // print(jsonElement.toHitch())
+            lastActivityDate = Date()
 
             userUUID = userSession.unsafeSessionUUID
 
@@ -259,6 +261,9 @@ extension Endeavour {
 
         private func queueForLongPull(serviceResponse: JsonElement,
                                       httpResponse: HttpResponse) {
+            while longPullQueue.count > 3 {
+                _ = longPullQueue.removeFirst()
+            }
             longPullQueue.append((serviceResponse, httpResponse))
             handleLongPullQueue()
         }
@@ -268,9 +273,9 @@ extension Endeavour {
                 // We might be sending to someone who no longer exists.  We give them a short
                 // period of time to reconnect otherwise we make them leave all documents they
                 // are connected to
-                if abs(self.longPullLastSendDate.timeIntervalSinceNow) > 10.0 {
+                if abs(self.lastActivityDate.timeIntervalSinceNow) > 10.0 {
                     safeHandleShutdown {
-                        print("User \(self.userUUID) disconnected due to inactivity")
+                        print("User \(self.userUUID) disconnected due to inactivity ( \(self.lastActivityDate.timeIntervalSinceNow) > \(10.0) )")
                     }
                 }
                 return
@@ -280,7 +285,7 @@ extension Endeavour {
             let next = longPullQueue.removeFirst()
             longPull(next.0, next.1)
             self.longPull = nil
-            self.longPullLastSendDate = Date()
+            self.lastActivityDate = Date()
         }
 
         private func _beDocumentDidSave(document: Endeavour.Document,
