@@ -5,14 +5,14 @@ import {Decoration, DecorationSet, WidgetType} from "@codemirror/view"
 import {RangeSetBuilder} from "@codemirror/rangeset"
 
 export const peerColors = [
-    { color: '#1a6480', light: '#30bced33' },
-    { color: '#3c8047', light: '#6eeb8333' },
-    { color: '#805e21', light: '#ffbc4233' },
-    { color: '#807225', light: '#ecd44433' },
-    { color: '#80352b', light: '#ee635233' },
-    { color: '#627b80', light: '#9ac2c933' },
-    { color: '#578055', light: '#8acb8833' },
-    { color: '#0e7480', light: '#1be7ff33' }
+    { color: 'var(--end-peer0-dark)', light: 'var(--end-peer0-light)' },
+    { color: 'var(--end-peer1-dark)', light: 'var(--end-peer1-light)' },
+    { color: 'var(--end-peer2-dark)', light: 'var(--end-peer2-light)' },
+    { color: 'var(--end-peer3-dark)', light: 'var(--end-peer3-light)' },
+    { color: 'var(--end-peer4-dark)', light: 'var(--end-peer4-light)' },
+    { color: 'var(--end-peer5-dark)', light: 'var(--end-peer5-light)' },
+    { color: 'var(--end-peer6-dark)', light: 'var(--end-peer6-light)' },
+    { color: 'var(--end-peer7-dark)', light: 'var(--end-peer7-light)' }
 ];
 
 export const peerWidgetBaseTheme = EditorView.baseTheme({
@@ -32,18 +32,18 @@ export const peerWidgetBaseTheme = EditorView.baseTheme({
         position: 'absolute',
         top: '-1.05em',
         left: '-1px',
-        fontSize: '.75em',
+        fontSize: '.75rem',
         fontFamily: 'serif',
         fontStyle: 'normal',
         fontWeight: 'normal',
         lineHeight: 'normal',
         userSelect: 'none',
-        color: 'white',
-        paddingLeft: '2px',
-        paddingRight: '2px',
+        paddingLeft: '0.3rem',
+        paddingRight: '0.3rem',
         zIndex: 101,
         transition: 'opacity .3s ease-in-out',
-        backgroundColor: 'inherit'
+        backgroundColor: 'inherit',
+        borderRadius: '0.3rem 0.3rem 0.3rem 0rem'
     },
     '.cm-peerSelection0': { backgroundColor: peerColors[0].light },
     '.cm-peerSelection1': { backgroundColor: peerColors[1].light },
@@ -60,13 +60,13 @@ class PeerWidget extends WidgetType {
     constructor (peerInfo) {
         super()
         this.peerInfo = peerInfo;
-        this.color = peerColors[peerInfo.peerIdx].color;
+        this.color = peerColors[peerInfo.peerIdx];
         this.name = peerInfo.name || peerInfo.clientID;
     }
     
     toDOM() {
         const placeholder = document.createElement('div');
-        placeholder.innerHTML = `<span class="cm-peerCaret" style="background-color: ${this.color}; border-color: ${this.color}"><div class='cm-peerInfo'>${this.name}</div></span>`;
+        placeholder.innerHTML = `<span class="cm-peerCaret" style="color: ${this.color.light};background-color: ${this.color.color}; border-color: ${this.color.color}"><div class='cm-peerInfo'>${this.name}</div></span>`;
         return placeholder.firstElementChild;
     }
     

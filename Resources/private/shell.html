@@ -11,10 +11,21 @@
 
 #define DOCUMENTBORDER() BORDER(0.15,VAR(item-outline))
 
+#macro PEER_PILL(NAME,CLR1,CLR2)
+ELEMENT(LATO(0.75)RADIUS(0.5)PADDING(0.1,0.5,0.1,0.5)MARGIN(0,0,0,0.5)COLOR_VAR(CLR1)BACKGROUND_VAR(CLR2)CENTER(),NAME)
+#endmacro
+
+#macro PEER(NAME,CLR)
+ELEMENT(LATO(0.75)PADDING(0.1,0.2,0.1,0.2)MARGIN(0,0,0,0.5)COLOR_VAR(CLR)CENTER(),NAME)
+#endmacro
+
 #macro EDITOR(ID)
 ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENTBORDER()CLIPS()RADIUS(0.75)WHITE(),
     ELEMENT(HSTACK()MIDDLE()PADDING(0.5,1,0.5,1)MARGIN(0,0,0,-0.125),
-        ID_ELEMENT(header##ID,LATO(1)FBLACK()START()BOTTOM(),Creating new document...)
+        ELEMENT(VSTACK()EVENLY()GROW()SELF_STRETCH(),
+            ID_ELEMENT(header##ID,LATO(1)FBLACK(),Creating new document...)
+            ID_ELEMENT(peers##ID,HSTACK(),)
+        )
         HSPACE()
         ID_BUTTON(revert##ID,MINWIDTH(4)PADDING(0,1,0,1),Revert,revertDocument('ID'))
         ID_BUTTON(save##ID,MINWIDTH(4)PADDING(0,1,0,1),Save,saveDocument('ID'))
@@ -41,6 +52,7 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
     #include <./shell.fonts.html>
     #include <./endeavour/editor.fonts.html>
     #include <./figurehead/figurehead.style>
+    #include <./endeavour/endeavour.style>
     
     <script>
         // Required by Picaroon to hook up server-side actor with user to maintain state across connections
@@ -54,7 +66,7 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
         
     <script src="script.combined.js"></script>
     
-    <style>        
+    <style>
         h1 {
             ROBOTO(2)
         }
@@ -119,6 +131,7 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
             let documentID = `document${documentUUID}`
             let editorID = `editor${documentUUID}`
             let headerID = `header${documentUUID}`
+            let peersID = `peers${documentUUID}`
             let saveID = `save${documentUUID}`
             let revertID = `revert${documentUUID}`
                             
@@ -173,6 +186,15 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
                     }
                 }
                 
+                let peerHtml = ``;
+                if (documentStatus.peers != undefined) {
+                    FOREACH(peer,documentStatus.peers) {
+                        peerHtml += `PEER_PILL(${peer.name},${peer.colors.color},${peer.colors.light})`;
+                    }
+                }
+                let peersHeader = document.getElementById(peersID);
+                replaceHtml(peersHeader, peerHtml);
+                
                 // If the version of the document is 0 then there have been
                 // no changes and the save button should be disabled
                 if (documentSave != undefined && documentRevert != undefined) {
@@ -184,6 +206,8 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
                         enableDiv(documentRevert);
                     }
                 }
+                
+                print(documentStatus);
             }
 
             let editor = cm.CreateEditor(editorID, [

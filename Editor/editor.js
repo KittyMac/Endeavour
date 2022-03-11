@@ -25,7 +25,7 @@ import {swift} from "./index.swift.js"
 
 import {light} from "./light.js"
 import {dark} from "./dark.js"
-import {newPeerDecoration, peerWidgetBaseTheme} from "./peerWidget.js"
+import {peerColors, newPeerDecoration, peerWidgetBaseTheme} from "./peerWidget.js"
 
 let cm = {};
 window.cm = cm;
@@ -302,7 +302,8 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                 {
                     documentUUID: this.documentUUID,
                     version: this.documentVersion(),
-                    clientID: this.clientID()
+                    clientID: this.clientID(),
+                    peers: this.peers
                 }
             );
             
@@ -348,8 +349,11 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                 this.cursors = json.cursors;
                 this.decorations = this.getDeco(this.view);
                 
+                this.peers.forEach(function(peer) {
+                    peer.colors = peerColors[peer.peerIdx];
+                });
+                
                 this.view.dispatch({});
-                //this.view.update([]);
             }
             
             // Full document refresh:
@@ -394,7 +398,8 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                     {
                         documentUUID: this.documentUUID,
                         version: this.documentVersion(),
-                        clientID: this.clientID()
+                        clientID: this.clientID(),
+                        peers: this.peers
                     }
                 );
             }
@@ -408,6 +413,7 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                         documentUUID: this.documentUUID,
                         version: this.documentVersion(),
                         clientID: this.clientID(),
+                        peers: this.peers,
                         error: errorResponse
                     }
                 );
@@ -419,7 +425,7 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
             // ranges, and add the appropriate decorations.
             let ranges = [];
             let localThis = this;
-            
+                        
             this.cursors.forEach(function(peer) {
                 let peerInfo = undefined;
                 localThis.peers.forEach(function(otherPeerInfo) {
@@ -428,7 +434,7 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                     }
                 });
                 
-                if (peerInfo == undefined) {
+                if (peerInfo == undefined || peerInfo.clientID == localThis.clientID()) {
                     return;
                 }
                     
@@ -486,9 +492,18 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                                 value: peerRange.peer,
                                 //label: "cursor",
                                 //line: line.number
-                            })
+                            });
+                            
+                            decorations.push({
+                                from: line.from,
+                                to: line.from,
+                                value: peerRange.line,
+                                //label: "line-inside",
+                                //line: line.number
+                            });
                         }
                         
+                        /*
                         let lhs = -1;
                         let rhs = -1;
                         
@@ -535,7 +550,7 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                                 //label: "line-inside",
                                 //line: line.number
                             })
-                        }
+                        }*/
                     });
                 
                     pos = line.to + 1
