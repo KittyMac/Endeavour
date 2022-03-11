@@ -176,7 +176,6 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
                 }
                 
                 if (displayText != undefined && documentHeader.innerText != displayText) {
-                    print(displayText);
                     documentHeader.innerText = displayText;
                     
                     if (isError) {
@@ -186,14 +185,19 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
                     }
                 }
                 
-                let peerHtml = ``;
-                if (documentStatus.peers != undefined) {
-                    FOREACH(peer,documentStatus.peers) {
-                        peerHtml += `PEER_PILL(${peer.name},${peer.colors.color},${peer.colors.light})`;
-                    }
-                }
                 let peersHeader = document.getElementById(peersID);
-                replaceHtml(peersHeader, peerHtml);
+                if (peersHeader != undefined) {
+                    let peerHtml = ``;
+                    if (documentStatus.peers != undefined) {
+                        FOREACH(peer,documentStatus.peers) {
+                            if (peer.clientID != undefined) {
+                                peerHtml += `PEER_PILL(${peer.name},${peer.colors.color},${peer.colors.light})`;
+                            }
+                        }
+                    }
+                    
+                    replaceHtml(peersHeader, peerHtml);
+                }
                 
                 // If the version of the document is 0 then there have been
                 // no changes and the save button should be disabled
@@ -206,8 +210,6 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
                         enableDiv(documentRevert);
                     }
                 }
-                
-                print(documentStatus);
             }
 
             let editor = cm.CreateEditor(editorID, [

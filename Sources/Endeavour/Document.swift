@@ -399,6 +399,8 @@ extension Endeavour {
             service.beDocumentDidUpdate(document: self,
                                         documentUUID: documentUUID,
                                         documentVersion: history.count)
+
+            self.broadcastPeers()
         }
 
         private func _beGetUpdates(peer: UserUUID,

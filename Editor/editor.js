@@ -279,6 +279,14 @@ cm.endeavourPullUpdates = function() {
     }
 }
 
+cm.removeOne = function(arr, value) {
+    var index = arr.indexOf(value);
+    if (index > -1) {
+        arr.splice(index, 1);
+    }
+    return arr;
+}
+
 cm.endeavourExtension = function (serviceJson, statusCallback) {
     let startingDocumentUUID = serviceJson.documentUUID;
     let startingDocumentVersion = parseInt(serviceJson.version);
@@ -308,6 +316,8 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
             );
             
             this.decorations = this.getDeco(view);
+            
+            cm.endeavourPushUpdates(this, [], []);
         }
 
         update(update) {
@@ -343,7 +353,7 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
             // and do the appropriate thing:
                         
             if (serviceJson.command == "cursors") {
-                // peers updated their cursor positions
+                // peers updated their cursor positions                
                 let json = cm.endeavourJsonParse(contentText);
                 this.peers = json.peers;
                 this.cursors = json.cursors;
@@ -351,6 +361,9 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                 
                 this.peers.forEach(function(peer) {
                     peer.colors = peerColors[peer.peerIdx];
+                    if (peer.colors == undefined) {
+                        peer.colors = peerColors[0];
+                    }
                 });
                 
                 this.view.dispatch({});
