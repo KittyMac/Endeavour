@@ -23735,7 +23735,6 @@
                     cm.endeavourIsPulling = false;
                 } else if (command.command == "push") {
                     cm.endeavourIsPushing = false;
-                    print("cm.endeavourIsPushing = false;");
                 }
                 
                 let serviceResponse = xhttp.getResponseHeader("Service-Response");
