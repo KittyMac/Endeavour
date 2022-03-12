@@ -169,6 +169,13 @@ cm.endeavourSend = function(command, documentUUID) {
         if (this.readyState == 4) {
             let plugin = undefined;
             
+            if (command.command == "pull") {
+                cm.endeavourIsPulling = false;
+            } else if (command.command == "push") {
+                cm.endeavourIsPushing = false;
+                print("cm.endeavourIsPushing = false;")
+            }
+            
             let serviceResponse = xhttp.getResponseHeader("Service-Response");
             let serviceJson = cm.endeavourJsonParse(serviceResponse);
             if (serviceJson != undefined) {
@@ -193,22 +200,15 @@ cm.endeavourSend = function(command, documentUUID) {
                     break;
                 }
             }
-            
+                        
             if (cm.endeavourSendErrorCount > 6) {
                 cm.broadcastStatus(documentUUID, command, "Disconnected from server")
                 cm.endeavourIsPulling = false;
                 return;
             }
             
-            switch (command.command) {
-            case "pull":
-                cm.endeavourIsPulling = false;
+            if (command.command == "pull") {
                 cm.endeavourPullUpdates();
-                break;
-            case "push":
-            case "cursors":
-                cm.endeavourIsPushing = false;
-                break;
             }
         }
     };
@@ -291,13 +291,14 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
     let startingDocumentUUID = serviceJson.documentUUID;
     let startingDocumentVersion = parseInt(serviceJson.version);
     
-    // We pull regardless of how many documents we are connected to
-    cm.endeavourPullUpdates();
-    
     let plugin = ViewPlugin.fromClass(class {
         pushing = false;
         
         constructor(view) {
+            
+            // We pull regardless of how many documents we are connected to
+            cm.endeavourPullUpdates();
+            
             this.statusCallback = statusCallback;
             this.documentUUID = startingDocumentUUID;
             this.view = view;
@@ -360,6 +361,9 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                 this.decorations = this.getDeco(this.view);
                 
                 this.peers.forEach(function(peer) {
+                    if (peer.name == undefined) {
+                        peer.name = peer.clientID;
+                    }
                     peer.colors = peerColors[peer.peerIdx];
                     if (peer.colors == undefined) {
                         peer.colors = peerColors[0];
