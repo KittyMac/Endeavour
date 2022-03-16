@@ -44,15 +44,7 @@ export const peerWidgetBaseTheme = EditorView.baseTheme({
         transition: 'opacity .3s ease-in-out',
         backgroundColor: 'inherit',
         borderRadius: '0.3rem 0.3rem 0.3rem 0rem'
-    },
-    '.cm-peerSelection0': { backgroundColor: peerColors[0].light },
-    '.cm-peerSelection1': { backgroundColor: peerColors[1].light },
-    '.cm-peerSelection2': { backgroundColor: peerColors[2].light },
-    '.cm-peerSelection3': { backgroundColor: peerColors[3].light },
-    '.cm-peerSelection4': { backgroundColor: peerColors[4].light },
-    '.cm-peerSelection5': { backgroundColor: peerColors[5].light },
-    '.cm-peerSelection6': { backgroundColor: peerColors[6].light },
-    '.cm-peerSelection7': { backgroundColor: peerColors[7].light }
+    }
 })
 
 class PeerWidget extends WidgetType {
@@ -91,6 +83,6 @@ class PeerWidget extends WidgetType {
     }
 }
 
-export function newPeerDecoration(peerdIdx, name) {
-    return Decoration.widget({ widget: new PeerWidget(peerdIdx, name) })
+export function newPeerDecoration(peerInfo) {
+    return Decoration.widget({ widget: new PeerWidget(peerInfo) })
 }

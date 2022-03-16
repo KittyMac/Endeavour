@@ -316,6 +316,9 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
             );
             
             this.decorations = this.getDeco(view);
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                this.decorations = this.getDeco(this.view);
+            });
             
             cm.endeavourPushUpdates(this, [], []);
         }
@@ -441,6 +444,30 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
             // ranges, and add the appropriate decorations.
             let ranges = [];
             let localThis = this;
+            
+            let hex2rgb = function (colorString) {
+                let idx = colorString.indexOf("#");
+                if (idx > 0) {
+                    colorString = colorString.slice(idx+1);
+                }
+                
+                var hex = 0;
+                if (colorString.length == 6) {
+                    // RRGGBB
+                    hex = (parseInt(colorString, 16) << 8) + 255;
+                }
+                if (colorString.length == 8) {
+                    // RRGGBBAA
+                    hex = parseInt(colorString, 16);
+                }
+                
+                return [
+                    ((hex >> 24) & 0xFF),
+                    ((hex >> 16) & 0xFF),
+                    ((hex >> 8) & 0xFF),
+                    ((hex >> 0) & 0xFF)
+                ];
+            }
                         
             this.cursors.forEach(function(peer) {
                 let peerInfo = undefined;
@@ -455,12 +482,6 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                 }
                     
                 let peerDeco = newPeerDecoration(peerInfo);
-                let selectionDeco = Decoration.mark({
-                    class: `cm-peerSelection${peerInfo.peerIdx}`
-                });
-                let lineDeco = Decoration.line({
-                    class: `cm-peerSelection${peerInfo.peerIdx}`
-                })
                 
                 if (peer.ranges != undefined) {
                     peer.ranges.forEach(function(range) {
@@ -474,8 +495,6 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                         ranges.push({
                             peerInfo: peerInfo,
                             peer: peerDeco,
-                            selection: selectionDeco,
-                            line: lineDeco,
                             range: range
                         });
                     })
@@ -487,7 +506,10 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
             });
             
             let decorations = [];
+            let colorsPerLine = {};
             let firstForPeer = [];
+            
+            let computedStyle = getComputedStyle(document.documentElement)
             
             // Ranges should be added in sorted (by from and value.startSide) order
             for (let {from, to} of view.visibleRanges) {
@@ -506,20 +528,12 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                                 from: peerFrom,
                                 to: peerFrom,
                                 value: peerRange.peer,
-                                //label: "cursor",
-                                //line: line.number
-                            });
-                            
-                            decorations.push({
-                                from: line.from,
-                                to: line.from,
-                                value: peerRange.line,
-                                //label: "line-inside",
-                                //line: line.number
+                                label: "cursor",
+                                line: line.number
                             });
                         }
                         
-                        /*
+                        
                         let lhs = -1;
                         let rhs = -1;
                         
@@ -530,14 +544,46 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                             rhs = peerTo;
                         }
                         
+                        // The only thing that seems to work well is using a line decoration to
+                        // cover the whole line. Other decoration schemes seem to make funky funky
+                        // things happen in the editor. Since we cannot nest spans using the 
+                        // line decoration, we need to calculate the combined color of a line and
+                        // set just one decoration for that
+                        if ((lhs != -1 && rhs != -1) ||
+                            (lhs == -1 && rhs != -1) ||
+                            (lhs != -1 && rhs == -1) ||
+                            (peerFrom < line.from && peerTo > line.to))
+                        {
+                            let peerIdx = peerRange.peerInfo.peerIdx;
+                            let root = document.documentElement;
+                            let lineIdx = line.from;
+                            
+                            let colorString = computedStyle.getPropertyValue(`--end-peer${peerIdx}-light`);
+                            let color = hex2rgb(colorString)
+                            
+                            let colorPerLine = colorsPerLine[lineIdx];
+                            if (colorPerLine == undefined) {
+                                colorsPerLine[lineIdx] = [
+                                    color[0], color[1], color[2], color[3], 1.0
+                                ];
+                            } else {
+                                colorPerLine[0] += color[0];
+                                colorPerLine[1] += color[1];
+                                colorPerLine[2] += color[2];
+                                colorPerLine[3] += color[3];
+                                colorPerLine[4] += 1.0;
+                            }                            
+                        }
+                        
+                        /*
                         if (lhs != -1 && rhs != -1) {
                             // We're fully inside this line
                             decorations.push({
                                 from: lhs,
                                 to: rhs,
                                 value: peerRange.selection,
-                                //label: "selection-inside",
-                                //line: line.number
+                                label: "selection-inside",
+                                line: line.number
                             });
                         } else if (lhs == -1 && rhs != -1) {
                             // We overlap this line from the left
@@ -545,8 +591,8 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                                 from: line.from,
                                 to: rhs,
                                 value: peerRange.selection,
-                                //label: "overlap-left",
-                                //line: line.number
+                                label: "overlap-left",
+                                line: line.number
                             })
                         } else if (lhs != -1 && rhs == -1) {
                             // We overlap this line from the right
@@ -554,18 +600,28 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                                 from: lhs,
                                 to: line.to,
                                 value: peerRange.selection,
-                                //label: "overlap-right",
-                                //line: line.number
+                                label: "overlap-right",
+                                line: line.number
                             })
                         } else if (peerFrom < line.from && peerTo > line.to) {
                             // the line is fully inside the selection
-                            decorations.push({
-                                from: line.from,
-                                to: line.from,
-                                value: peerRange.line,
-                                //label: "line-inside",
-                                //line: line.number
-                            })
+                            if (line.from == line.to) {
+                                decorations.push({
+                                    from: line.from,
+                                    to: line.from,
+                                    value: peerRange.wholeLine,
+                                    label: "empty-line",
+                                    line: line.number
+                                })
+                            } else {
+                                decorations.push({
+                                    from: line.from,
+                                    to: line.to,
+                                    value: peerRange.line,
+                                    label: "line-inside",
+                                    line: line.number
+                                })
+                            }
                         }*/
                     });
                 
@@ -573,7 +629,23 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                 }
             }
             
-            //print(decorations)
+            for (const fromPos in colorsPerLine) {
+                let fromPosInt = parseInt(fromPos);
+                let color = colorsPerLine[fromPos];
+                color[0] /= color[4];
+                color[1] /= color[4];
+                color[2] /= color[4];
+                
+                let lineDeco = Decoration.line({
+                    attributes: { style: `background-color: rgba(${color[0]},${color[1]},${color[2]},0.6)` }
+                })
+                
+                decorations.push({
+                    from: fromPosInt,
+                    to: fromPosInt,
+                    value: lineDeco,
+                })
+            }
             
             return Decoration.set(decorations, true);
         }
@@ -633,7 +705,7 @@ cm.CreateEditor = function(parentDivId, extensions, content="", editable=true) {
             editor.dispatch({
                 effects: StateEffect.reconfigure.of(lightExtensions)
             });
-        }
+        };
     });
 
     return editor;
