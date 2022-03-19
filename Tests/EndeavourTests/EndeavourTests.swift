@@ -14,6 +14,8 @@ final class EndeavourTests: XCTestCase {
         let ownerUUID = UUID().uuidHitch
         let peerUUID = UUID().uuidHitch
         let documentUUID: Hitch = "SwiftSample"
+        let userSession = UserServiceableSession()
+
         Endeavour.shared.beNewDocument(userUUID: ownerUUID,
                                        named: documentUUID,
                                        content: #"print("hello world")"#,
@@ -25,7 +27,8 @@ final class EndeavourTests: XCTestCase {
 
             // document.beSetPersistableDocument(persistableDocument: PersistDocument())
 
-            Endeavour.shared.beJoinDocument(userUUID: peerUUID,
+            Endeavour.shared.beJoinDocument(userSession: userSession,
+                                            userUUID: peerUUID,
                                             documentUUID: documentInfo.uuid,
                                             Flynn.any) { documentInfo, document, error in
                 guard let documentInfo = documentInfo,

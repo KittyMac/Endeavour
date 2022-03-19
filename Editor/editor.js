@@ -391,7 +391,7 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                 // Horrible hack to reset our version history
                 for (let idx = 0; idx < this.view.state.values.length; idx++) {
                     let value = this.view.state.values[idx];
-                    if (value?.constructor?.name == "CollabState") {
+                    if (value?.version != undefined && value?.unconfirmed != undefined) {
                         value.version = 0;
                         value.unconfirmed.length = 0;
                     }
