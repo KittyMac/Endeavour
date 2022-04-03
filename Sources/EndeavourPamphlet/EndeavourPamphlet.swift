@@ -5,6 +5,7 @@ import Foundation
 
 
 public enum EndeavourPamphlet {
+    #if DEBUG
     public static func get(string member: String) -> String? {
         switch member {
         case "/public/close.svg": return EndeavourPamphlet.Public.CloseSvg()
@@ -36,6 +37,39 @@ public enum EndeavourPamphlet {
         }
         return nil
     }
+    #else
+    public static func get(string member: String) -> StaticString? {
+        switch member {
+        case "/public/close.svg": return EndeavourPamphlet.Public.CloseSvg()
+        case "/private/figurehead/utility/defines.js": return EndeavourPamphlet.Private.Figurehead.Utility.DefinesJs()
+        case "/public/endeavour/editor.bundle.js": return EndeavourPamphlet.Public.Endeavour.EditorBundleJs()
+        case "/private/endeavour/editor.fonts.html": return EndeavourPamphlet.Private.Endeavour.EditorFontsHtml()
+        case "/private/endeavour/endeavour.html": return EndeavourPamphlet.Private.Endeavour.EndeavourHtml()
+        case "/private/endeavour/endeavour.js": return EndeavourPamphlet.Private.Endeavour.EndeavourJs()
+        case "/private/endeavour/endeavour.style": return EndeavourPamphlet.Private.Endeavour.EndeavourStyle()
+        case "/private/figurehead/figurehead.html": return EndeavourPamphlet.Private.Figurehead.FigureheadHtml()
+        case "/private/figurehead/figurehead.js": return EndeavourPamphlet.Private.Figurehead.FigureheadJs()
+        case "/private/figurehead/figurehead.style": return EndeavourPamphlet.Private.Figurehead.FigureheadStyle()
+        case "/private/figurehead/utility/laba.js": return EndeavourPamphlet.Private.Figurehead.Utility.LabaJs()
+        case "/public/manifest.json": return EndeavourPamphlet.Public.ManifestJson()
+        case "/private/figurehead/utility/navigation.js": return EndeavourPamphlet.Private.Figurehead.Utility.NavigationJs()
+        case "/private/script.combined.js": return EndeavourPamphlet.Private.ScriptCombinedJs()
+        case "/private/shell.fonts.html": return EndeavourPamphlet.Private.ShellFontsHtml()
+        case "/private/shell.html": return EndeavourPamphlet.Private.ShellHtml()
+        case "/private/figurehead/utility/timer.js": return EndeavourPamphlet.Private.Figurehead.Utility.TimerJs()
+        case "/private/figurehead/ui/ui.alert.html": return EndeavourPamphlet.Private.Figurehead.Ui.UiAlertHtml()
+        case "/private/figurehead/ui/ui.alert.js": return EndeavourPamphlet.Private.Figurehead.Ui.UiAlertJs()
+        case "/private/figurehead/ui/ui.all.html": return EndeavourPamphlet.Private.Figurehead.Ui.UiAllHtml()
+        case "/private/figurehead/ui/ui.all.js": return EndeavourPamphlet.Private.Figurehead.Ui.UiAllJs()
+        case "/private/figurehead/ui/ui.button.html": return EndeavourPamphlet.Private.Figurehead.Ui.UiButtonHtml()
+        case "/private/figurehead/ui/ui.button.js": return EndeavourPamphlet.Private.Figurehead.Ui.UiButtonJs()
+        case "/private/figurehead/ui/ui.grid.html": return EndeavourPamphlet.Private.Figurehead.Ui.UiGridHtml()
+        case "/private/figurehead/utility/utility.js": return EndeavourPamphlet.Private.Figurehead.Utility.UtilityJs()
+        default: break
+        }
+        return nil
+    }
+    #endif
     public static func get(gzip member: String) -> Data? {
         #if DEBUG
             return nil

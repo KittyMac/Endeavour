@@ -447,7 +447,7 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
             
             let hex2rgb = function (colorString) {
                 let idx = colorString.indexOf("#");
-                if (idx > 0) {
+                if (idx >= 0) {
                     colorString = colorString.slice(idx+1);
                 }
                 

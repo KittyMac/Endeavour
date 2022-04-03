@@ -10,6 +10,9 @@
 #define BOLD() font-weight:bold;
 #define ITALIC() font-style:italic;
 
+#define VISIBLE() visibility:visible;
+#define INVISIBLE() visibility:hidden;
+
 #define HIDE() display:none;
 #define SHOW() display:flex;
 
@@ -137,6 +140,8 @@
 
 #define BORDER(X,COLOR) border:X##rem solid COLOR;
 #define BORDERBOTTOM(X,COLOR) border-bottom:X##rem solid COLOR;
+#define BORDERTOP(X,COLOR) border-top:X##rem solid COLOR;
+
 
 #define SHADOW(X,Y,BLUR,SPREAD,COLOR) box-shadow: X##rem Y##rem BLUR##rem SPREAD##rem COLOR;
 
@@ -213,7 +218,10 @@
 
 #define NOSELECT() -webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;
 
-#define CLICKABLE() NOSELECT();cursor:pointer;
+#define CLICKABLE() NOSELECT()cursor:pointer;
+#define UNCLICKABLE() cursor:not-allowed;
+
+#define GROWCOL(X) flex: 1 1 X;
 
 #define FLEX() display:flex;
 #define GROW() flex: 1 1 auto;
@@ -225,8 +233,12 @@
 #define FLEXBASIS(V) flex-basis:V##rem;
 
 #define SCROLLING() overflow:auto;
-#define HSCROLLING() overflow-x:scroll;overflow-y:hidden;
-#define VSCROLLING() overflow-y:scroll;overflow-x:hidden;
+#define HSCROLLING() overflow-x:auto;overflow-y:hidden;
+#define VSCROLLING() overflow-y:auto;overflow-x:hidden;
+
+#define SCROLLING_ALWAYS() overflow:scroll;
+#define HSCROLLING_ALWAYS() overflow-x:scroll;overflow-y:hidden;
+#define VSCROLLING_ALWAYS() overflow-y:scroll;overflow-x:hidden;
 
 #define CLIPS() overflow:hidden;
 
@@ -253,6 +265,13 @@
 #define BASELINE() align-items:baseline;
 #define STRETCH() align-items:stretch;
 
+#define CONTENT_START() align-content:flex-start;
+#define CONTENT_CENTER() align-content:center;
+#define CONTENT_END() align-content:flex-end;
+#define CONTENT_STRETCH() align-content:stretch;
+#define CONTENT_BETWEEN() align-content:space-between;
+#define CONTENT_AROUND() align-content:space-around;
+
 #define SELF_TOP() align-self:flex-start;
 #define SELF_MIDDLE() align-self:center;
 #define SELF_BOTTOM() align-self:flex-end;
@@ -263,10 +282,9 @@
 
 #define DISABLED() cursor:not-allowed;IGNOREMOUSE()ALPHA(0.3)
 
-#define VGRADIENT(R1,G1,B1,A1,R2,G2,B2,A2) background:linear-gradient(to bottom, rgba(R1,G1,B1,A1), rgba(R2,G2,B2,A2))
-#define HGRADIENT(R1,G1,B1,A1,R2,G2,B2,A2) background:linear-gradient(to right, rgba(R1,G1,B1,A1), rgba(R2,G2,B2,A2))
+#define VGRADIENT(R1,G1,B1,A1,R2,G2,B2,A2) background:linear-gradient(to bottom, rgba(R1,G1,B1,A1), rgba(R2,G2,B2,A2));
+#define HGRADIENT(R1,G1,B1,A1,R2,G2,B2,A2) background:linear-gradient(to right, rgba(R1,G1,B1,A1), rgba(R2,G2,B2,A2));
 
-<!-- (X,Y,BLUR,SPREAD,RED,GREEN,BLUE,ALPHA -->
 #define BOTTOMSHADOW() SHADOW(0,0.5,0.5,0.1,VAR(std-shadow))
 #define STDSHADOW() SHADOW(0,0.5,2.0,0.1,VAR(std-shadow))
 #define DIALOG_BACKGROUND()RADIUS(1)WHITE()STDSHADOW()

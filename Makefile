@@ -14,9 +14,9 @@ figurehead:
 	mate ./.build/checkouts/Figurehead/Resources/
 
 update:
-	mkdir -p ./Sources/Pamphlet
+	mkdir -p ./Sources/EndeavourPamphlet
 	swift package update
-	rm -rf ./Sources/Pamphlet
+	rm -rf ./Sources/EndeavourPamphlet
 	./meta/CombinedBuildPhases.sh
 
 clean:
@@ -26,7 +26,7 @@ test:
 	swift test -v
 
 pamphlet:
-	rm -rf ./Sources/Pamphlet
+	rm -rf ./Sources/EndeavourPamphlet
 	./meta/CombinedBuildPhases.sh
 
 xcode: pamphlet preprocess
@@ -36,13 +36,12 @@ xcode: pamphlet preprocess
 	open Endeavour.xcodeproj
 
 docker:
-	-DOCKER_HOST=tcp://192.168.1.209:2376 docker buildx create --name cluster --platform linux/arm64/v8 --append
-	-DOCKER_HOST=tcp://192.168.1.198:2376 docker buildx create --name cluster --platform linux/amd64 --append
-	-docker buildx use cluster
+	-docker buildx create --name local_builder
+	-DOCKER_HOST=tcp://192.168.1.198:2376 docker buildx create --name local_builder --platform linux/amd64 --append
+	-docker buildx use local_builder
 	-docker buildx inspect --bootstrap
 	-docker login
-	#docker buildx build --platform linux/amd64,linux/arm64/v8 --push -t kittymac/endeavour .
-	docker buildx build --platform linux/amd64 --push -t kittymac/endeavour .
+	docker buildx build --platform linux/amd64,linux/arm64 --push -t kittymac/endeavour .
 
 docker-local:
 	docker run --publish published=8080,target=8080,mode=host kittymac/endeavour:latest ./EndeavourApp http

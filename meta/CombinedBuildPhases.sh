@@ -12,7 +12,7 @@ if [ "$(uname)" == "Darwin" ]; then
     
     ./CopyDependencyResources.sh
     
-    time ./pamphlet --prefix Endeavour --collapse ../Resources/ ../Sources/EndeavourPamphlet/
+    time pamphlet --prefix Endeavour --collapse ../Resources/ ../Sources/EndeavourPamphlet/
     
     make -C ../Editor/ all
     

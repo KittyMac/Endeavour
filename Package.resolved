@@ -15,7 +15,7 @@
         "repositoryURL": "https://github.com/KittyMac/Figurehead.git",
         "state": {
           "branch": "main",
-          "revision": "77a3961e1aa8cd1388a8fd04ce482f9732f675b8",
+          "revision": "e22cfa33485c8030ab056363fbf01bfda4949e9d",
           "version": null
         }
       },
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/KittyMac/Flynn.git",
         "state": {
           "branch": null,
-          "revision": "bef6eb1bc963eb3b55a8e0a7c98ddc8a44a8a90c",
-          "version": "0.2.2"
+          "revision": "c58a430d75b7597bf56e05067dee533c98140ea7",
+          "version": "0.2.5"
         }
       },
       {
@@ -33,7 +33,7 @@
         "repositoryURL": "https://github.com/1024jp/GzipSwift.git",
         "state": {
           "branch": "develop",
-          "revision": "e8c00b4bdc621b3c714ab72e3958778f5751e146",
+          "revision": "ae02027cd030c73a9d177f50e612bbd491ebe371",
           "version": null
         }
       },
@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/KittyMac/Hitch.git",
         "state": {
           "branch": null,
-          "revision": "7a1ba421cf7bfc3fad4f5ac7e8ff5a74956537de",
-          "version": "0.4.23"
+          "revision": "4bf2cca39f0b2c1bbed72577b0ce81d67e036033",
+          "version": "0.4.26"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
           "branch": null,
-          "revision": "e394bf350e38cb100b6bc4172834770ede1b7232",
-          "version": "1.0.3"
+          "revision": "82905286cc3f0fa8adc4674bf49437cab65a8373",
+          "version": "1.1.1"
         }
       }
     ]

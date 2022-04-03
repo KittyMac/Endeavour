@@ -9,6 +9,7 @@
         --fh-fdarkgrey: rgba(100,100,100,1);
         --fh-fgrey: rgba(200,200,200,1);
         --fh-flightgrey: rgba(242,242,242,1);
+        --fh-fdarkblack: rgba(0,0,0,1);
         --fh-fblack: rgba(83,84,87,1);
         --fh-fred: rgba(255, 0, 0, 1);
         --fh-fgreen: rgba(0, 255, 0, 1);
@@ -21,6 +22,7 @@
         --fh-darkgrey: rgba(100,100,100,1);
         --fh-grey: rgba(200,200,200,1);
         --fh-lightgrey: rgba(242,242,242,1);
+        --fh-darkblack: rgba(0,0,0,1);
         --fh-black: rgba(83,84,87,1);
         --fh-red: rgba(255, 0, 0, 1);
         --fh-green: rgba(0, 255, 0, 1);
@@ -61,6 +63,7 @@
             --fh-fdarkgrey: rgba(155,155,155,1);
             --fh-fgrey: rgba(55,55,55,1);
             --fh-flightgrey: rgba(32,32,32,1);
+            --fh-fdarkblack: rgba(255,255,255,1);
             --fh-fblack: rgba(172,171,168,1);
             --fh-fred: rgba(255, 0, 0, 1);
             --fh-fgreen: rgba(0, 255, 0, 1);
@@ -73,6 +76,7 @@
             --fh-darkgrey: rgba(155,155,155,1);
             --fh-grey: rgba(55,55,55,1);
             --fh-lightgrey: rgba(32,32,32,1);
+            --fh-darkblack: rgba(255,255,255,1);
             --fh-black: rgba(172,171,168,1);
             --fh-red: rgba(255, 0, 0, 1);
             --fh-green: rgba(0, 255, 0, 1);
