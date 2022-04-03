@@ -20,6 +20,10 @@ import {RangeSetBuilder} from "@codemirror/rangeset"
 
 import {json} from "@codemirror/lang-json"
 import {javascript} from "@codemirror/lang-javascript"
+import {markdown} from "@codemirror/lang-markdown"
+import {html} from "@codemirror/lang-html"
+import {css} from "@codemirror/lang-css"
+import {xml} from "@codemirror/lang-xml"
 
 import {swift} from "./index.swift.js"
 
@@ -30,7 +34,7 @@ import {peerColors, newPeerDecoration, peerWidgetBaseTheme} from "./peerWidget.j
 let cm = {};
 window.cm = cm;
 
-cm.swiftSetup = [
+cm.anyLanguageSetup = [
     highlightSpecialChars(),
     history(),
     drawSelection(),
@@ -54,66 +58,16 @@ cm.swiftSetup = [
         ...lintKeymap
     ]),
     indentUnit.of("    "),
-    keymap.of([indentWithTab]),
-    swift()
+    keymap.of([indentWithTab])
 ]
 
-cm.javascriptSetup = [
-    highlightSpecialChars(),
-    history(),
-    drawSelection(),
-    dropCursor(),
-    EditorState.allowMultipleSelections.of(true),
-    indentOnInput(),
-    defaultHighlightStyle.fallback,
-    bracketMatching(),
-    closeBrackets(),
-    autocompletion(),
-    rectangularSelection(),
-    highlightSelectionMatches(),
-    keymap.of([
-        ...closeBracketsKeymap,
-        ...defaultKeymap,
-        ...searchKeymap,
-        ...historyKeymap,
-        ...foldKeymap,
-        ...commentKeymap,
-        ...completionKeymap,
-        ...lintKeymap
-    ]),
-    indentUnit.of("    "),
-    keymap.of([indentWithTab]),
-    javascript()
-]
-
-
-cm.jsonSetup = [
-    highlightSpecialChars(),
-    history(),
-    drawSelection(),
-    dropCursor(),
-    EditorState.allowMultipleSelections.of(true),
-    indentOnInput(),
-    defaultHighlightStyle.fallback,
-    bracketMatching(),
-    closeBrackets(),
-    autocompletion(),
-    rectangularSelection(),
-    highlightSelectionMatches(),
-    keymap.of([
-        ...closeBracketsKeymap,
-        ...defaultKeymap,
-        ...searchKeymap,
-        ...historyKeymap,
-        ...foldKeymap,
-        ...commentKeymap,
-        ...completionKeymap,
-        ...lintKeymap
-    ]),
-    indentUnit.of("    "),
-    keymap.of([indentWithTab]),
-    json()
-]
+cm.swiftSetup = cm.anyLanguageSetup.concat([swift()])
+cm.javascriptSetup = cm.anyLanguageSetup.concat([javascript()])
+cm.markdownSetup = cm.anyLanguageSetup.concat([markdown()])
+cm.jsonSetup = cm.anyLanguageSetup.concat([json()])
+cm.htmlSetup = cm.anyLanguageSetup.concat([html()])
+cm.cssSetup = cm.anyLanguageSetup.concat([css()])
+cm.xmlSetup = cm.anyLanguageSetup.concat([xml()])
 
 cm.minimalSetup = [
     highlightSpecialChars(),
@@ -135,9 +89,19 @@ cm.minimalSetup = [
         ...lintKeymap
     ]),
     indentUnit.of("    "),
-    keymap.of([indentWithTab]),
-    json()
+    keymap.of([indentWithTab])
 ]
+
+cm.swiftMinimalSetup = cm.minimalSetup.concat([swift()])
+cm.javascriptMinimalSetup = cm.minimalSetup.concat([javascript()])
+cm.markdownMinimalSetup = cm.minimalSetup.concat([markdown()])
+cm.jsonMinimalSetup = cm.minimalSetup.concat([json()])
+cm.htmlMinimalSetup = cm.minimalSetup.concat([html()])
+cm.cssMinimalSetup = cm.minimalSetup.concat([css()])
+cm.xmlMinimalSetup = cm.minimalSetup.concat([xml()])
+
+// backwards compatibility...
+cm.minimalSetup = cm.jsonMinimalSetup;
 
 cm.endeavourJsonParse = function(json) {
     try {
@@ -662,7 +626,11 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
     ];
 }
 
-cm.CreateEditor = function(parentDivId, extensions, content="", editable=true) {
+cm.CreateEditor = function(parentDivId,
+						   extensions,
+						   content="", 
+						   editable=true,
+						   darkModeOnly=false) {
     let parentDiv = document.getElementById(parentDivId);
         
     if (editable) {
@@ -681,7 +649,7 @@ cm.CreateEditor = function(parentDivId, extensions, content="", editable=true) {
     darkExtensions.push(dark);
     lightExtensions.push(light);
     
-    if (isDarkMode()) {
+    if (isDarkMode() || darkModeOnly) {
         extensions = darkExtensions;
     } else {
         extensions = lightExtensions;
@@ -695,18 +663,22 @@ cm.CreateEditor = function(parentDivId, extensions, content="", editable=true) {
         }),
         parent: parentDiv
     });
-            
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-        if (event.matches) {
-            editor.dispatch({
-                effects: StateEffect.reconfigure.of(darkExtensions)
-            });
-        } else {
-            editor.dispatch({
-                effects: StateEffect.reconfigure.of(lightExtensions)
-            });
-        };
-    });
+	
+	print(darkModeOnly);
+    
+	if (darkModeOnly == false) {
+	    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+	        if (event.matches) {
+	            editor.dispatch({
+	                effects: StateEffect.reconfigure.of(darkExtensions)
+	            });
+	        } else {
+	            editor.dispatch({
+	                effects: StateEffect.reconfigure.of(lightExtensions)
+	            });
+	        };
+	    });
+	}
 
     return editor;
 }

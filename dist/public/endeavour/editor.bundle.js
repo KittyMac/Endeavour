@@ -285,7 +285,7 @@
             for (let i = 0;; i++) {
                 let string = this.text[i], end = offset + string.length;
                 if ((isLine ? line : end) >= target)
-                    return new Line(offset, end, line, string);
+                    return new Line$1(offset, end, line, string);
                 offset = end + 1;
                 line++;
             }
@@ -659,7 +659,7 @@
     This type describes a line in the document. It is created
     on-demand when lines are [queried](https://codemirror.net/6/docs/ref/#text.Text.lineAt).
     */
-    class Line {
+    class Line$1 {
         /**
         @internal
         */
@@ -2488,9 +2488,9 @@
         }
         return spec == tr ? tr : new Transaction(state, tr.changes, tr.selection, spec.effects, spec.annotations, spec.scrollIntoView);
     }
-    const none$3 = [];
+    const none$4 = [];
     function asArray$1(value) {
-        return value == null ? none$3 : Array.isArray(value) ? value : [value];
+        return value == null ? none$4 : Array.isArray(value) ? value : [value];
     }
 
     /**
@@ -5926,7 +5926,7 @@
         updateDOM(elt) { return elt.nodeName.toLowerCase() == this.tag; }
     }
 
-    const none$2 = [];
+    const none$3 = [];
     const clickAddsSelectionRange = /*@__PURE__*/Facet.define();
     const dragMovesSelection$1 = /*@__PURE__*/Facet.define();
     const mouseSelectionStyle = /*@__PURE__*/Facet.define();
@@ -6245,7 +6245,7 @@
         /**
         The transactions involved in the update. May be empty.
         */
-        transactions = none$2) {
+        transactions = none$3) {
             this.view = view;
             this.state = state;
             this.transactions = transactions;
@@ -12036,7 +12036,7 @@
         // transaction needs to be converted to an item. Returns null when
         // there are no changes or effects in the transaction.
         static fromTransaction(tr, selection) {
-            let effects = none$1;
+            let effects = none$2;
             for (let invert of tr.startState.facet(invertedEffects)) {
                 let result = invert(tr);
                 if (result.length)
@@ -12044,10 +12044,10 @@
             }
             if (!effects.length && tr.changes.empty)
                 return null;
-            return new HistEvent(tr.changes.invert(tr.startState.doc), effects, undefined, selection || tr.startState.selection, none$1);
+            return new HistEvent(tr.changes.invert(tr.startState.doc), effects, undefined, selection || tr.startState.selection, none$2);
         }
         static selection(selections) {
-            return new HistEvent(undefined, none$1, undefined, undefined, selections);
+            return new HistEvent(undefined, none$2, undefined, undefined, selections);
         }
     }
     function updateBranch(branch, to, maxLen, newEvent) {
@@ -12075,7 +12075,7 @@
     function conc(a, b) {
         return !a.length ? b : !b.length ? a : a.concat(b);
     }
-    const none$1 = [];
+    const none$2 = [];
     const MaxSelectionsPerEvent = 200;
     function addSelection(branch, selection) {
         if (!branch.length) {
@@ -12103,7 +12103,7 @@
     function addMappingToBranch(branch, mapping) {
         if (!branch.length)
             return branch;
-        let length = branch.length, selections = none$1;
+        let length = branch.length, selections = none$2;
         while (length) {
             let event = mapEvent(branch[length - 1], mapping, selections);
             if (event.changes && !event.changes.empty || event.effects.length) { // Event survived mapping
@@ -12117,10 +12117,10 @@
                 selections = event.selectionsAfter;
             }
         }
-        return selections.length ? [HistEvent.selection(selections)] : none$1;
+        return selections.length ? [HistEvent.selection(selections)] : none$2;
     }
     function mapEvent(event, mapping, extraSelections) {
-        let selections = conc(event.selectionsAfter.length ? event.selectionsAfter.map(s => s.map(mapping)) : none$1, extraSelections);
+        let selections = conc(event.selectionsAfter.length ? event.selectionsAfter.map(s => s.map(mapping)) : none$2, extraSelections);
         // Change-less events don't store mappings (they are always the last event in a branch)
         if (!event.changes)
             return HistEvent.selection(selections);
@@ -12148,15 +12148,15 @@
                     isAdjacent(lastEvent.changes, event.changes)) ||
                     // For compose (but not compose.start) events, always join with previous event
                     userEvent == "input.type.compose")) {
-                done = updateBranch(done, done.length - 1, maxLen, new HistEvent(event.changes.compose(lastEvent.changes), conc(event.effects, lastEvent.effects), lastEvent.mapped, lastEvent.startSelection, none$1));
+                done = updateBranch(done, done.length - 1, maxLen, new HistEvent(event.changes.compose(lastEvent.changes), conc(event.effects, lastEvent.effects), lastEvent.mapped, lastEvent.startSelection, none$2));
             }
             else {
                 done = updateBranch(done, done.length, maxLen, event);
             }
-            return new HistoryState(done, none$1, time, userEvent);
+            return new HistoryState(done, none$2, time, userEvent);
         }
         addSelection(selection, time, userEvent, newGroupDelay) {
-            let last = this.done.length ? this.done[this.done.length - 1].selectionsAfter : none$1;
+            let last = this.done.length ? this.done[this.done.length - 1].selectionsAfter : none$2;
             if (last.length > 0 &&
                 time - this.prevTime < newGroupDelay &&
                 userEvent == this.prevUserEvent && userEvent && /^select($|\.)/.test(userEvent) &&
@@ -12184,7 +12184,7 @@
                 return null;
             }
             else {
-                let rest = branch.length == 1 ? none$1 : branch.slice(0, branch.length - 1);
+                let rest = branch.length == 1 ? none$2 : branch.slice(0, branch.length - 1);
                 if (event.mapped)
                     rest = addMappingToBranch(rest, event.mapped);
                 return state.update({
@@ -12199,7 +12199,7 @@
             }
         }
     }
-    HistoryState.empty = /*@__PURE__*/new HistoryState(none$1, none$1);
+    HistoryState.empty = /*@__PURE__*/new HistoryState(none$2, none$2);
     /**
     Default key bindings for the undo history.
 
@@ -12282,6 +12282,28 @@
     /// node, with another tree. This is useful to include trees from
     /// different languages.
     NodeProp.mounted = new NodeProp({ perNode: true });
+    /// A mounted tree, which can be [stored](#common.NodeProp^mounted) on
+    /// a tree node to indicate that parts of its content are
+    /// represented by another tree.
+    class MountedTree {
+        constructor(
+        /// The inner tree.
+        tree, 
+        /// If this is null, this tree replaces the entire node (it will
+        /// be included in the regular iteration instead of its host
+        /// node). If not, only the given ranges are considered to be
+        /// covered by this tree. This is used for trees that are mixed in
+        /// a way that isn't strictly hierarchical. Such mounted trees are
+        /// only entered by [`resolveInner`](#common.Tree.resolveInner)
+        /// and [`enter`](#common.SyntaxNode.enter).
+        overlay, 
+        /// The parser used to create this subtree.
+        parser) {
+            this.tree = tree;
+            this.overlay = overlay;
+            this.parser = parser;
+        }
+    }
     const noProps = Object.create(null);
     /// Each node in a syntax tree has a node type associated with it.
     class NodeType {
@@ -13479,7 +13501,405 @@
         get lineChunks() { return false; }
         read(from, to) { return this.string.slice(from, to); }
     }
-    new NodeProp({ perNode: true });
+
+    /// Create a parse wrapper that, after the inner parse completes,
+    /// scans its tree for mixed language regions with the `nest`
+    /// function, runs the resulting [inner parses](#common.NestedParse),
+    /// and then [mounts](#common.NodeProp^mounted) their results onto the
+    /// tree.
+    ///
+    /// The nesting function is passed a cursor to provide context for a
+    /// node, but _should not_ move that cursor, only inspect its
+    /// properties and optionally access its
+    /// [node object](#common.TreeCursor.node).
+    function parseMixed(nest) {
+        return (parse, input, fragments, ranges) => new MixedParse(parse, nest, input, fragments, ranges);
+    }
+    class InnerParse {
+        constructor(parser, parse, overlay, target, ranges) {
+            this.parser = parser;
+            this.parse = parse;
+            this.overlay = overlay;
+            this.target = target;
+            this.ranges = ranges;
+        }
+    }
+    class ActiveOverlay {
+        constructor(parser, predicate, mounts, index, start, target, prev) {
+            this.parser = parser;
+            this.predicate = predicate;
+            this.mounts = mounts;
+            this.index = index;
+            this.start = start;
+            this.target = target;
+            this.prev = prev;
+            this.depth = 0;
+            this.ranges = [];
+        }
+    }
+    const stoppedInner = new NodeProp({ perNode: true });
+    class MixedParse {
+        constructor(base, nest, input, fragments, ranges) {
+            this.nest = nest;
+            this.input = input;
+            this.fragments = fragments;
+            this.ranges = ranges;
+            this.inner = [];
+            this.innerDone = 0;
+            this.baseTree = null;
+            this.stoppedAt = null;
+            this.baseParse = base;
+        }
+        advance() {
+            if (this.baseParse) {
+                let done = this.baseParse.advance();
+                if (!done)
+                    return null;
+                this.baseParse = null;
+                this.baseTree = done;
+                this.startInner();
+                if (this.stoppedAt != null)
+                    for (let inner of this.inner)
+                        inner.parse.stopAt(this.stoppedAt);
+            }
+            if (this.innerDone == this.inner.length) {
+                let result = this.baseTree;
+                if (this.stoppedAt != null)
+                    result = new Tree(result.type, result.children, result.positions, result.length, result.propValues.concat([[stoppedInner, this.stoppedAt]]));
+                return result;
+            }
+            let inner = this.inner[this.innerDone], done = inner.parse.advance();
+            if (done) {
+                this.innerDone++;
+                // This is a somewhat dodgy but super helpful hack where we
+                // patch up nodes created by the inner parse (and thus
+                // presumably not aliased anywhere else) to hold the information
+                // about the inner parse.
+                let props = Object.assign(Object.create(null), inner.target.props);
+                props[NodeProp.mounted.id] = new MountedTree(done, inner.overlay, inner.parser);
+                inner.target.props = props;
+            }
+            return null;
+        }
+        get parsedPos() {
+            if (this.baseParse)
+                return 0;
+            let pos = this.input.length;
+            for (let i = this.innerDone; i < this.inner.length; i++) {
+                if (this.inner[i].ranges[0].from < pos)
+                    pos = Math.min(pos, this.inner[i].parse.parsedPos);
+            }
+            return pos;
+        }
+        stopAt(pos) {
+            this.stoppedAt = pos;
+            if (this.baseParse)
+                this.baseParse.stopAt(pos);
+            else
+                for (let i = this.innerDone; i < this.inner.length; i++)
+                    this.inner[i].parse.stopAt(pos);
+        }
+        startInner() {
+            let fragmentCursor = new FragmentCursor$2(this.fragments);
+            let overlay = null;
+            let covered = null;
+            let cursor = new TreeCursor(new TreeNode(this.baseTree, this.ranges[0].from, 0, null), 1 /* Full */);
+            scan: for (let nest, isCovered; this.stoppedAt == null || cursor.from < this.stoppedAt;) {
+                let enter = true, range;
+                if (fragmentCursor.hasNode(cursor)) {
+                    if (overlay) {
+                        let match = overlay.mounts.find(m => m.frag.from <= cursor.from && m.frag.to >= cursor.to && m.mount.overlay);
+                        if (match)
+                            for (let r of match.mount.overlay) {
+                                let from = r.from + match.pos, to = r.to + match.pos;
+                                if (from >= cursor.from && to <= cursor.to && !overlay.ranges.some(r => r.from < to && r.to > from))
+                                    overlay.ranges.push({ from, to });
+                            }
+                    }
+                    enter = false;
+                }
+                else if (covered && (isCovered = checkCover(covered.ranges, cursor.from, cursor.to))) {
+                    enter = isCovered != 2 /* Full */;
+                }
+                else if (!cursor.type.isAnonymous && cursor.from < cursor.to && (nest = this.nest(cursor, this.input))) {
+                    if (!cursor.tree)
+                        materialize(cursor);
+                    let oldMounts = fragmentCursor.findMounts(cursor.from, nest.parser);
+                    if (typeof nest.overlay == "function") {
+                        overlay = new ActiveOverlay(nest.parser, nest.overlay, oldMounts, this.inner.length, cursor.from, cursor.tree, overlay);
+                    }
+                    else {
+                        let ranges = punchRanges(this.ranges, nest.overlay || [new Range(cursor.from, cursor.to)]);
+                        if (ranges.length)
+                            this.inner.push(new InnerParse(nest.parser, nest.parser.startParse(this.input, enterFragments(oldMounts, ranges), ranges), nest.overlay ? nest.overlay.map(r => new Range(r.from - cursor.from, r.to - cursor.from)) : null, cursor.tree, ranges));
+                        if (!nest.overlay)
+                            enter = false;
+                        else if (ranges.length)
+                            covered = { ranges, depth: 0, prev: covered };
+                    }
+                }
+                else if (overlay && (range = overlay.predicate(cursor))) {
+                    if (range === true)
+                        range = new Range(cursor.from, cursor.to);
+                    if (range.from < range.to)
+                        overlay.ranges.push(range);
+                }
+                if (enter && cursor.firstChild()) {
+                    if (overlay)
+                        overlay.depth++;
+                    if (covered)
+                        covered.depth++;
+                }
+                else {
+                    for (;;) {
+                        if (cursor.nextSibling())
+                            break;
+                        if (!cursor.parent())
+                            break scan;
+                        if (overlay && !--overlay.depth) {
+                            let ranges = punchRanges(this.ranges, overlay.ranges);
+                            if (ranges.length)
+                                this.inner.splice(overlay.index, 0, new InnerParse(overlay.parser, overlay.parser.startParse(this.input, enterFragments(overlay.mounts, ranges), ranges), overlay.ranges.map(r => new Range(r.from - overlay.start, r.to - overlay.start)), overlay.target, ranges));
+                            overlay = overlay.prev;
+                        }
+                        if (covered && !--covered.depth)
+                            covered = covered.prev;
+                    }
+                }
+            }
+        }
+    }
+    function checkCover(covered, from, to) {
+        for (let range of covered) {
+            if (range.from >= to)
+                break;
+            if (range.to > from)
+                return range.from <= from && range.to >= to ? 2 /* Full */ : 1 /* Partial */;
+        }
+        return 0 /* None */;
+    }
+    // Take a piece of buffer and convert it into a stand-alone
+    // TreeBuffer.
+    function sliceBuf(buf, startI, endI, nodes, positions, off) {
+        if (startI < endI) {
+            let from = buf.buffer[startI + 1], to = buf.buffer[endI - 2];
+            nodes.push(buf.slice(startI, endI, from, to));
+            positions.push(from - off);
+        }
+    }
+    // This function takes a node that's in a buffer, and converts it, and
+    // its parent buffer nodes, into a Tree. This is again acting on the
+    // assumption that the trees and buffers have been constructed by the
+    // parse that was ran via the mix parser, and thus aren't shared with
+    // any other code, making violations of the immutability safe.
+    function materialize(cursor) {
+        let { node } = cursor, depth = 0;
+        // Scan up to the nearest tree
+        do {
+            cursor.parent();
+            depth++;
+        } while (!cursor.tree);
+        // Find the index of the buffer in that tree
+        let i = 0, base = cursor.tree, off = 0;
+        for (;; i++) {
+            off = base.positions[i] + cursor.from;
+            if (off <= node.from && off + base.children[i].length >= node.to)
+                break;
+        }
+        let buf = base.children[i], b = buf.buffer;
+        // Split a level in the buffer, putting the nodes before and after
+        // the child that contains `node` into new buffers.
+        function split(startI, endI, type, innerOffset, length) {
+            let i = startI;
+            while (b[i + 2] + off <= node.from)
+                i = b[i + 3];
+            let children = [], positions = [];
+            sliceBuf(buf, startI, i, children, positions, innerOffset);
+            let from = b[i + 1], to = b[i + 2];
+            let isTarget = from + off == node.from && to + off == node.to && b[i] == node.type.id;
+            children.push(isTarget ? node.toTree() : split(i + 4, b[i + 3], buf.set.types[b[i]], from, to - from));
+            positions.push(from - innerOffset);
+            sliceBuf(buf, b[i + 3], endI, children, positions, innerOffset);
+            return new Tree(type, children, positions, length);
+        }
+        base.children[i] = split(0, b.length, NodeType.none, 0, buf.length);
+        // Move the cursor back to the target node
+        for (let d = 0; d <= depth; d++)
+            cursor.childAfter(node.from);
+    }
+    class StructureCursor {
+        constructor(root, offset) {
+            this.offset = offset;
+            this.done = false;
+            this.cursor = root.fullCursor();
+        }
+        // Move to the first node (in pre-order) that starts at or after `pos`.
+        moveTo(pos) {
+            let { cursor } = this, p = pos - this.offset;
+            while (!this.done && cursor.from < p) {
+                if (cursor.to >= pos && cursor.enter(p, 1, false, false)) ;
+                else if (!cursor.next(false))
+                    this.done = true;
+            }
+        }
+        hasNode(cursor) {
+            this.moveTo(cursor.from);
+            if (!this.done && this.cursor.from + this.offset == cursor.from && this.cursor.tree) {
+                for (let tree = this.cursor.tree;;) {
+                    if (tree == cursor.tree)
+                        return true;
+                    if (tree.children.length && tree.positions[0] == 0 && tree.children[0] instanceof Tree)
+                        tree = tree.children[0];
+                    else
+                        break;
+                }
+            }
+            return false;
+        }
+    }
+    class FragmentCursor$2 {
+        constructor(fragments) {
+            var _a;
+            this.fragments = fragments;
+            this.curTo = 0;
+            this.fragI = 0;
+            if (fragments.length) {
+                let first = this.curFrag = fragments[0];
+                this.curTo = (_a = first.tree.prop(stoppedInner)) !== null && _a !== void 0 ? _a : first.to;
+                this.inner = new StructureCursor(first.tree, -first.offset);
+            }
+            else {
+                this.curFrag = this.inner = null;
+            }
+        }
+        hasNode(node) {
+            while (this.curFrag && node.from >= this.curTo)
+                this.nextFrag();
+            return this.curFrag && this.curFrag.from <= node.from && this.curTo >= node.to && this.inner.hasNode(node);
+        }
+        nextFrag() {
+            var _a;
+            this.fragI++;
+            if (this.fragI == this.fragments.length) {
+                this.curFrag = this.inner = null;
+            }
+            else {
+                let frag = this.curFrag = this.fragments[this.fragI];
+                this.curTo = (_a = frag.tree.prop(stoppedInner)) !== null && _a !== void 0 ? _a : frag.to;
+                this.inner = new StructureCursor(frag.tree, -frag.offset);
+            }
+        }
+        findMounts(pos, parser) {
+            var _a;
+            let result = [];
+            if (this.inner) {
+                this.inner.cursor.moveTo(pos, 1);
+                for (let pos = this.inner.cursor.node; pos; pos = pos.parent) {
+                    let mount = (_a = pos.tree) === null || _a === void 0 ? void 0 : _a.prop(NodeProp.mounted);
+                    if (mount && mount.parser == parser) {
+                        for (let i = this.fragI; i < this.fragments.length; i++) {
+                            let frag = this.fragments[i];
+                            if (frag.from >= pos.to)
+                                break;
+                            if (frag.tree == this.curFrag.tree)
+                                result.push({
+                                    frag,
+                                    pos: pos.from - frag.offset,
+                                    mount
+                                });
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+    }
+    function punchRanges(outer, ranges) {
+        let copy = null, current = ranges;
+        for (let i = 1, j = 0; i < outer.length; i++) {
+            let gapFrom = outer[i - 1].to, gapTo = outer[i].from;
+            for (; j < current.length; j++) {
+                let r = current[j];
+                if (r.from >= gapTo)
+                    break;
+                if (r.to <= gapFrom)
+                    continue;
+                if (!copy)
+                    current = copy = ranges.slice();
+                if (r.from < gapFrom) {
+                    copy[j] = new Range(r.from, gapFrom);
+                    if (r.to > gapTo)
+                        copy.splice(j + 1, 0, new Range(gapTo, r.to));
+                }
+                else if (r.to > gapTo) {
+                    copy[j--] = new Range(gapTo, r.to);
+                }
+                else {
+                    copy.splice(j--, 1);
+                }
+            }
+        }
+        return current;
+    }
+    function findCoverChanges(a, b, from, to) {
+        let iA = 0, iB = 0, inA = false, inB = false, pos = -1e9;
+        let result = [];
+        for (;;) {
+            let nextA = iA == a.length ? 1e9 : inA ? a[iA].to : a[iA].from;
+            let nextB = iB == b.length ? 1e9 : inB ? b[iB].to : b[iB].from;
+            if (inA != inB) {
+                let start = Math.max(pos, from), end = Math.min(nextA, nextB, to);
+                if (start < end)
+                    result.push(new Range(start, end));
+            }
+            pos = Math.min(nextA, nextB);
+            if (pos == 1e9)
+                break;
+            if (nextA == pos) {
+                if (!inA)
+                    inA = true;
+                else {
+                    inA = false;
+                    iA++;
+                }
+            }
+            if (nextB == pos) {
+                if (!inB)
+                    inB = true;
+                else {
+                    inB = false;
+                    iB++;
+                }
+            }
+        }
+        return result;
+    }
+    // Given a number of fragments for the outer tree, and a set of ranges
+    // to parse, find fragments for inner trees mounted around those
+    // ranges, if any.
+    function enterFragments(mounts, ranges) {
+        let result = [];
+        for (let { pos, mount, frag } of mounts) {
+            let startPos = pos + (mount.overlay ? mount.overlay[0].from : 0), endPos = startPos + mount.tree.length;
+            let from = Math.max(frag.from, startPos), to = Math.min(frag.to, endPos);
+            if (mount.overlay) {
+                let overlay = mount.overlay.map(r => new Range(r.from + pos, r.to + pos));
+                let changes = findCoverChanges(ranges, overlay, from, to);
+                for (let i = 0, pos = from;; i++) {
+                    let last = i == changes.length, end = last ? to : changes[i].from;
+                    if (end > pos)
+                        result.push(new TreeFragment(pos, end, mount.tree, -startPos, frag.from >= pos, frag.to <= end));
+                    if (last)
+                        break;
+                    pos = changes[i].to;
+                }
+            }
+            else {
+                result.push(new TreeFragment(from, to, mount.tree, -startPos, frag.from >= startPos, frag.to <= endPos));
+            }
+        }
+        return result;
+    }
 
     var _a;
     /**
@@ -14071,6 +14491,103 @@
             this.language = language;
             this.support = support;
             this.extension = [language, support];
+        }
+    }
+    /**
+    Language descriptions are used to store metadata about languages
+    and to dynamically load them. Their main role is finding the
+    appropriate language for a filename or dynamically loading nested
+    parsers.
+    */
+    class LanguageDescription {
+        constructor(
+        /**
+        The name of this language.
+        */
+        name, 
+        /**
+        Alternative names for the mode (lowercased, includes `this.name`).
+        */
+        alias, 
+        /**
+        File extensions associated with this language.
+        */
+        extensions, 
+        /**
+        Optional filename pattern that should be associated with this
+        language.
+        */
+        filename, loadFunc, 
+        /**
+        If the language has been loaded, this will hold its value.
+        */
+        support = undefined) {
+            this.name = name;
+            this.alias = alias;
+            this.extensions = extensions;
+            this.filename = filename;
+            this.loadFunc = loadFunc;
+            this.support = support;
+            this.loading = null;
+        }
+        /**
+        Start loading the the language. Will return a promise that
+        resolves to a [`LanguageSupport`](https://codemirror.net/6/docs/ref/#language.LanguageSupport)
+        object when the language successfully loads.
+        */
+        load() {
+            return this.loading || (this.loading = this.loadFunc().then(support => this.support = support, err => { this.loading = null; throw err; }));
+        }
+        /**
+        Create a language description.
+        */
+        static of(spec) {
+            let { load, support } = spec;
+            if (!load) {
+                if (!support)
+                    throw new RangeError("Must pass either 'load' or 'support' to LanguageDescription.of");
+                load = () => Promise.resolve(support);
+            }
+            return new LanguageDescription(spec.name, (spec.alias || []).concat(spec.name).map(s => s.toLowerCase()), spec.extensions || [], spec.filename, load, support);
+        }
+        /**
+        Look for a language in the given array of descriptions that
+        matches the filename. Will first match
+        [`filename`](https://codemirror.net/6/docs/ref/#language.LanguageDescription.filename) patterns,
+        and then [extensions](https://codemirror.net/6/docs/ref/#language.LanguageDescription.extensions),
+        and return the first language that matches.
+        */
+        static matchFilename(descs, filename) {
+            for (let d of descs)
+                if (d.filename && d.filename.test(filename))
+                    return d;
+            let ext = /\.([^.]+)$/.exec(filename);
+            if (ext)
+                for (let d of descs)
+                    if (d.extensions.indexOf(ext[1]) > -1)
+                        return d;
+            return null;
+        }
+        /**
+        Look for a language whose name or alias matches the the given
+        name (case-insensitively). If `fuzzy` is true, and no direct
+        matchs is found, this'll also search for a language whose name
+        or alias occurs in the string (for names shorter than three
+        characters, only when surrounded by non-word characters).
+        */
+        static matchLanguageName(descs, name, fuzzy = true) {
+            name = name.toLowerCase();
+            for (let d of descs)
+                if (d.alias.some(a => a == name))
+                    return d;
+            if (fuzzy)
+                for (let d of descs)
+                    for (let a of d.alias) {
+                        let found = name.indexOf(a);
+                        if (found > -1 && (a.length > 2 || !/\w/.test(name[found - 1]) && !/\w/.test(name[found + a.length])))
+                            return d;
+                    }
+            return null;
         }
     }
 
@@ -16410,7 +16927,7 @@
                     range: EditorSelection.range(range.anchor + token.length, range.head + token.length) };
             let pos = range.head, next = nextChar(state.doc, pos);
             if (next == token) {
-                if (nodeStart(state, pos)) {
+                if (nodeStart$1(state, pos)) {
                     return { changes: { insert: token + token, from: pos },
                         effects: closeBracketEffect.of(pos + token.length),
                         range: EditorSelection.cursor(pos + token.length) };
@@ -16422,7 +16939,7 @@
                 }
             }
             else if (allowTriple && state.sliceDoc(pos - 2 * token.length, pos) == token + token &&
-                nodeStart(state, pos - 2 * token.length)) {
+                nodeStart$1(state, pos - 2 * token.length)) {
                 return { changes: { insert: token + token + token + token, from: pos },
                     effects: closeBracketEffect.of(pos + token.length),
                     range: EditorSelection.cursor(pos + token.length) };
@@ -16441,7 +16958,7 @@
             userEvent: "input.type"
         });
     }
-    function nodeStart(state, pos) {
+    function nodeStart$1(state, pos) {
         let tree = syntaxTree(state).resolveInner(pos + 1);
         return tree.parent && tree.from == pos;
     }
@@ -18911,7 +19428,7 @@
             this.open = open;
         }
         static start() {
-            return new CompletionState(none, "cm-ac-" + Math.floor(Math.random() * 2e6).toString(36), null);
+            return new CompletionState(none$1, "cm-ac-" + Math.floor(Math.random() * 2e6).toString(36), null);
         }
         update(tr) {
             let { state } = tr, conf = state.facet(completionConfig);
@@ -18963,7 +19480,7 @@
             "aria-controls": id
         };
     }
-    const none = [];
+    const none$1 = [];
     function cmpOption(a, b) {
         let dScore = b.match[0] - a.match[0];
         if (dScore)
@@ -20387,7 +20904,7 @@
     For tags that extend some parent tag, the documentation links to
     the parent.
     */
-    const tags = {
+    const tags$1 = {
         /**
         A comment.
         */
@@ -20757,44 +21274,44 @@
     A default highlight style (works well with light themes).
     */
     const defaultHighlightStyle = /*@__PURE__*/HighlightStyle.define([
-        { tag: tags.link,
+        { tag: tags$1.link,
             textDecoration: "underline" },
-        { tag: tags.heading,
+        { tag: tags$1.heading,
             textDecoration: "underline",
             fontWeight: "bold" },
-        { tag: tags.emphasis,
+        { tag: tags$1.emphasis,
             fontStyle: "italic" },
-        { tag: tags.strong,
+        { tag: tags$1.strong,
             fontWeight: "bold" },
-        { tag: tags.strikethrough,
+        { tag: tags$1.strikethrough,
             textDecoration: "line-through" },
-        { tag: tags.keyword,
+        { tag: tags$1.keyword,
             color: "#708" },
-        { tag: [tags.atom, tags.bool, tags.url, tags.contentSeparator, tags.labelName],
+        { tag: [tags$1.atom, tags$1.bool, tags$1.url, tags$1.contentSeparator, tags$1.labelName],
             color: "#219" },
-        { tag: [tags.literal, tags.inserted],
+        { tag: [tags$1.literal, tags$1.inserted],
             color: "#164" },
-        { tag: [tags.string, tags.deleted],
+        { tag: [tags$1.string, tags$1.deleted],
             color: "#a11" },
-        { tag: [tags.regexp, tags.escape, /*@__PURE__*/tags.special(tags.string)],
+        { tag: [tags$1.regexp, tags$1.escape, /*@__PURE__*/tags$1.special(tags$1.string)],
             color: "#e40" },
-        { tag: /*@__PURE__*/tags.definition(tags.variableName),
+        { tag: /*@__PURE__*/tags$1.definition(tags$1.variableName),
             color: "#00f" },
-        { tag: /*@__PURE__*/tags.local(tags.variableName),
+        { tag: /*@__PURE__*/tags$1.local(tags$1.variableName),
             color: "#30a" },
-        { tag: [tags.typeName, tags.namespace],
+        { tag: [tags$1.typeName, tags$1.namespace],
             color: "#085" },
-        { tag: tags.className,
+        { tag: tags$1.className,
             color: "#167" },
-        { tag: [/*@__PURE__*/tags.special(tags.variableName), tags.macroName],
+        { tag: [/*@__PURE__*/tags$1.special(tags$1.variableName), tags$1.macroName],
             color: "#256" },
-        { tag: /*@__PURE__*/tags.definition(tags.propertyName),
+        { tag: /*@__PURE__*/tags$1.definition(tags$1.propertyName),
             color: "#00c" },
-        { tag: tags.comment,
+        { tag: tags$1.comment,
             color: "#940" },
-        { tag: tags.meta,
+        { tag: tags$1.meta,
             color: "#7a757a" },
-        { tag: tags.invalid,
+        { tag: tags$1.invalid,
             color: "#f00" }
     ]);
     /**
@@ -20846,36 +21363,36 @@
       to `"cmt-propertyName cmt-definition"`
     */
     /*@__PURE__*/HighlightStyle.define([
-        { tag: tags.link, class: "cmt-link" },
-        { tag: tags.heading, class: "cmt-heading" },
-        { tag: tags.emphasis, class: "cmt-emphasis" },
-        { tag: tags.strong, class: "cmt-strong" },
-        { tag: tags.keyword, class: "cmt-keyword" },
-        { tag: tags.atom, class: "cmt-atom" },
-        { tag: tags.bool, class: "cmt-bool" },
-        { tag: tags.url, class: "cmt-url" },
-        { tag: tags.labelName, class: "cmt-labelName" },
-        { tag: tags.inserted, class: "cmt-inserted" },
-        { tag: tags.deleted, class: "cmt-deleted" },
-        { tag: tags.literal, class: "cmt-literal" },
-        { tag: tags.string, class: "cmt-string" },
-        { tag: tags.number, class: "cmt-number" },
-        { tag: [tags.regexp, tags.escape, /*@__PURE__*/tags.special(tags.string)], class: "cmt-string2" },
-        { tag: tags.variableName, class: "cmt-variableName" },
-        { tag: /*@__PURE__*/tags.local(tags.variableName), class: "cmt-variableName cmt-local" },
-        { tag: /*@__PURE__*/tags.definition(tags.variableName), class: "cmt-variableName cmt-definition" },
-        { tag: /*@__PURE__*/tags.special(tags.variableName), class: "cmt-variableName2" },
-        { tag: /*@__PURE__*/tags.definition(tags.propertyName), class: "cmt-propertyName cmt-definition" },
-        { tag: tags.typeName, class: "cmt-typeName" },
-        { tag: tags.namespace, class: "cmt-namespace" },
-        { tag: tags.className, class: "cmt-className" },
-        { tag: tags.macroName, class: "cmt-macroName" },
-        { tag: tags.propertyName, class: "cmt-propertyName" },
-        { tag: tags.operator, class: "cmt-operator" },
-        { tag: tags.comment, class: "cmt-comment" },
-        { tag: tags.meta, class: "cmt-meta" },
-        { tag: tags.invalid, class: "cmt-invalid" },
-        { tag: tags.punctuation, class: "cmt-punctuation" }
+        { tag: tags$1.link, class: "cmt-link" },
+        { tag: tags$1.heading, class: "cmt-heading" },
+        { tag: tags$1.emphasis, class: "cmt-emphasis" },
+        { tag: tags$1.strong, class: "cmt-strong" },
+        { tag: tags$1.keyword, class: "cmt-keyword" },
+        { tag: tags$1.atom, class: "cmt-atom" },
+        { tag: tags$1.bool, class: "cmt-bool" },
+        { tag: tags$1.url, class: "cmt-url" },
+        { tag: tags$1.labelName, class: "cmt-labelName" },
+        { tag: tags$1.inserted, class: "cmt-inserted" },
+        { tag: tags$1.deleted, class: "cmt-deleted" },
+        { tag: tags$1.literal, class: "cmt-literal" },
+        { tag: tags$1.string, class: "cmt-string" },
+        { tag: tags$1.number, class: "cmt-number" },
+        { tag: [tags$1.regexp, tags$1.escape, /*@__PURE__*/tags$1.special(tags$1.string)], class: "cmt-string2" },
+        { tag: tags$1.variableName, class: "cmt-variableName" },
+        { tag: /*@__PURE__*/tags$1.local(tags$1.variableName), class: "cmt-variableName cmt-local" },
+        { tag: /*@__PURE__*/tags$1.definition(tags$1.variableName), class: "cmt-variableName cmt-definition" },
+        { tag: /*@__PURE__*/tags$1.special(tags$1.variableName), class: "cmt-variableName2" },
+        { tag: /*@__PURE__*/tags$1.definition(tags$1.propertyName), class: "cmt-propertyName cmt-definition" },
+        { tag: tags$1.typeName, class: "cmt-typeName" },
+        { tag: tags$1.namespace, class: "cmt-namespace" },
+        { tag: tags$1.className, class: "cmt-className" },
+        { tag: tags$1.macroName, class: "cmt-macroName" },
+        { tag: tags$1.propertyName, class: "cmt-propertyName" },
+        { tag: tags$1.operator, class: "cmt-operator" },
+        { tag: tags$1.comment, class: "cmt-comment" },
+        { tag: tags$1.meta, class: "cmt-meta" },
+        { tag: tags$1.invalid, class: "cmt-invalid" },
+        { tag: tags$1.punctuation, class: "cmt-punctuation" }
     ]);
 
     class SelectedDiagnostic {
@@ -22178,7 +22695,7 @@
                 }
         }
     }
-    class FragmentCursor {
+    class FragmentCursor$1 {
         constructor(fragments, nodeSet) {
             this.fragments = fragments;
             this.nodeSet = nodeSet;
@@ -22406,7 +22923,7 @@
             let { from } = ranges[0];
             this.stacks = [Stack.start(this, parser.top[0], from)];
             this.fragments = fragments.length && this.stream.end - from > parser.bufferLength * 4
-                ? new FragmentCursor(fragments, parser.nodeSet) : null;
+                ? new FragmentCursor$1(fragments, parser.nodeSet) : null;
         }
         get parsedPos() {
             return this.minStackPos;
@@ -22934,7 +23451,7 @@
     }
 
     // This file was generated by lezer-generator. You probably shouldn't edit it.
-    const parser$2 = LRParser.deserialize({
+    const parser$6 = LRParser.deserialize({
       version: 13,
       states: "$bOVQPOOOOQO'#Cb'#CbOnQPO'#CeOvQPO'#CjOOQO'#Cp'#CpQOQPOOOOQO'#Cg'#CgO}QPO'#CfO!SQPO'#CrOOQO,59P,59PO![QPO,59PO!aQPO'#CuOOQO,59U,59UO!iQPO,59UOVQPO,59QOqQPO'#CkO!nQPO,59^OOQO1G.k1G.kOVQPO'#ClO!vQPO,59aOOQO1G.p1G.pOOQO1G.l1G.lOOQO,59V,59VOOQO-E6i-E6iOOQO,59W,59WOOQO-E6j-E6j",
       stateData: "#O~OcOS~OQSORSOSSOTSOWQO]ROePO~OVXOeUO~O[[O~PVOg^O~Oh_OVfX~OVaO~OhbO[iX~O[dO~Oh_OVfa~OhbO[ia~O",
@@ -22957,7 +23474,7 @@
     A language provider that provides JSON parsing.
     */
     const jsonLanguage = /*@__PURE__*/LRLanguage.define({
-        parser: /*@__PURE__*/parser$2.configure({
+        parser: /*@__PURE__*/parser$6.configure({
             props: [
                 /*@__PURE__*/indentNodeProp.add({
                     Object: /*@__PURE__*/continuedIndent({ except: /^\s*\}/ }),
@@ -22967,14 +23484,14 @@
                     "Object Array": foldInside$1
                 }),
                 /*@__PURE__*/styleTags({
-                    String: tags.string,
-                    Number: tags.number,
-                    "True False": tags.bool,
-                    PropertyName: tags.propertyName,
-                    Null: tags.null,
-                    ",": tags.separator,
-                    "[ ]": tags.squareBracket,
-                    "{ }": tags.brace
+                    String: tags$1.string,
+                    Number: tags$1.number,
+                    "True False": tags$1.bool,
+                    PropertyName: tags$1.propertyName,
+                    Null: tags$1.null,
+                    ",": tags$1.separator,
+                    "[ ]": tags$1.squareBracket,
+                    "{ }": tags$1.brace
                 })
             ]
         }),
@@ -23008,10 +23525,10 @@
     /* Hand-written tokenizers for JavaScript tokens that can't be
        expressed by lezer's built-in tokenizer. */
 
-    const space = [9, 10, 11, 12, 13, 32, 133, 160, 5760, 8192, 8193, 8194, 8195, 8196, 8197, 8198, 8199, 8200,
+    const space$2 = [9, 10, 11, 12, 13, 32, 133, 160, 5760, 8192, 8193, 8194, 8195, 8196, 8197, 8198, 8199, 8200,
                    8201, 8202, 8232, 8233, 8239, 8287, 12288];
 
-    const braceR = 125, braceL = 123, semicolon = 59, slash = 47, star = 42,
+    const braceR = 125, braceL = 123, semicolon = 59, slash$1 = 47, star = 42,
           plus = 43, minus = 45, dollar = 36, backtick = 96, backslash = 92;
 
     const trackNewline = new ContextTracker({
@@ -23030,8 +23547,8 @@
 
     const noSemicolon = new ExternalTokenizer((input, stack) => {
       let {next} = input, after;
-      if (space.indexOf(next) > -1) return
-      if (next == slash && ((after = input.peek(1)) == slash || after == star)) return
+      if (space$2.indexOf(next) > -1) return
+      if (next == slash$1 && ((after = input.peek(1)) == slash$1 || after == star)) return
       if (next != braceR && next != semicolon && next != -1 && !stack.context && stack.canShift(noSemi))
         input.acceptToken(noSemi);
     }, {contextual: true});
@@ -23080,10 +23597,10 @@
     }
 
     // This file was generated by lezer-generator. You probably shouldn't edit it.
-    const spec_identifier$1 = {__proto__:null,export:18, as:23, from:29, default:32, async:37, function:38, this:48, true:56, false:56, void:66, typeof:70, null:86, super:88, new:122, await:139, yield:141, delete:142, class:152, extends:154, public:197, private:197, protected:197, readonly:199, instanceof:220, in:222, const:224, import:256, keyof:307, unique:311, infer:317, is:351, abstract:371, implements:373, type:375, let:378, var:380, interface:387, enum:391, namespace:397, module:399, declare:403, global:407, for:428, of:437, while:440, with:444, do:448, if:452, else:454, switch:458, case:464, try:470, catch:472, finally:474, return:478, throw:482, break:486, continue:490, debugger:494};
+    const spec_identifier$2 = {__proto__:null,export:18, as:23, from:29, default:32, async:37, function:38, this:48, true:56, false:56, void:66, typeof:70, null:86, super:88, new:122, await:139, yield:141, delete:142, class:152, extends:154, public:197, private:197, protected:197, readonly:199, instanceof:220, in:222, const:224, import:256, keyof:307, unique:311, infer:317, is:351, abstract:371, implements:373, type:375, let:378, var:380, interface:387, enum:391, namespace:397, module:399, declare:403, global:407, for:428, of:437, while:440, with:444, do:448, if:452, else:454, switch:458, case:464, try:470, catch:472, finally:474, return:478, throw:482, break:486, continue:490, debugger:494};
     const spec_word = {__proto__:null,async:109, get:111, set:113, public:161, private:161, protected:161, static:163, abstract:165, override:167, readonly:173, new:355};
     const spec_LessThan = {__proto__:null,"<":129};
-    const parser$1 = LRParser.deserialize({
+    const parser$5 = LRParser.deserialize({
       version: 13,
       states: "$1jO`QYOOO'QQ!LdO'#ChO'XOSO'#DVO)dQYO'#D]O)tQYO'#DhO){QYO'#DrO-xQYO'#DxOOQO'#E]'#E]O.]QWO'#E[O.bQWO'#E[OOQ!LS'#Ef'#EfO0aQ!LdO'#IrO2wQ!LdO'#IsO3eQWO'#EzO3jQpO'#FaOOQ!LS'#FS'#FSO3rO!bO'#FSO4QQWO'#FhO5_QWO'#FgOOQ!LS'#Is'#IsOOQ!LQ'#Ir'#IrOOQQ'#J['#J[O5dQWO'#HnO5iQ!LYO'#HoOOQQ'#If'#IfOOQQ'#Hp'#HpQ`QYOOO){QYO'#DjO5qQWO'#G[O5vQ#tO'#CmO6UQWO'#EZO6aQWO'#EgO6fQ#tO'#FRO7QQWO'#G[O7VQWO'#G`O7bQWO'#G`O7pQWO'#GcO7pQWO'#GdO7pQWO'#GfO5qQWO'#GiO8aQWO'#GlO9oQWO'#CdO:PQWO'#GyO:XQWO'#HPO:XQWO'#HRO`QYO'#HTO:XQWO'#HVO:XQWO'#HYO:^QWO'#H`O:cQ!LZO'#HdO){QYO'#HfO:nQ!LZO'#HhO:yQ!LZO'#HjO5iQ!LYO'#HlO){QYO'#DWOOOS'#Hr'#HrO;UOSO,59qOOQ!LS,59q,59qO=gQbO'#ChO=qQYO'#HsO>UQWO'#ItO@TQbO'#ItO'dQYO'#ItO@[QWO,59wO@rQ&jO'#DbOAkQWO'#E]OAxQWO'#JPOBTQWO'#JOOBTQWO'#JOOB]QWO,5:yOBbQWO'#I}OBiQWO'#DyO5vQ#tO'#EZOBwQWO'#EZOCSQ`O'#FROOQ!LS,5:S,5:SOC[QYO,5:SOEYQ!LdO,5:^OEvQWO,5:dOFaQ!LYO'#I|O7VQWO'#I{OFhQWO'#I{OFpQWO,5:xOFuQWO'#I{OGTQYO,5:vOITQWO'#EWOJ_QWO,5:vOKnQWO'#DlOKuQYO'#DqOLPQ&jO,5;PO){QYO,5;POOQQ'#Er'#ErOOQQ'#Et'#EtO){QYO,5;RO){QYO,5;RO){QYO,5;RO){QYO,5;RO){QYO,5;RO){QYO,5;RO){QYO,5;RO){QYO,5;RO){QYO,5;RO){QYO,5;RO){QYO,5;ROOQQ'#Ex'#ExOLXQYO,5;cOOQ!LS,5;h,5;hOOQ!LS,5;i,5;iONXQWO,5;iOOQ!LS,5;j,5;jO){QYO'#H}ON^Q!LYO,5<TONxQWO,5;RO){QYO,5;fO! bQpO'#JTO! PQpO'#JTO! iQpO'#JTO! zQpO,5;qOOOO,5;{,5;{O!!YQYO'#FcOOOO'#H|'#H|O3rO!bO,5;nO!!aQpO'#FeOOQ!LS,5;n,5;nO!!}Q,UO'#CrOOQ!LS'#Cu'#CuO!#bQWO'#CuO!#gOSO'#CyO!$TQ#tO,5<QO!$[QWO,5<SO!%hQWO'#FrO!%uQWO'#FsO!%zQWO'#FwO!&|Q&jO'#F{O!'oQ,UO'#IoOOQ!LS'#Io'#IoO!'yQWO'#InO!(XQWO'#ImOOQ!LS'#Cs'#CsOOQ!LS'#C|'#C|O!(aQWO'#DOOJdQWO'#FjOJdQWO'#FlO!(fQWO'#FnO!(kQWO'#FoO!(pQWO'#FuOJdQWO'#FzO!(uQWO'#E^O!)^QWO,5<RO`QYO,5>YOOQQ'#Ii'#IiOOQQ,5>Z,5>ZOOQQ-E;n-E;nO!+YQ!LdO,5:UOOQ!LQ'#Cp'#CpO!+yQ#tO,5<vOOQO'#Cf'#CfO!,[QWO'#CqO!,dQ!LYO'#IjO5_QWO'#IjO:^QWO,59XO!,rQpO,59XO!,zQ#tO,59XO5vQ#tO,59XO!-VQWO,5:vO!-_QWO'#GxO!-mQWO'#J`O){QYO,5;kO!-uQ&jO,5;mO!-zQWO,5=cO!.PQWO,5=cO!.UQWO,5=cO5iQ!LYO,5=cO5qQWO,5<vO!.dQWO'#E_O!.xQ&jO'#E`OOQ!LQ'#I}'#I}O!/ZQ!LYO'#J]O5iQ!LYO,5<zO7pQWO,5=QOOQO'#Cr'#CrO!/fQpO,5<}O!/nQ#tO,5=OO!/yQWO,5=QO!0OQ`O,5=TO:^QWO'#GnO5qQWO'#GpO!0WQWO'#GpO5vQ#tO'#GsO!0]QWO'#GsOOQQ,5=W,5=WO!0bQWO'#GtO!0jQWO'#CmO!0oQWO,59OO!0yQWO,59OO!2{QYO,59OOOQQ,59O,59OO!3YQ!LYO,59OO){QYO,59OO!3eQYO'#G{OOQQ'#G|'#G|OOQQ'#G}'#G}O`QYO,5=eO!3uQWO,5=eO){QYO'#DxO`QYO,5=kO`QYO,5=mO!3zQWO,5=oO`QYO,5=qO!4PQWO,5=tO!4UQYO,5=zOOQQ,5>O,5>OO){QYO,5>OO5iQ!LYO,5>QOOQQ,5>S,5>SO!8VQWO,5>SOOQQ,5>U,5>UO!8VQWO,5>UOOQQ,5>W,5>WO!8[Q`O,59rOOOS-E;p-E;pOOQ!LS1G/]1G/]O!8aQbO,5>_O'dQYO,5>_OOQO,5>d,5>dO!8kQYO'#HsOOQO-E;q-E;qO!8xQWO,5?`O!9QQbO,5?`O!9XQWO,5?jOOQ!LS1G/c1G/cO!9aQpO'#DTOOQO'#Iv'#IvO){QYO'#IvO!:OQpO'#IvO!:mQpO'#DcO!;OQ&jO'#DcO!=ZQYO'#DcO!=bQWO'#IuO!=jQWO,59|O!=oQWO'#EaO!=}QWO'#JQO!>VQWO,5:zO!>mQ&jO'#DcO){QYO,5?kO!>wQWO'#HxOOQO-E;v-E;vO!9XQWO,5?jOOQ!LQ1G0e1G0eO!@TQ&jO'#D|OOQ!LS,5:e,5:eO){QYO,5:eOITQWO,5:eO!@[QWO,5:eO:^QWO,5:uO!,rQpO,5:uO!,zQ#tO,5:uO5vQ#tO,5:uOOQ!LS1G/n1G/nOOQ!LS1G0O1G0OOOQ!LQ'#EV'#EVO){QYO,5?hO!@gQ!LYO,5?hO!@xQ!LYO,5?hO!APQWO,5?gO!AXQWO'#HzO!APQWO,5?gOOQ!LQ1G0d1G0dO7VQWO,5?gOOQ!LS1G0b1G0bO!AsQ!LdO1G0bO!BdQ!LbO,5:rOOQ!LS'#Fq'#FqO!CQQ!LdO'#IoOGTQYO1G0bO!EPQ#tO'#IwO!EZQWO,5:WO!E`QbO'#IxO){QYO'#IxO!EjQWO,5:]OOQ!LS'#DT'#DTOOQ!LS1G0k1G0kO!EoQWO1G0kO!HQQ!LdO1G0mO!HXQ!LdO1G0mO!JlQ!LdO1G0mO!JsQ!LdO1G0mO!LzQ!LdO1G0mO!M_Q!LdO1G0mO#!OQ!LdO1G0mO#!VQ!LdO1G0mO#$jQ!LdO1G0mO#$qQ!LdO1G0mO#&fQ!LdO1G0mO#)`Q7^O'#ChO#+ZQ7^O1G0}O#-UQ7^O'#IsOOQ!LS1G1T1G1TO#-iQ!LdO,5>iOOQ!LQ-E;{-E;{O#.YQ!LdO1G0mOOQ!LS1G0m1G0mO#0[Q!LdO1G1QO#0{QpO,5;sO#1QQpO,5;tO#1VQpO'#F[O#1kQWO'#FZOOQO'#JU'#JUOOQO'#H{'#H{O#1pQpO1G1]OOQ!LS1G1]1G1]OOOO1G1f1G1fO#2OQ7^O'#IrO#2YQWO,5;}OLXQYO,5;}OOOO-E;z-E;zOOQ!LS1G1Y1G1YOOQ!LS,5<P,5<PO#2_QpO,5<POOQ!LS,59a,59aOITQWO'#C{OOOS'#Hq'#HqO#2dOSO,59eOOQ!LS,59e,59eO){QYO1G1lO!(kQWO'#IPO#2oQWO,5<eOOQ!LS,5<b,5<bOOQO'#GV'#GVOJdQWO,5<pOOQO'#GX'#GXOJdQWO,5<rOJdQWO,5<tOOQO1G1n1G1nO#2zQ`O'#CpO#3_Q`O,5<^O#3fQWO'#JXO5qQWO'#JXO#3tQWO,5<`OJdQWO,5<_O#3yQ`O'#FqO#4WQ`O'#JYO#4bQWO'#JYOITQWO'#JYO#4gQWO,5<cOOQ!LQ'#Dg'#DgO#4lQWO'#FtO#4wQpO'#F|O!&wQ&jO'#F|O!&wQ&jO'#GOO#5YQWO'#GPO!(pQWO'#GSOOQO'#IR'#IRO#5_Q&jO,5<gOOQ!LS,5<g,5<gO#5fQ&jO'#F|O#5tQ&jO'#F}O#5|Q&jO'#F}OOQ!LS,5<u,5<uOJdQWO,5?YOJdQWO,5?YO#6RQWO'#ISO#6^QWO,5?XOOQ!LS'#Ch'#ChO#7QQ#tO,59jOOQ!LS,59j,59jO#7sQ#tO,5<UO#8fQ#tO,5<WO#8pQWO,5<YOOQ!LS,5<Z,5<ZO#8uQWO,5<aO#8zQ#tO,5<fOGTQYO1G1mO#9[QWO1G1mOOQQ1G3t1G3tOOQ!LS1G/p1G/pONXQWO1G/pOOQQ1G2b1G2bOITQWO1G2bO){QYO1G2bOITQWO1G2bO#9aQWO1G2bO#9oQWO,59]O#:xQWO'#EWOOQ!LQ,5?U,5?UO#;SQ!LYO,5?UOOQQ1G.s1G.sO:^QWO1G.sO!,rQpO1G.sO!,zQ#tO1G.sO#;bQWO1G0bO#;gQWO'#ChO#;rQWO'#JaO#;zQWO,5=dO#<PQWO'#JaO#<UQWO'#JaO#<^QWO'#I[O#<lQWO,5?zO#<tQbO1G1VOOQ!LS1G1X1G1XO5qQWO1G2}O#<{QWO1G2}O#=QQWO1G2}O#=VQWO1G2}OOQQ1G2}1G2}O#=[Q#tO1G2bO7VQWO'#JOO7VQWO'#EaO7VQWO'#IUO#=mQ!LYO,5?wOOQQ1G2f1G2fO!/yQWO1G2lOITQWO1G2iO#=xQWO1G2iOOQQ1G2j1G2jOITQWO1G2jO#=}QWO1G2jO#>VQ&jO'#GhOOQQ1G2l1G2lO!&wQ&jO'#IWO!0OQ`O1G2oOOQQ1G2o1G2oOOQQ,5=Y,5=YO#>_Q#tO,5=[O5qQWO,5=[O#5YQWO,5=_O5_QWO,5=_O!,rQpO,5=_O!,zQ#tO,5=_O5vQ#tO,5=_O#>pQWO'#J_O#>{QWO,5=`OOQQ1G.j1G.jO#?QQ!LYO1G.jO#?]QWO1G.jO#?bQWO1G.jO5iQ!LYO1G.jO#?jQbO,5?|O#?tQWO,5?|O#@PQYO,5=gO#@WQWO,5=gO7VQWO,5?|OOQQ1G3P1G3PO`QYO1G3POOQQ1G3V1G3VOOQQ1G3X1G3XO:XQWO1G3ZO#@]QYO1G3]O#DWQYO'#H[OOQQ1G3`1G3`O:^QWO1G3fO#DeQWO1G3fO5iQ!LYO1G3jOOQQ1G3l1G3lOOQ!LQ'#Fx'#FxO5iQ!LYO1G3nO5iQ!LYO1G3pOOOS1G/^1G/^O#DmQ`O,5<TO#DuQbO1G3yOOQO1G4O1G4OO){QYO,5>_O#EPQWO1G4zO#EXQWO1G5UO#EaQWO,5?bOLXQYO,5:{O7VQWO,5:{O:^QWO,59}OLXQYO,59}O!,rQpO,59}O#EfQ7^O,59}OOQO,5:{,5:{O#EpQ&jO'#HtO#FWQWO,5?aOOQ!LS1G/h1G/hO#F`Q&jO'#HyO#FtQWO,5?lOOQ!LQ1G0f1G0fO!;OQ&jO,59}O#F|QbO1G5VO7VQWO,5>dOOQ!LQ'#ES'#ESO#GWQ!LrO'#ETO!?{Q&jO'#D}OOQO'#Hw'#HwO#GrQ&jO,5:hOOQ!LS,5:h,5:hO#GyQ&jO'#D}O#H[Q&jO'#D}O#HcQ&jO'#EYO#HfQ&jO'#ETO#HsQ&jO'#ETO!?{Q&jO'#ETO#IWQWO1G0PO#I]Q`O1G0POOQ!LS1G0P1G0PO){QYO1G0POITQWO1G0POOQ!LS1G0a1G0aO:^QWO1G0aO!,rQpO1G0aO!,zQ#tO1G0aO#IdQ!LdO1G5SO){QYO1G5SO#ItQ!LYO1G5SO#JVQWO1G5RO7VQWO,5>fOOQO,5>f,5>fO#J_QWO,5>fOOQO-E;x-E;xO#JVQWO1G5RO#JmQ!LdO,59jO#LlQ!LdO,5<UO#NnQ!LdO,5<WO$!pQ!LdO,5<fOOQ!LS7+%|7+%|O$$xQ!LdO7+%|O$%iQWO'#HuO$%sQWO,5?cOOQ!LS1G/r1G/rO$%{QYO'#HvO$&YQWO,5?dO$&bQbO,5?dOOQ!LS1G/w1G/wOOQ!LS7+&V7+&VO$&lQ7^O,5:^O){QYO7+&iO$&vQ7^O,5:UOOQO1G1_1G1_OOQO1G1`1G1`O$'TQMhO,5;vOLXQYO,5;uOOQO-E;y-E;yOOQ!LS7+&w7+&wOOOO7+'Q7+'QOOOO1G1i1G1iO$'`QWO1G1iOOQ!LS1G1k1G1kO$'eQ`O,59gOOOS-E;o-E;oOOQ!LS1G/P1G/PO$'lQ!LdO7+'WOOQ!LS,5>k,5>kO$(]QWO,5>kOOQ!LS1G2P1G2PP$(bQWO'#IPPOQ!LS-E;}-E;}O$)RQ#tO1G2[O$)tQ#tO1G2^O$*OQ#tO1G2`OOQ!LS1G1x1G1xO$*VQWO'#IOO$*eQWO,5?sO$*eQWO,5?sO$*mQWO,5?sO$*xQWO,5?sOOQO1G1z1G1zO$+WQ#tO1G1yO$+hQWO'#IQO$+xQWO,5?tOITQWO,5?tO$,QQ`O,5?tOOQ!LS1G1}1G1}O5iQ!LYO,5<hO5iQ!LYO,5<iO$,[QWO,5<iO#5TQWO,5<iO!,rQpO,5<hO$,aQWO,5<jO5iQ!LYO,5<kO$,[QWO,5<nOOQO-E<P-E<POOQ!LS1G2R1G2RO!&wQ&jO,5<hO$,iQWO,5<iO!&wQ&jO,5<jO!&wQ&jO,5<iO$,tQ#tO1G4tO$-OQ#tO1G4tOOQO,5>n,5>nOOQO-E<Q-E<QO!-uQ&jO,59lO){QYO,59lO$-]QWO1G1tOJdQWO1G1{O$-bQ!LdO7+'XOOQ!LS7+'X7+'XOGTQYO7+'XOOQ!LS7+%[7+%[O$.RQ`O'#JZO#IWQWO7+'|O$.]QWO7+'|O$.eQ`O7+'|OOQQ7+'|7+'|OITQWO7+'|O){QYO7+'|OITQWO7+'|OOQO1G.w1G.wO$.oQ!LbO'#ChO$/PQ!LbO,5<lO$/nQWO,5<lOOQ!LQ1G4p1G4pOOQQ7+$_7+$_O:^QWO7+$_O!,rQpO7+$_OGTQYO7+%|O$/sQWO'#IZO$0UQWO,5?{OOQO1G3O1G3OO5qQWO,5?{O$0UQWO,5?{O$0^QWO,5?{OOQO,5>v,5>vOOQO-E<Y-E<YOOQ!LS7+&q7+&qO$0cQWO7+(iO5iQ!LYO7+(iO5qQWO7+(iO$0hQWO7+(iO$0mQWO7+'|OOQ!LQ,5>p,5>pOOQ!LQ-E<S-E<SOOQQ7+(W7+(WO$0{Q!LbO7+(TOITQWO7+(TO$1VQ`O7+(UOOQQ7+(U7+(UOITQWO7+(UO$1^QWO'#J^O$1iQWO,5=SOOQO,5>r,5>rOOQO-E<U-E<UOOQQ7+(Z7+(ZO$2cQ&jO'#GqOOQQ1G2v1G2vOITQWO1G2vO){QYO1G2vOITQWO1G2vO$2jQWO1G2vO$2xQ#tO1G2vO5iQ!LYO1G2yO#5YQWO1G2yO5_QWO1G2yO!,rQpO1G2yO!,zQ#tO1G2yO$3ZQWO'#IYO$3fQWO,5?yO$3nQ&jO,5?yOOQ!LQ1G2z1G2zOOQQ7+$U7+$UO$3vQWO7+$UO5iQ!LYO7+$UO$3{QWO7+$UO){QYO1G5hO){QYO1G5iO$4QQYO1G3RO$4XQWO1G3RO$4^QYO1G3RO$4eQ!LYO1G5hOOQQ7+(k7+(kO5iQ!LYO7+(uO`QYO7+(wOOQQ'#Jd'#JdOOQQ'#I]'#I]O$4oQYO,5=vOOQQ,5=v,5=vO){QYO'#H]O$4|QWO'#H_OOQQ7+)Q7+)QO$5RQYO7+)QO7VQWO7+)QOOQQ7+)U7+)UOOQQ7+)Y7+)YOOQQ7+)[7+)[OOQO1G4|1G4|O$9PQ7^O1G0gO$9ZQWO1G0gOOQO1G/i1G/iO$9fQ7^O1G/iO:^QWO1G/iOLXQYO'#DcOOQO,5>`,5>`OOQO-E;r-E;rOOQO,5>e,5>eOOQO-E;w-E;wO!,rQpO1G/iO:^QWO,5:iOOQO,5:o,5:oO){QYO,5:oO$9pQ!LYO,5:oO$9{Q!LYO,5:oO!,rQpO,5:iOOQO-E;u-E;uOOQ!LS1G0S1G0SO!?{Q&jO,5:iO$:ZQ&jO,5:iO$:lQ!LrO,5:oO$;WQ&jO,5:iO!?{Q&jO,5:oOOQO,5:t,5:tO$;_Q&jO,5:oO$;lQ!LYO,5:oOOQ!LS7+%k7+%kO#IWQWO7+%kO#I]Q`O7+%kOOQ!LS7+%{7+%{O:^QWO7+%{O!,rQpO7+%{O$<QQ!LdO7+*nO){QYO7+*nOOQO1G4Q1G4QO7VQWO1G4QO$<bQWO7+*mO$<jQ!LdO1G2[O$>lQ!LdO1G2^O$@nQ!LdO1G1yO$BvQ#tO,5>aOOQO-E;s-E;sO$CQQbO,5>bO){QYO,5>bOOQO-E;t-E;tO$C[QWO1G5OO$CdQ7^O1G0bO$EkQ7^O1G0mO$ErQ7^O1G0mO$GsQ7^O1G0mO$GzQ7^O1G0mO$IoQ7^O1G0mO$JSQ7^O1G0mO$LaQ7^O1G0mO$LhQ7^O1G0mO$NiQ7^O1G0mO$NpQ7^O1G0mO%!eQ7^O1G0mO%!xQ!LdO<<JTO%#iQ7^O1G0mO%%XQ7^O'#IoO%'UQ7^O1G1QOLXQYO'#F^OOQO'#JV'#JVOOQO1G1b1G1bO%'cQWO1G1aO%'hQ7^O,5>iOOOO7+'T7+'TOOOS1G/R1G/ROOQ!LS1G4V1G4VOJdQWO7+'zO%'rQWO,5>jO5qQWO,5>jOOQO-E;|-E;|O%(QQWO1G5_O%(QQWO1G5_O%(YQWO1G5_O%(eQ`O,5>lO%(oQWO,5>lOITQWO,5>lOOQO-E<O-E<OO%(tQ`O1G5`O%)OQWO1G5`OOQO1G2S1G2SOOQO1G2T1G2TO5iQ!LYO1G2TO$,[QWO1G2TO5iQ!LYO1G2SO%)WQWO1G2UOITQWO1G2UOOQO1G2V1G2VO5iQ!LYO1G2YO!,rQpO1G2SO#5TQWO1G2TO%)]QWO1G2UO%)eQWO1G2TOJdQWO7+*`OOQ!LS1G/W1G/WO%)pQWO1G/WOOQ!LS7+'`7+'`O%)uQ#tO7+'gO%*VQ!LdO<<JsOOQ!LS<<Js<<JsOITQWO'#ITO%*vQWO,5?uOOQQ<<Kh<<KhOITQWO<<KhO#IWQWO<<KhO%+OQWO<<KhO%+WQ`O<<KhOITQWO1G2WOOQQ<<Gy<<GyO:^QWO<<GyO%+bQ!LdO<<IhOOQ!LS<<Ih<<IhOOQO,5>u,5>uO%,RQWO,5>uO%,WQWO,5>uOOQO-E<X-E<XO%,`QWO1G5gO%,`QWO1G5gO5qQWO1G5gO%,hQWO<<LTOOQQ<<LT<<LTO%,mQWO<<LTO5iQ!LYO<<LTO){QYO<<KhOITQWO<<KhOOQQ<<Ko<<KoO$0{Q!LbO<<KoOOQQ<<Kp<<KpO$1VQ`O<<KpO%,rQ&jO'#IVO%,}QWO,5?xOLXQYO,5?xOOQQ1G2n1G2nO#GWQ!LrO'#ETO!?{Q&jO'#GrOOQO'#IX'#IXO%-VQ&jO,5=]OOQQ,5=],5=]O%-^Q&jO'#ETO%-iQ&jO'#ETO%.QQ&jO'#ETO%.[Q&jO'#GrO%.mQWO7+(bO%.rQWO7+(bO%.zQ`O7+(bOOQQ7+(b7+(bOITQWO7+(bO){QYO7+(bOITQWO7+(bO%/UQWO7+(bOOQQ7+(e7+(eO5iQ!LYO7+(eO#5YQWO7+(eO5_QWO7+(eO!,rQpO7+(eO%/dQWO,5>tOOQO-E<W-E<WOOQO'#Gu'#GuO%/oQWO1G5eO5iQ!LYO<<GpOOQQ<<Gp<<GpO%/wQWO<<GpO%/|QWO7++SO%0RQWO7++TOOQQ7+(m7+(mO%0WQWO7+(mO%0]QYO7+(mO%0dQWO7+(mO){QYO7++SO){QYO7++TOOQQ<<La<<LaOOQQ<<Lc<<LcOOQQ-E<Z-E<ZOOQQ1G3b1G3bO%0iQWO,5=wOOQQ,5=y,5=yO:^QWO<<LlO%0nQWO<<LlOLXQYO7+&ROOQO7+%T7+%TO%0sQ7^O1G5VO:^QWO7+%TOOQO1G0T1G0TO%0}Q!LdO1G0ZOOQO1G0Z1G0ZO){QYO1G0ZO%1XQ!LYO1G0ZO:^QWO1G0TO!,rQpO1G0TO!?{Q&jO1G0TO%1dQ!LYO1G0ZO%1rQ&jO1G0TO%2TQ!LYO1G0ZO%2iQ!LrO1G0ZO%2sQ&jO1G0TO!?{Q&jO1G0ZOOQ!LS<<IV<<IVOOQ!LS<<Ig<<IgO:^QWO<<IgO%2zQ!LdO<<NYOOQO7+)l7+)lO%3[Q!LdO7+'gO%5dQbO1G3|O%5nQ7^O7+%|O%5{Q7^O,59jO%7xQ7^O,5<UO%9uQ7^O,5<WO%;rQ7^O,5<fO%=bQ7^O7+'WO%=oQ7^O7+'XO%=|QWO,5;xOOQO7+&{7+&{O%>RQ#tO<<KfOOQO1G4U1G4UO%>cQWO1G4UO%>nQWO1G4UO%>|QWO7+*yO%>|QWO7+*yOITQWO1G4WO%?UQ`O1G4WO%?`QWO7+*zOOQO7+'o7+'oO5iQ!LYO7+'oOOQO7+'n7+'nO$,[QWO7+'pO%?hQ`O7+'pOOQO7+'t7+'tO5iQ!LYO7+'nO$,[QWO7+'oO%?oQWO7+'pOITQWO7+'pO#5TQWO7+'oO%?tQ#tO<<MzOOQ!LS7+$r7+$rO%@OQ`O,5>oOOQO-E<R-E<RO#IWQWOANASOOQQANASANASOITQWOANASO%@YQ!LbO7+'rOOQQAN=eAN=eO5qQWO1G4aOOQO1G4a1G4aO%@gQWO1G4aO%@lQWO7++RO%@lQWO7++RO5iQ!LYOANAoO%@tQWOANAoOOQQANAoANAoO%@yQWOANASO%ARQ`OANASOOQQANAZANAZOOQQANA[ANA[O%A]QWO,5>qOOQO-E<T-E<TO%AhQ7^O1G5dO#5YQWO,5=^O5_QWO,5=^O!,rQpO,5=^OOQO-E<V-E<VOOQQ1G2w1G2wO$:lQ!LrO,5:oO!?{Q&jO,5=^O%ArQ&jO,5=^O%BTQ&jO,5:oOOQQ<<K|<<K|OITQWO<<K|O%.mQWO<<K|O%B_QWO<<K|O%BgQ`O<<K|O){QYO<<K|OITQWO<<K|OOQQ<<LP<<LPO5iQ!LYO<<LPO#5YQWO<<LPO5_QWO<<LPO%BqQ&jO1G4`O%ByQWO7++POOQQAN=[AN=[O5iQ!LYOAN=[OOQQ<<Nn<<NnOOQQ<<No<<NoOOQQ<<LX<<LXO%CRQWO<<LXO%CWQYO<<LXO%C_QWO<<NnO%CdQWO<<NoOOQQ1G3c1G3cOOQQANBWANBWO:^QWOANBWO%CiQ7^O<<ImOOQO<<Ho<<HoOOQO7+%u7+%uO%0}Q!LdO7+%uO){QYO7+%uOOQO7+%o7+%oO:^QWO7+%oO!,rQpO7+%oO%CsQ!LYO7+%uO!?{Q&jO7+%oO%DOQ!LYO7+%uO%D^Q&jO7+%oO%DoQ!LYO7+%uOOQ!LSAN?RAN?RO%ETQ!LdO<<KfO%G]Q7^O<<JTO%GjQ7^O1G1yO%IYQ7^O1G2[O%KVQ7^O1G2^O%MSQ7^O<<JsO%MaQ7^O<<IhOOQO1G1d1G1dOOQO7+)p7+)pO%MnQWO7+)pO%MyQWO<<NeO%NRQ`O7+)rOOQO<<KZ<<KZO5iQ!LYO<<K[O$,[QWO<<K[OOQO<<KY<<KYO5iQ!LYO<<KZO%N]Q`O<<K[O$,[QWO<<KZOOQQG26nG26nO#IWQWOG26nOOQO7+){7+){O5qQWO7+){O%NdQWO<<NmOOQQG27ZG27ZO5iQ!LYOG27ZOITQWOG26nOLXQYO1G4]O%NlQWO7++OO5iQ!LYO1G2xO#5YQWO1G2xO5_QWO1G2xO!,rQpO1G2xO!?{Q&jO1G2xO%2iQ!LrO1G0ZO%NtQ&jO1G2xO%.mQWOANAhOOQQANAhANAhOITQWOANAhO& VQWOANAhO& _Q`OANAhOOQQANAkANAkO5iQ!LYOANAkO#5YQWOANAkOOQO'#Gv'#GvOOQO7+)z7+)zOOQQG22vG22vOOQQANAsANAsO& iQWOANAsOOQQANDYANDYOOQQANDZANDZO& nQYOG27rOOQO<<Ia<<IaO%0}Q!LdO<<IaOOQO<<IZ<<IZO:^QWO<<IZO){QYO<<IaO!,rQpO<<IZO&%lQ!LYO<<IaO!?{Q&jO<<IZO&%wQ!LYO<<IaO&&VQ7^O7+'gOOQO<<M[<<M[OOQOAN@vAN@vO5iQ!LYOAN@vOOQOAN@uAN@uO$,[QWOAN@vO5iQ!LYOAN@uOOQQLD,YLD,YOOQO<<Mg<<MgOOQQLD,uLD,uO#IWQWOLD,YO&'uQ7^O7+)wOOQO7+(d7+(dO5iQ!LYO7+(dO#5YQWO7+(dO5_QWO7+(dO!,rQpO7+(dO!?{Q&jO7+(dOOQQG27SG27SO%.mQWOG27SOITQWOG27SOOQQG27VG27VO5iQ!LYOG27VOOQQG27_G27_O:^QWOLD-^OOQOAN>{AN>{OOQOAN>uAN>uO%0}Q!LdOAN>{O:^QWOAN>uO){QYOAN>{O!,rQpOAN>uO&(PQ!LYOAN>{O&([Q7^O<<KfOOQOG26bG26bO5iQ!LYOG26bOOQOG26aG26aOOQQ!$( t!$( tOOQO<<LO<<LOO5iQ!LYO<<LOO#5YQWO<<LOO5_QWO<<LOO!,rQpO<<LOOOQQLD,nLD,nO%.mQWOLD,nOOQQLD,qLD,qOOQQ!$(!x!$(!xOOQOG24gG24gOOQOG24aG24aO%0}Q!LdOG24gO:^QWOG24aO){QYOG24gOOQOLD+|LD+|OOQOANAjANAjO5iQ!LYOANAjO#5YQWOANAjO5_QWOANAjOOQQ!$(!Y!$(!YOOQOLD*RLD*ROOQOLD){LD){O%0}Q!LdOLD*ROOQOG27UG27UO5iQ!LYOG27UO#5YQWOG27UOOQO!$'Mm!$'MmOOQOLD,pLD,pO5iQ!LYOLD,pOOQO!$(![!$(![OLXQYO'#DrO&)zQbO'#IrOLXQYO'#DjO&*RQ!LdO'#ChO&*lQbO'#ChO&*|QYO,5:vOLXQYO,5;ROLXQYO,5;ROLXQYO,5;ROLXQYO,5;ROLXQYO,5;ROLXQYO,5;ROLXQYO,5;ROLXQYO,5;ROLXQYO,5;ROLXQYO,5;ROLXQYO,5;ROLXQYO'#H}O&,|QWO,5<TO&.`QWO,5;ROLXQYO,5;fO!(aQWO'#DOO!(aQWO'#DOOITQWO'#FjO&-UQWO'#FjOITQWO'#FlO&-UQWO'#FlOITQWO'#FzO&-UQWO'#FzOLXQYO,5?kO&*|QYO1G0bO&.gQ7^O'#ChOLXQYO1G1lOITQWO,5<pO&-UQWO,5<pOITQWO,5<rO&-UQWO,5<rOITQWO,5<_O&-UQWO,5<_O&*|QYO1G1mOLXQYO7+&iOITQWO1G1{O&-UQWO1G1{O&*|QYO7+'XO&*|QYO7+%|OITQWO7+'zO&-UQWO7+'zO&.qQWO'#E[O&.vQWO'#E[O&/OQWO'#EzO&/TQWO'#EgO&/YQWO'#JPO&/eQWO'#I}O&/pQWO,5:vO&/uQ#tO,5<QO&/|QWO'#FsO&0RQWO'#FsO&0WQWO,5<RO&0`QWO,5:vO&0hQ7^O1G0}O&0oQWO,5<aO&0tQWO,5<aO&0yQWO1G1mO&1OQWO1G0bO&1TQ#tO1G2`O&1[Q#tO1G2`O4QQWO'#FhO5_QWO'#FgOBwQWO'#EZOLXQYO,5;cO!(pQWO'#FuO!(pQWO'#FuOJdQWO,5<tOJdQWO,5<t",
       stateData: "&2X~O'WOS'XOSTOSUOS~OPTOQTOXyO]cO_hObnOcmOhcOjTOkcOlcOqTOsTOxRO{cO|cO}cO!TSO!_kO!dUO!gTO!hTO!iTO!jTO!kTO!nlO#dsO#tpO#x^O%PqO%RtO%TrO%UrO%XuO%ZvO%^wO%_wO%axO%nzO%t{O%v|O%x}O%z!OO%}!PO&T!QO&X!RO&Z!SO&]!TO&_!UO&a!VO'ZPO'dQO'mYO'zaO~OP[XZ[X_[Xj[Xu[Xv[Xx[X!R[X!a[X!b[X!d[X!j[X!{[X#WdX#[[X#][X#^[X#_[X#`[X#a[X#b[X#c[X#e[X#g[X#i[X#j[X#o[X'U[X'd[X'n[X'u[X'v[X~O!]$lX~P$zOR!WO'S!XO'T!ZO~OPTOQTO]cOb!kOc!jOhcOjTOkcOlcOqTOsTOxRO{cO|cO}cO!T!bO!_kO!dUO!gTO!hTO!iTO!jTO!kTO!n!iO#t!lO#x^O'Z![O'dQO'mYO'zaO~O!Q!`O!R!]O!O'hP!O'rP~P'dO!S!mO~P`OPTOQTO]cOb!kOc!jOhcOjTOkcOlcOqTOsTOxRO{cO|cO}cO!T!bO!_kO!dUO!gTO!hTO!iTO!jTO!kTO!n!iO#t!lO#x^O'Z9YO'dQO'mYO'zaO~OPTOQTO]cOb!kOc!jOhcOjTOkcOlcOqTOsTOxRO{cO|cO}cO!T!bO!_kO!dUO!gTO!hTO!iTO!jTO!kTO!n!iO#t!lO#x^O'dQO'mYO'zaO~O!Q!rO#U!uO#V!rO'Z9ZO!c'oP~P+{O#W!vO~O!]!wO#W!vO~OP#^OZ#dOj#ROu!{Ov!{Ox!|O!R#bO!a#TO!b!yO!d!zO!j#^O#[#PO#]#QO#^#QO#_#QO#`#SO#a#TO#b#TO#c#TO#e#UO#g#WO#i#YO#j#ZO'dQO'n#[O'u!}O'v#OO~O_'fX'U'fX!c'fX!O'fX!T'fX%Q'fX!]'fX~P.jO!{#eO#o#eOP'gXZ'gX_'gXj'gXu'gXv'gXx'gX!R'gX!a'gX!b'gX!d'gX!j'gX#['gX#]'gX#^'gX#_'gX#`'gX#a'gX#b'gX#e'gX#g'gX#i'gX#j'gX'd'gX'n'gX'u'gX'v'gX~O#c'gX'U'gX!O'gX!c'gXn'gX!T'gX%Q'gX!]'gX~P0zO!{#eO~O#z#fO$R#jO~O!T#kO#x^O$U#lO$W#nO~O]#qOh$OOj#rOk#qOl#qOq$POs$QOx#xO!T#yO!_$VO!d#vO#V$WO#t$TO$_$RO$a$SO$d$UO'Z#pO'd#sO'_'aP~O!d$XO~O!]$ZO~O_$[O'U$[O~O'Z$`O~O!d$XO'Z$`O'[$bO'`$cO~Oc$iO!d$XO'Z$`O~O#c#TO~O]$rOu$nO!T$kO!d$mO%R$qO'Z$`O'[$bO^(SP~O!n$sO~Ox$tO!T$uO'Z$`O~Ox$tO!T$uO%Z$yO'Z$`O~O'Z$zO~O#dsO%RtO%TrO%UrO%XuO%ZvO%^wO%_wO~Ob%TOc%SO!n%QO%P%RO%c%PO~P7uOb%WOcmO!T%VO!nlO#dsO%PqO%TrO%UrO%XuO%ZvO%^wO%_wO%axO~O`%ZO!{%^O%R%XO'[$bO~P8tO!d%_O!g%cO~O!d%dO~O!TSO~O_$[O'R%lO'U$[O~O_$[O'R%oO'U$[O~O_$[O'R%qO'U$[O~OR!WO'S!XO'T%uO~OP[XZ[Xj[Xu[Xv[Xx[X!R[X!RdX!a[X!b[X!d[X!j[X!{[X!{dX#WdX#[[X#][X#^[X#_[X#`[X#a[X#b[X#c[X#e[X#g[X#i[X#j[X#o[X'd[X'n[X'u[X'v[X~O!O[X!OdX~P;aO!Q%wO!O&gX!O&lX!R&gX!R&lX~P'dO!R%yO!O'hX~OP#^OZ#dOj#ROu!{Ov!{Ox!|O!R%yO!a#TO!b!yO!d!zO!j#^O#[#PO#]#QO#^#QO#_#QO#`#SO#a#TO#b#TO#c#TO#e#UO#g#WO#i#YO#j#ZO'dQO'n#[O'u!}O'v#OO~O!O'hX~P>^O!O&OO~Ox&RO!W&]O!X&UO!Y&UO'[$bO~O]&SOk&SO!Q&VO'e&PO!S'iP!S'tP~P@aO!O'qX!R'qX!]'qX!c'qX'n'qX~O!{'qX#W#PX!S'qX~PAYO!{&^O!O'sX!R'sX~O!R&_O!O'rX~O!O&bO~O!{#eO~PAYOS&fO!T&cO!o&eO'Z$`O~Oc&kO!d$XO'Z$`O~Ou$nO!d$mO~O!S&lO~P`Ou!{Ov!{Ox!|O!b!yO!d!zO'dQOP!faZ!faj!fa!R!fa!a!fa!j!fa#[!fa#]!fa#^!fa#_!fa#`!fa#a!fa#b!fa#c!fa#e!fa#g!fa#i!fa#j!fa'n!fa'u!fa'v!fa~O_!fa'U!fa!O!fa!c!fan!fa!T!fa%Q!fa!]!fa~PCcO!c&mO~O!]!wO!{&oO'n&nO!R'pX_'pX'U'pX~O!c'pX~PE{O!R&sO!c'oX~O!c&uO~Ox$tO!T$uO#V&vO'Z$`O~OPTOQTO]cOb!kOc!jOhcOjTOkcOlcOqTOsTOxRO{cO|cO}cO!TSO!_kO!dUO!gTO!hTO!iTO!jTO!kTO!n!iO#t!lO#x^O'Z9YO'dQO'mYO'zaO~O]#qOh$OOj#rOk#qOl#qOq$POs9lOx#xO!T#yO!_:oO!d#vO#V9rO#t$TO$_9nO$a9pO$d$UO'Z&zO'd#sO~O#W&|O~O]#qOh$OOj#rOk#qOl#qOq$POs$QOx#xO!T#yO!_$VO!d#vO#V$WO#t$TO$_$RO$a$SO$d$UO'Z&zO'd#sO~O'_'kP~PJdO!Q'QO!c'lP~P){O'e'SO'mYO~OP9VOQ9VO]cOb:mOc!jOhcOj9VOkcOlcOq9VOs9VOxRO{cO|cO}cO!T!bO!_9XO!dUO!g9VO!h9VO!i9VO!j9VO!k9VO!n!iO#t!lO#x^O'Z'bO'dQO'mYO'z:kO~O!d!zO~O!R#bO_$]a'U$]a!c$]a!O$]a!T$]a%Q$]a!]$]a~O#d'iO~PITO!]'kO!T'wX#w'wX#z'wX$R'wX~Ou'lO~P! POu'lO!T'wX#w'wX#z'wX$R'wX~O!T'nO#w'rO#z'mO$R'sO~O!Q'vO~PLXO#z#fO$R'yO~Ou$eXx$eX!b$eX'n$eX'u$eX'v$eX~OSfX!RfX!{fX'_fX'_$eX~P!!iOk'{O~OR'|O'S'}O'T(PO~Ou(ROx(SO'n#[O'u(UO'v(WO~O'_(QO~P!#rO'_(ZO~O]#qOh$OOj#rOk#qOl#qOq$POs9lOx#xO!T#yO!_:oO!d#vO#V9rO#t$TO$_9nO$a9pO$d$UO'd#sO~O!Q(_O'Z([O!c'{P~P!$aO#W(aO~O!Q(eO'Z(bO!O'|P~P!$aO_(nOj(sOx(kO!W(qO!X(jO!Y(jO!d(hO!x(rO$w(mO'[$bO'e(gO~O!S(pO~P!&XO!b!yOu'cXx'cX'n'cX'u'cX'v'cX!R'cX!{'cX~O'_'cX#m'cX~P!'TOS(vO!{(uO!R'bX'_'bX~O!R(wO'_'aX~O'Z(yO~O!d)OO~O'Z&zO~O!d(hO~Ox$tO!Q!rO!T$uO#U!uO#V!rO'Z$`O!c'oP~O!]!wO#W)SO~OP#^OZ#dOj#ROu!{Ov!{Ox!|O!a#TO!b!yO!d!zO!j#^O#[#PO#]#QO#^#QO#_#QO#`#SO#a#TO#b#TO#c#TO#e#UO#g#WO#i#YO#j#ZO'dQO'n#[O'u!}O'v#OO~O_!^a!R!^a'U!^a!O!^a!c!^an!^a!T!^a%Q!^a!]!^a~P!)fOS)[O!T&cO!o)ZO%Q)YO'`$cO~O'Z$zO'_'aP~O!])_O!T'^X_'^X'U'^X~O!d$XO'`$cO~O!d$XO'Z$`O'`$cO~O!]!wO#W&|O~O])jO%R)kO'Z)gO!S(TP~O!R)lO^(SX~O'e'SO~OZ)pO~O^)qO~O!T$kO'Z$`O'[$bO^(SP~Ox$tO!Q)vO!R&_O!T$uO'Z$`O!O'rP~O]&YOk&YO!Q)wO'e'SO!S'tP~O!R)xO_(PX'U(PX~O!{)|O'`$cO~OS*PO!T#yO'`$cO~O!T*RO~Ou*TO!TSO~O!n*YO~Oc*_O~O'Z(yO!S(RP~Oc$iO~O%RtO'Z$zO~P8tOZ*eO^*dO~OPTOQTO]cObnOcmOhcOjTOkcOlcOqTOsTOxRO{cO|cO}cO!_kO!dUO!gTO!hTO!iTO!jTO!kTO!nlO#x^O%PqO'dQO'mYO'zaO~O!T!bO#t!lO'Z9YO~P!1RO^*dO_$[O'U$[O~O_*iO#d*kO%T*kO%U*kO~P){O!d%_O~O%t*pO~O!T*rO~O&U*uO&V*tOP&SaQ&SaX&Sa]&Sa_&Sab&Sac&Sah&Saj&Sak&Sal&Saq&Sas&Sax&Sa{&Sa|&Sa}&Sa!T&Sa!_&Sa!d&Sa!g&Sa!h&Sa!i&Sa!j&Sa!k&Sa!n&Sa#d&Sa#t&Sa#x&Sa%P&Sa%R&Sa%T&Sa%U&Sa%X&Sa%Z&Sa%^&Sa%_&Sa%a&Sa%n&Sa%t&Sa%v&Sa%x&Sa%z&Sa%}&Sa&T&Sa&X&Sa&Z&Sa&]&Sa&_&Sa&a&Sa'Q&Sa'Z&Sa'd&Sa'm&Sa'z&Sa!S&Sa%{&Sa`&Sa&Q&Sa~O'Z*xO~On*{O~O!O&ga!R&ga~P!)fO!Q+PO!O&gX!R&gX~P){O!R%yO!O'ha~O!O'ha~P>^O!R&_O!O'ra~O!RwX!R!ZX!SwX!S!ZX!]wX!]!ZX!d!ZX!{wX'`!ZX~O!]+UO!{+TO!R#TX!R'jX!S#TX!S'jX!]'jX!d'jX'`'jX~O!]+WO!d$XO'`$cO!R!VX!S!VX~O]&QOk&QOx&RO'e(gO~OP9VOQ9VO]cOb:mOc!jOhcOj9VOkcOlcOq9VOs9VOxRO{cO|cO}cO!T!bO!_9XO!dUO!g9VO!h9VO!i9VO!j9VO!k9VO!n!iO#t!lO#x^O'dQO'mYO'z:kO~O'Z9vO~P!;^O!R+[O!S'iX~O!S+^O~O!]+UO!{+TO!R#TX!S#TX~O!R+_O!S'tX~O!S+aO~O]&QOk&QOx&RO'[$bO'e(gO~O!X+bO!Y+bO~P!>[Ox$tO!Q+dO!T$uO'Z$`O!O&lX!R&lX~O_+hO!W+kO!X+gO!Y+gO!r+oO!s+mO!t+nO!u+lO!x+pO'[$bO'e(gO'm+eO~O!S+jO~P!?]OS+uO!T&cO!o+tO~O!{+{O!R'pa!c'pa_'pa'U'pa~O!]!wO~P!@gO!R&sO!c'oa~Ox$tO!Q,OO!T$uO#U,QO#V,OO'Z$`O!R&nX!c&nX~O_#Oi!R#Oi'U#Oi!O#Oi!c#Oin#Oi!T#Oi%Q#Oi!]#Oi~P!)fO#W!za!R!za!c!za!{!za!T!za_!za'U!za!O!za~P!#rO#W'cXP'cXZ'cX_'cXj'cXv'cX!a'cX!d'cX!j'cX#['cX#]'cX#^'cX#_'cX#`'cX#a'cX#b'cX#c'cX#e'cX#g'cX#i'cX#j'cX'U'cX'd'cX!c'cX!O'cX!T'cXn'cX%Q'cX!]'cX~P!'TO!R,ZO'_'kX~P!#rO'_,]O~O!R,^O!c'lX~P!)fO!c,aO~O!O,bO~OP#^Ou!{Ov!{Ox!|O!b!yO!d!zO!j#^O'dQOZ#Zi_#Zij#Zi!R#Zi!a#Zi#]#Zi#^#Zi#_#Zi#`#Zi#a#Zi#b#Zi#c#Zi#e#Zi#g#Zi#i#Zi#j#Zi'U#Zi'n#Zi'u#Zi'v#Zi!O#Zi!c#Zin#Zi!T#Zi%Q#Zi!]#Zi~O#[#Zi~P!EtO#[#PO~P!EtOP#^Ou!{Ov!{Ox!|O!b!yO!d!zO!j#^O#[#PO#]#QO#^#QO#_#QO'dQOZ#Zi_#Zi!R#Zi!a#Zi#`#Zi#a#Zi#b#Zi#c#Zi#e#Zi#g#Zi#i#Zi#j#Zi'U#Zi'n#Zi'u#Zi'v#Zi!O#Zi!c#Zin#Zi!T#Zi%Q#Zi!]#Zi~Oj#Zi~P!H`Oj#RO~P!H`OP#^Oj#ROu!{Ov!{Ox!|O!b!yO!d!zO!j#^O#[#PO#]#QO#^#QO#_#QO#`#SO'dQO_#Zi!R#Zi#e#Zi#g#Zi#i#Zi#j#Zi'U#Zi'n#Zi'u#Zi'v#Zi!O#Zi!c#Zin#Zi!T#Zi%Q#Zi!]#Zi~OZ#Zi!a#Zi#a#Zi#b#Zi#c#Zi~P!JzOZ#dO!a#TO#a#TO#b#TO#c#TO~P!JzOP#^OZ#dOj#ROu!{Ov!{Ox!|O!a#TO!b!yO!d!zO!j#^O#[#PO#]#QO#^#QO#_#QO#`#SO#a#TO#b#TO#c#TO#e#UO'dQO_#Zi!R#Zi#g#Zi#i#Zi#j#Zi'U#Zi'n#Zi'v#Zi!O#Zi!c#Zin#Zi!T#Zi%Q#Zi!]#Zi~O'u#Zi~P!MrO'u!}O~P!MrOP#^OZ#dOj#ROu!{Ov!{Ox!|O!a#TO!b!yO!d!zO!j#^O#[#PO#]#QO#^#QO#_#QO#`#SO#a#TO#b#TO#c#TO#e#UO#g#WO'dQO'u!}O_#Zi!R#Zi#i#Zi#j#Zi'U#Zi'n#Zi!O#Zi!c#Zin#Zi!T#Zi%Q#Zi!]#Zi~O'v#Zi~P#!^O'v#OO~P#!^OP#^OZ#dOj#ROu!{Ov!{Ox!|O!a#TO!b!yO!d!zO!j#^O#[#PO#]#QO#^#QO#_#QO#`#SO#a#TO#b#TO#c#TO#e#UO#g#WO#i#YO'dQO'u!}O'v#OO~O_#Zi!R#Zi#j#Zi'U#Zi'n#Zi!O#Zi!c#Zin#Zi!T#Zi%Q#Zi!]#Zi~P#$xOP[XZ[Xj[Xu[Xv[Xx[X!a[X!b[X!d[X!j[X!{[X#WdX#[[X#][X#^[X#_[X#`[X#a[X#b[X#c[X#e[X#g[X#i[X#j[X#o[X'd[X'n[X'u[X'v[X!R[X!S[X~O#m[X~P#']OP#^OZ9jOj9_Ou!{Ov!{Ox!|O!a9aO!b!yO!d!zO!j#^O#[9]O#]9^O#^9^O#_9^O#`9`O#a9aO#b9aO#c9aO#e9bO#g9dO#i9fO#j9gO'dQO'n#[O'u!}O'v#OO~O#m,dO~P#)gOP'gXZ'gXj'gXu'gXv'gXx'gX!a'gX!b'gX!d'gX!j'gX#['gX#]'gX#^'gX#_'gX#`'gX#a'gX#b'gX#e'gX#g'gX#i'gX#j'gX'd'gX'n'gX'u'gX'v'gX!R'gX~O!{9kO#o9kO#c'gX#m'gX!S'gX~P#+bO_&qa!R&qa'U&qa!c&qan&qa!O&qa!T&qa%Q&qa!]&qa~P!)fOP#ZiZ#Zi_#Zij#Ziv#Zi!R#Zi!a#Zi!b#Zi!d#Zi!j#Zi#[#Zi#]#Zi#^#Zi#_#Zi#`#Zi#a#Zi#b#Zi#c#Zi#e#Zi#g#Zi#i#Zi#j#Zi'U#Zi'd#Zi!O#Zi!c#Zin#Zi!T#Zi%Q#Zi!]#Zi~P!#rO_#ni!R#ni'U#ni!O#ni!c#nin#ni!T#ni%Q#ni!]#ni~P!)fO#z,fO~O#z,gO~O!]'kO!{,hO!T$OX#w$OX#z$OX$R$OX~O!Q,iO~O!T'nO#w,kO#z'mO$R,lO~O!R9hO!S'fX~P#)gO!S,mO~O$R,oO~OR'|O'S'}O'T,rO~O],uOk,uO!O,vO~O!RdX!]dX!cdX!c$eX'ndX~P!!iO!c,|O~P!#rO!R,}O!]!wO'n&nO!c'{X~O!c-SO~O!O$eX!R$eX!]$lX~P!!iO!R-UO!O'|X~P!#rO!]-WO~O!O-YO~O!Q(_O'Z$`O!c'{P~Oj-^O!]!wO!d$XO'`$cO'n&nO~O!])_O~O!S-dO~P!&XO!X-eO!Y-eO'[$bO'e(gO~Ox-gO'e(gO~O!x-hO~O'Z$zO!R&vX'_&vX~O!R(wO'_'aa~Ou-mOv-mOx-nO'nra'ura'vra!Rra!{ra~O'_ra#mra~P#6fOu(ROx(SO'n$^a'u$^a'v$^a!R$^a!{$^a~O'_$^a#m$^a~P#7[Ou(ROx(SO'n$`a'u$`a'v$`a!R$`a!{$`a~O'_$`a#m$`a~P#7}O]-oO~O#W-pO~O'_$na!R$na#m$na!{$na~P!#rO#W-sO~OS-|O!T&cO!o-{O%Q-zO~O'_-}O~O]#qOj#rOk#qOl#qOq$POs9lOx#xO!T#yO!_:oO!d#vO#V9rO#t$TO$_9nO$a9pO$d$UO'd#sO~Oh.PO'Z.OO~P#9tO!])_O!T'^a_'^a'U'^a~O#W.VO~OZ[X!RdX!SdX~O!R.WO!S(TX~O!S.YO~OZ.ZO~O].]O'Z)gO~O!T$kO'Z$`O^'OX!R'OX~O!R)lO^(Sa~O!c.`O~P!)fO].bO~OZ.cO~O^.dO~OS-|O!T&cO!o-{O%Q-zO'`$cO~O!R)xO_(Pa'U(Pa~O!{.jO~OS.mO!T#yO~O'e'SO!S(QP~OS.wO!T.sO!o.vO%Q.uO'`$cO~OZ/RO!R/PO!S(RX~O!S/SO~O^/UO_$[O'U$[O~O]/VO~O]/WO'Z(yO~O#c/XO%r/YO~P0zO!{#eO#c/XO%r/YO~O_/ZO~P){O_/]O~O%{/aOP%yiQ%yiX%yi]%yi_%yib%yic%yih%yij%yik%yil%yiq%yis%yix%yi{%yi|%yi}%yi!T%yi!_%yi!d%yi!g%yi!h%yi!i%yi!j%yi!k%yi!n%yi#d%yi#t%yi#x%yi%P%yi%R%yi%T%yi%U%yi%X%yi%Z%yi%^%yi%_%yi%a%yi%n%yi%t%yi%v%yi%x%yi%z%yi%}%yi&T%yi&X%yi&Z%yi&]%yi&_%yi&a%yi'Q%yi'Z%yi'd%yi'm%yi'z%yi!S%yi`%yi&Q%yi~O`/gO!S/eO&Q/fO~P`O!TSO!d/jO~O!R#bOn$]a~O!O&gi!R&gi~P!)fO!R%yO!O'hi~O!R&_O!O'ri~O!O/nO~O!R!Va!S!Va~P#)gO]&QOk&QO!Q/tO'e(gO!R&hX!S&hX~P@aO!R+[O!S'ia~O]&YOk&YO!Q)wO'e'SO!R&mX!S&mX~O!R+_O!S'ta~O!O'si!R'si~P!)fO_$[O!]!wO!d$XO!j0OO!{/|O'U$[O'`$cO'n&nO~O!S0RO~P!?]O!X0SO!Y0SO'[$bO'e(gO'm+eO~O!W0TO~P#GyO!TSO!W0TO!u0VO!x0WO~P#GyO!W0TO!s0YO!t0YO!u0VO!x0WO~P#GyO!T&cO~O!T&cO~P!#rO!R'pi!c'pi_'pi'U'pi~P!)fO!{0cO!R'pi!c'pi_'pi'U'pi~O!R&sO!c'oi~Ox$tO!T$uO#V0eO'Z$`O~O#WraPraZra_rajra!ara!bra!dra!jra#[ra#]ra#^ra#_ra#`ra#ara#bra#cra#era#gra#ira#jra'Ura'dra!cra!Ora!Tranra%Qra!]ra~P#6fO#W$^aP$^aZ$^a_$^aj$^av$^a!a$^a!b$^a!d$^a!j$^a#[$^a#]$^a#^$^a#_$^a#`$^a#a$^a#b$^a#c$^a#e$^a#g$^a#i$^a#j$^a'U$^a'd$^a!c$^a!O$^a!T$^an$^a%Q$^a!]$^a~P#7[O#W$`aP$`aZ$`a_$`aj$`av$`a!a$`a!b$`a!d$`a!j$`a#[$`a#]$`a#^$`a#_$`a#`$`a#a$`a#b$`a#c$`a#e$`a#g$`a#i$`a#j$`a'U$`a'd$`a!c$`a!O$`a!T$`an$`a%Q$`a!]$`a~P#7}O#W$naP$naZ$na_$naj$nav$na!R$na!a$na!b$na!d$na!j$na#[$na#]$na#^$na#_$na#`$na#a$na#b$na#c$na#e$na#g$na#i$na#j$na'U$na'd$na!c$na!O$na!T$na!{$nan$na%Q$na!]$na~P!#rO_#Oq!R#Oq'U#Oq!O#Oq!c#Oqn#Oq!T#Oq%Q#Oq!]#Oq~P!)fO!R&iX'_&iX~PJdO!R,ZO'_'ka~O!Q0mO!R&jX!c&jX~P){O!R,^O!c'la~O!R,^O!c'la~P!)fO#m!fa!S!fa~PCcO#m!^a!R!^a!S!^a~P#)gO!T1QO#x^O$P1RO~O!S1VO~On1WO~P!#rO_$Yq!R$Yq'U$Yq!O$Yq!c$Yqn$Yq!T$Yq%Q$Yq!]$Yq~P!)fO!O1XO~O],uOk,uO~Ou(ROx(SO'v(WO'n$xi'u$xi!R$xi!{$xi~O'_$xi#m$xi~P$(jOu(ROx(SO'n$zi'u$zi'v$zi!R$zi!{$zi~O'_$zi#m$zi~P$)]O#m1YO~P!#rO!Q1[O'Z$`O!R&rX!c&rX~O!R,}O!c'{a~O!R,}O!]!wO!c'{a~O!R,}O!]!wO'n&nO!c'{a~O'_$gi!R$gi#m$gi!{$gi~P!#rO!Q1cO'Z(bO!O&tX!R&tX~P!$aO!R-UO!O'|a~O!R-UO!O'|a~P!#rO!]!wO~O!]!wO#c1mO~Oj1qO!]!wO'n&nO~O!R'bi'_'bi~P!#rO!{1tO!R'bi'_'bi~P!#rO!c1wO~O_$Zq!R$Zq'U$Zq!O$Zq!c$Zqn$Zq!T$Zq%Q$Zq!]$Zq~P!)fO!R1{O!T'}X~P!#rO!T&cO%Q2OO~O!T&cO%Q2OO~P!#rO!T$eX$u[X_$eX'U$eX~P!!iO$u2SOugXxgX!TgX'ngX'ugX'vgX_gX'UgX~O$u2SO~O]2YO%R2ZO'Z)gO!R&}X!S&}X~O!R.WO!S(Ta~OZ2_O~O^2`O~O]2cO~OS2eO!T&cO!o2dO%Q2OO~O_$[O'U$[O~P!#rO!T#yO~P!#rO!R2jO!{2lO!S(QX~O!S2mO~Ox(kO!W2vO!X2oO!Y2oO!r2uO!s2tO!t2tO!x2sO'[$bO'e(gO'm+eO~O!S2rO~P$1nOS2}O!T.sO!o2|O%Q2{O~OS2}O!T.sO!o2|O%Q2{O'`$cO~O'Z(yO!R&|X!S&|X~O!R/PO!S(Ra~O]3XO'e3WO~O]3YO~O^3[O~O!c3_O~P){O_3aO~O_3aO~P){O#c3cO%r3dO~PE{O`/gO!S3hO&Q/fO~P`O!]3jO~O&V3kOP&SqQ&SqX&Sq]&Sq_&Sqb&Sqc&Sqh&Sqj&Sqk&Sql&Sqq&Sqs&Sqx&Sq{&Sq|&Sq}&Sq!T&Sq!_&Sq!d&Sq!g&Sq!h&Sq!i&Sq!j&Sq!k&Sq!n&Sq#d&Sq#t&Sq#x&Sq%P&Sq%R&Sq%T&Sq%U&Sq%X&Sq%Z&Sq%^&Sq%_&Sq%a&Sq%n&Sq%t&Sq%v&Sq%x&Sq%z&Sq%}&Sq&T&Sq&X&Sq&Z&Sq&]&Sq&_&Sq&a&Sq'Q&Sq'Z&Sq'd&Sq'm&Sq'z&Sq!S&Sq%{&Sq`&Sq&Q&Sq~O!R#Ti!S#Ti~P#)gO!{3mO!R#Ti!S#Ti~O!R!Vi!S!Vi~P#)gO_$[O!{3tO'U$[O~O_$[O!]!wO!{3tO'U$[O~O!X3xO!Y3xO'[$bO'e(gO'm+eO~O_$[O!]!wO!d$XO!j3yO!{3tO'U$[O'`$cO'n&nO~O!W3zO~P$:ZO!W3zO!u3}O!x4OO~P$:ZO_$[O!]!wO!j3yO!{3tO'U$[O'n&nO~O!R'pq!c'pq_'pq'U'pq~P!)fO!R&sO!c'oq~O#W$xiP$xiZ$xi_$xij$xiv$xi!a$xi!b$xi!d$xi!j$xi#[$xi#]$xi#^$xi#_$xi#`$xi#a$xi#b$xi#c$xi#e$xi#g$xi#i$xi#j$xi'U$xi'd$xi!c$xi!O$xi!T$xin$xi%Q$xi!]$xi~P$(jO#W$ziP$ziZ$zi_$zij$ziv$zi!a$zi!b$zi!d$zi!j$zi#[$zi#]$zi#^$zi#_$zi#`$zi#a$zi#b$zi#c$zi#e$zi#g$zi#i$zi#j$zi'U$zi'd$zi!c$zi!O$zi!T$zin$zi%Q$zi!]$zi~P$)]O#W$giP$giZ$gi_$gij$giv$gi!R$gi!a$gi!b$gi!d$gi!j$gi#[$gi#]$gi#^$gi#_$gi#`$gi#a$gi#b$gi#c$gi#e$gi#g$gi#i$gi#j$gi'U$gi'd$gi!c$gi!O$gi!T$gi!{$gin$gi%Q$gi!]$gi~P!#rO!R&ia'_&ia~P!#rO!R&ja!c&ja~P!)fO!R,^O!c'li~O#m#Oi!R#Oi!S#Oi~P#)gOP#^Ou!{Ov!{Ox!|O!b!yO!d!zO!j#^O'dQOZ#Zij#Zi!a#Zi#]#Zi#^#Zi#_#Zi#`#Zi#a#Zi#b#Zi#c#Zi#e#Zi#g#Zi#i#Zi#j#Zi#m#Zi'n#Zi'u#Zi'v#Zi!R#Zi!S#Zi~O#[#Zi~P$CqO#[9]O~P$CqOP#^Ou!{Ov!{Ox!|O!b!yO!d!zO!j#^O#[9]O#]9^O#^9^O#_9^O'dQOZ#Zi!a#Zi#`#Zi#a#Zi#b#Zi#c#Zi#e#Zi#g#Zi#i#Zi#j#Zi#m#Zi'n#Zi'u#Zi'v#Zi!R#Zi!S#Zi~Oj#Zi~P$EyOj9_O~P$EyOP#^Oj9_Ou!{Ov!{Ox!|O!b!yO!d!zO!j#^O#[9]O#]9^O#^9^O#_9^O#`9`O'dQO#e#Zi#g#Zi#i#Zi#j#Zi#m#Zi'n#Zi'u#Zi'v#Zi!R#Zi!S#Zi~OZ#Zi!a#Zi#a#Zi#b#Zi#c#Zi~P$HROZ9jO!a9aO#a9aO#b9aO#c9aO~P$HROP#^OZ9jOj9_Ou!{Ov!{Ox!|O!a9aO!b!yO!d!zO!j#^O#[9]O#]9^O#^9^O#_9^O#`9`O#a9aO#b9aO#c9aO#e9bO'dQO#g#Zi#i#Zi#j#Zi#m#Zi'n#Zi'v#Zi!R#Zi!S#Zi~O'u#Zi~P$JgO'u!}O~P$JgOP#^OZ9jOj9_Ou!{Ov!{Ox!|O!a9aO!b!yO!d!zO!j#^O#[9]O#]9^O#^9^O#_9^O#`9`O#a9aO#b9aO#c9aO#e9bO#g9dO'dQO'u!}O#i#Zi#j#Zi#m#Zi'n#Zi!R#Zi!S#Zi~O'v#Zi~P$LoO'v#OO~P$LoOP#^OZ9jOj9_Ou!{Ov!{Ox!|O!a9aO!b!yO!d!zO!j#^O#[9]O#]9^O#^9^O#_9^O#`9`O#a9aO#b9aO#c9aO#e9bO#g9dO#i9fO'dQO'u!}O'v#OO~O#j#Zi#m#Zi'n#Zi!R#Zi!S#Zi~P$NwO_#ky!R#ky'U#ky!O#ky!c#kyn#ky!T#ky%Q#ky!]#ky~P!)fOP#ZiZ#Zij#Ziv#Zi!a#Zi!b#Zi!d#Zi!j#Zi#[#Zi#]#Zi#^#Zi#_#Zi#`#Zi#a#Zi#b#Zi#c#Zi#e#Zi#g#Zi#i#Zi#j#Zi#m#Zi'd#Zi!R#Zi!S#Zi~P!#rO!b!yOP'cXZ'cXj'cXu'cXv'cXx'cX!a'cX!d'cX!j'cX#['cX#]'cX#^'cX#_'cX#`'cX#a'cX#b'cX#c'cX#e'cX#g'cX#i'cX#j'cX#m'cX'd'cX'n'cX'u'cX'v'cX!R'cX!S'cX~O#m#ni!R#ni!S#ni~P#)gO!S4`O~O!R&qa!S&qa~P#)gO!]!wO'n&nO!R&ra!c&ra~O!R,}O!c'{i~O!R,}O!]!wO!c'{i~O!O&ta!R&ta~P!#rO!]4gO~O!R-UO!O'|i~P!#rO!R-UO!O'|i~O!O4mO~O!]!wO#c4sO~Oj4tO!]!wO'n&nO~O!O4vO~O'_$iq!R$iq#m$iq!{$iq~P!#rO_$Zy!R$Zy'U$Zy!O$Zy!c$Zyn$Zy!T$Zy%Q$Zy!]$Zy~P!)fO!R1{O!T'}a~O!T&cO%Q4{O~O!T&cO%Q4{O~P!#rO_#Oy!R#Oy'U#Oy!O#Oy!c#Oyn#Oy!T#Oy%Q#Oy!]#Oy~P!)fOZ5OO~O]5QO'Z)gO~O!R.WO!S(Ti~O]5TO~O^5UO~O'e'SO!R&yX!S&yX~O!R2jO!S(Qa~O!S5cO~P$1nOx-gO'e(gO'm+eO~O!W5fO!X5eO!Y5eO!x0WO'[$bO'e(gO'm+eO~O!s5gO!t5gO~P%-iO!X5eO!Y5eO'[$bO'e(gO'm+eO~O!T.sO~O!T.sO%Q5iO~O!T.sO%Q5iO~P!#rOS5nO!T.sO!o5mO%Q5iO~OZ5sO!R&|a!S&|a~O!R/PO!S(Ri~O]5vO~O!c5wO~O!c5xO~O!c5yO~O!c5yO~P){O_5{O~O!]6OO~O!c6QO~O!R'si!S'si~P#)gO_$[O'U$[O~P!)fO_$[O!{6VO'U$[O~O_$[O!]!wO!{6VO'U$[O~O!X6[O!Y6[O'[$bO'e(gO'm+eO~O_$[O!]!wO!j6]O!{6VO'U$[O'n&nO~O!d$XO'`$cO~P%2TO!W6^O~P%1rO!R'py!c'py_'py'U'py~P!)fO#W$iqP$iqZ$iq_$iqj$iqv$iq!R$iq!a$iq!b$iq!d$iq!j$iq#[$iq#]$iq#^$iq#_$iq#`$iq#a$iq#b$iq#c$iq#e$iq#g$iq#i$iq#j$iq'U$iq'd$iq!c$iq!O$iq!T$iq!{$iqn$iq%Q$iq!]$iq~P!#rO!R&ji!c&ji~P!)fO#m#Oq!R#Oq!S#Oq~P#)gOu-mOv-mOx-nOPraZrajra!ara!bra!dra!jra#[ra#]ra#^ra#_ra#`ra#ara#bra#cra#era#gra#ira#jra#mra'dra'nra'ura'vra!Rra!Sra~Ou(ROx(SOP$^aZ$^aj$^av$^a!a$^a!b$^a!d$^a!j$^a#[$^a#]$^a#^$^a#_$^a#`$^a#a$^a#b$^a#c$^a#e$^a#g$^a#i$^a#j$^a#m$^a'd$^a'n$^a'u$^a'v$^a!R$^a!S$^a~Ou(ROx(SOP$`aZ$`aj$`av$`a!a$`a!b$`a!d$`a!j$`a#[$`a#]$`a#^$`a#_$`a#`$`a#a$`a#b$`a#c$`a#e$`a#g$`a#i$`a#j$`a#m$`a'd$`a'n$`a'u$`a'v$`a!R$`a!S$`a~OP$naZ$naj$nav$na!a$na!b$na!d$na!j$na#[$na#]$na#^$na#_$na#`$na#a$na#b$na#c$na#e$na#g$na#i$na#j$na#m$na'd$na!R$na!S$na~P!#rO#m$Yq!R$Yq!S$Yq~P#)gO#m$Zq!R$Zq!S$Zq~P#)gO!S6hO~O'_$|y!R$|y#m$|y!{$|y~P!#rO!]!wO!R&ri!c&ri~O!]!wO'n&nO!R&ri!c&ri~O!R,}O!c'{q~O!O&ti!R&ti~P!#rO!R-UO!O'|q~O!O6oO~P!#rO!O6oO~O!R'by'_'by~P!#rO!R&wa!T&wa~P!#rO!T$tq_$tq'U$tq~P!#rOZ6wO~O!R.WO!S(Tq~O]6zO~O!T&cO%Q6{O~O!T&cO%Q6{O~P!#rO!{6|O!R&ya!S&ya~O!R2jO!S(Qi~P#)gO!X7SO!Y7SO'[$bO'e(gO'm+eO~O!W7UO!x4OO~P%ArO!T.sO%Q7XO~O!T.sO%Q7XO~P!#rO]7`O'e7_O~O!R/PO!S(Rq~O!c7bO~O!c7bO~P){O!c7dO~O!c7eO~O!R#Ty!S#Ty~P#)gO_$[O!{7kO'U$[O~O_$[O!]!wO!{7kO'U$[O~O!X7nO!Y7nO'[$bO'e(gO'm+eO~O_$[O!]!wO!j7oO!{7kO'U$[O'n&nO~O#W$|yP$|yZ$|y_$|yj$|yv$|y!R$|y!a$|y!b$|y!d$|y!j$|y#[$|y#]$|y#^$|y#_$|y#`$|y#a$|y#b$|y#c$|y#e$|y#g$|y#i$|y#j$|y'U$|y'd$|y!c$|y!O$|y!T$|y!{$|yn$|y%Q$|y!]$|y~P!#rO#m#ky!R#ky!S#ky~P#)gOP$giZ$gij$giv$gi!a$gi!b$gi!d$gi!j$gi#[$gi#]$gi#^$gi#_$gi#`$gi#a$gi#b$gi#c$gi#e$gi#g$gi#i$gi#j$gi#m$gi'd$gi!R$gi!S$gi~P!#rOu(ROx(SO'v(WOP$xiZ$xij$xiv$xi!a$xi!b$xi!d$xi!j$xi#[$xi#]$xi#^$xi#_$xi#`$xi#a$xi#b$xi#c$xi#e$xi#g$xi#i$xi#j$xi#m$xi'd$xi'n$xi'u$xi!R$xi!S$xi~Ou(ROx(SOP$ziZ$zij$ziv$zi!a$zi!b$zi!d$zi!j$zi#[$zi#]$zi#^$zi#_$zi#`$zi#a$zi#b$zi#c$zi#e$zi#g$zi#i$zi#j$zi#m$zi'd$zi'n$zi'u$zi'v$zi!R$zi!S$zi~O#m$Zy!R$Zy!S$Zy~P#)gO#m#Oy!R#Oy!S#Oy~P#)gO!]!wO!R&rq!c&rq~O!R,}O!c'{y~O!O&tq!R&tq~P!#rO!O7uO~P!#rO!R.WO!S(Ty~O!R2jO!S(Qq~O!X8RO!Y8RO'[$bO'e(gO'm+eO~O!T.sO%Q8UO~O!T.sO%Q8UO~P!#rO!c8XO~O&V8YOP&S!ZQ&S!ZX&S!Z]&S!Z_&S!Zb&S!Zc&S!Zh&S!Zj&S!Zk&S!Zl&S!Zq&S!Zs&S!Zx&S!Z{&S!Z|&S!Z}&S!Z!T&S!Z!_&S!Z!d&S!Z!g&S!Z!h&S!Z!i&S!Z!j&S!Z!k&S!Z!n&S!Z#d&S!Z#t&S!Z#x&S!Z%P&S!Z%R&S!Z%T&S!Z%U&S!Z%X&S!Z%Z&S!Z%^&S!Z%_&S!Z%a&S!Z%n&S!Z%t&S!Z%v&S!Z%x&S!Z%z&S!Z%}&S!Z&T&S!Z&X&S!Z&Z&S!Z&]&S!Z&_&S!Z&a&S!Z'Q&S!Z'Z&S!Z'd&S!Z'm&S!Z'z&S!Z!S&S!Z%{&S!Z`&S!Z&Q&S!Z~O_$[O!{8_O'U$[O~O_$[O!]!wO!{8_O'U$[O~OP$iqZ$iqj$iqv$iq!a$iq!b$iq!d$iq!j$iq#[$iq#]$iq#^$iq#_$iq#`$iq#a$iq#b$iq#c$iq#e$iq#g$iq#i$iq#j$iq#m$iq'd$iq!R$iq!S$iq~P!#rO!R&yq!S&yq~P#)gO_$[O!{8tO'U$[O~OP$|yZ$|yj$|yv$|y!a$|y!b$|y!d$|y!j$|y#[$|y#]$|y#^$|y#_$|y#`$|y#a$|y#b$|y#c$|y#e$|y#g$|y#i$|y#j$|y#m$|y'd$|y!R$|y!S$|y~P!#rOn'fX~P.jOn[X!O[X!c[X%r[X!T[X%Q[X!][X~P$zO!]dX!c[X!cdX'ndX~P;aOP9VOQ9VO]cOb:mOc!jOhcOj9VOkcOlcOq9VOs9VOxRO{cO|cO}cO!TSO!_9XO!dUO!g9VO!h9VO!i9VO!j9VO!k9VO!n!iO#t!lO#x^O'Z'bO'dQO'mYO'z:kO~O!R9hO!S$]a~O]#qOh$OOj#rOk#qOl#qOq$POs9mOx#xO!T#yO!_:pO!d#vO#V9sO#t$TO$_9oO$a9qO$d$UO'Z&zO'd#sO~O#d'iO~P&-UO!S[X!SdX~P;aO#W9[O~O!]!wO#W9[O~O!{9kO~O#c9aO~O!{9tO!R'sX!S'sX~O!{9kO!R'qX!S'qX~O#W9uO~O'_9wO~P!#rO#W9|O~O#W9}O~O!]!wO#W:OO~O!]!wO#W9uO~O#m:PO~P#)gO#W:QO~O#W:RO~O#W:SO~O#W:TO~O#m:UO~P!#rO#m:VO~P!#rO#x~!b!r!t!u#U#V'z$_$a$d$u%P%Q%R%X%Z%^%_%a%c~UT#x'z#]}'W'X#z'W'Z'e~",
@@ -23103,7 +23620,7 @@
       topRules: {"Script":[0,7]},
       dialects: {jsx: 11335, ts: 11337},
       dynamicPrecedences: {"149":1,"176":1},
-      specialized: [{term: 287, get: (value, stack) => (tsExtends(value, stack) << 1)},{term: 287, get: value => spec_identifier$1[value] || -1},{term: 297, get: value => spec_word[value] || -1},{term: 63, get: value => spec_LessThan[value] || -1}],
+      specialized: [{term: 287, get: (value, stack) => (tsExtends(value, stack) << 1)},{term: 287, get: value => spec_identifier$2[value] || -1},{term: 297, get: value => spec_word[value] || -1},{term: 63, get: value => spec_LessThan[value] || -1}],
       tokenPrec: 11358
     });
 
@@ -23155,7 +23672,7 @@
     highlighting and indentation information.
     */
     const javascriptLanguage = /*@__PURE__*/LRLanguage.define({
-        parser: /*@__PURE__*/parser$1.configure({
+        parser: /*@__PURE__*/parser$5.configure({
             props: [
                 /*@__PURE__*/indentNodeProp.add({
                     IfStatement: /*@__PURE__*/continuedIndent({ except: /^\s*({|else\b)/ }),
@@ -23186,57 +23703,57 @@
                     BlockComment(tree) { return { from: tree.from + 2, to: tree.to - 2 }; }
                 }),
                 /*@__PURE__*/styleTags({
-                    "get set async static": tags.modifier,
-                    "for while do if else switch try catch finally return throw break continue default case": tags.controlKeyword,
-                    "in of await yield void typeof delete instanceof": tags.operatorKeyword,
-                    "let var const function class extends": tags.definitionKeyword,
-                    "import export from": tags.moduleKeyword,
-                    "with debugger as new": tags.keyword,
-                    TemplateString: /*@__PURE__*/tags.special(tags.string),
-                    Super: tags.atom,
-                    BooleanLiteral: tags.bool,
-                    this: tags.self,
-                    null: tags.null,
-                    Star: tags.modifier,
-                    VariableName: tags.variableName,
-                    "CallExpression/VariableName TaggedTemplateExpression/VariableName": /*@__PURE__*/tags.function(tags.variableName),
-                    VariableDefinition: /*@__PURE__*/tags.definition(tags.variableName),
-                    Label: tags.labelName,
-                    PropertyName: tags.propertyName,
-                    PrivatePropertyName: /*@__PURE__*/tags.special(tags.propertyName),
-                    "CallExpression/MemberExpression/PropertyName": /*@__PURE__*/tags.function(tags.propertyName),
-                    "FunctionDeclaration/VariableDefinition": /*@__PURE__*/tags.function(/*@__PURE__*/tags.definition(tags.variableName)),
-                    "ClassDeclaration/VariableDefinition": /*@__PURE__*/tags.definition(tags.className),
-                    PropertyDefinition: /*@__PURE__*/tags.definition(tags.propertyName),
-                    PrivatePropertyDefinition: /*@__PURE__*/tags.definition(/*@__PURE__*/tags.special(tags.propertyName)),
-                    UpdateOp: tags.updateOperator,
-                    LineComment: tags.lineComment,
-                    BlockComment: tags.blockComment,
-                    Number: tags.number,
-                    String: tags.string,
-                    ArithOp: tags.arithmeticOperator,
-                    LogicOp: tags.logicOperator,
-                    BitOp: tags.bitwiseOperator,
-                    CompareOp: tags.compareOperator,
-                    RegExp: tags.regexp,
-                    Equals: tags.definitionOperator,
-                    "Arrow : Spread": tags.punctuation,
-                    "( )": tags.paren,
-                    "[ ]": tags.squareBracket,
-                    "{ }": tags.brace,
-                    "InterpolationStart InterpolationEnd": /*@__PURE__*/tags.special(tags.brace),
-                    ".": tags.derefOperator,
-                    ", ;": tags.separator,
-                    TypeName: tags.typeName,
-                    TypeDefinition: /*@__PURE__*/tags.definition(tags.typeName),
-                    "type enum interface implements namespace module declare": tags.definitionKeyword,
-                    "abstract global Privacy readonly override": tags.modifier,
-                    "is keyof unique infer": tags.operatorKeyword,
-                    JSXAttributeValue: tags.attributeValue,
-                    JSXText: tags.content,
-                    "JSXStartTag JSXStartCloseTag JSXSelfCloseEndTag JSXEndTag": tags.angleBracket,
-                    "JSXIdentifier JSXNameSpacedName": tags.tagName,
-                    "JSXAttribute/JSXIdentifier JSXAttribute/JSXNameSpacedName": tags.attributeName
+                    "get set async static": tags$1.modifier,
+                    "for while do if else switch try catch finally return throw break continue default case": tags$1.controlKeyword,
+                    "in of await yield void typeof delete instanceof": tags$1.operatorKeyword,
+                    "let var const function class extends": tags$1.definitionKeyword,
+                    "import export from": tags$1.moduleKeyword,
+                    "with debugger as new": tags$1.keyword,
+                    TemplateString: /*@__PURE__*/tags$1.special(tags$1.string),
+                    Super: tags$1.atom,
+                    BooleanLiteral: tags$1.bool,
+                    this: tags$1.self,
+                    null: tags$1.null,
+                    Star: tags$1.modifier,
+                    VariableName: tags$1.variableName,
+                    "CallExpression/VariableName TaggedTemplateExpression/VariableName": /*@__PURE__*/tags$1.function(tags$1.variableName),
+                    VariableDefinition: /*@__PURE__*/tags$1.definition(tags$1.variableName),
+                    Label: tags$1.labelName,
+                    PropertyName: tags$1.propertyName,
+                    PrivatePropertyName: /*@__PURE__*/tags$1.special(tags$1.propertyName),
+                    "CallExpression/MemberExpression/PropertyName": /*@__PURE__*/tags$1.function(tags$1.propertyName),
+                    "FunctionDeclaration/VariableDefinition": /*@__PURE__*/tags$1.function(/*@__PURE__*/tags$1.definition(tags$1.variableName)),
+                    "ClassDeclaration/VariableDefinition": /*@__PURE__*/tags$1.definition(tags$1.className),
+                    PropertyDefinition: /*@__PURE__*/tags$1.definition(tags$1.propertyName),
+                    PrivatePropertyDefinition: /*@__PURE__*/tags$1.definition(/*@__PURE__*/tags$1.special(tags$1.propertyName)),
+                    UpdateOp: tags$1.updateOperator,
+                    LineComment: tags$1.lineComment,
+                    BlockComment: tags$1.blockComment,
+                    Number: tags$1.number,
+                    String: tags$1.string,
+                    ArithOp: tags$1.arithmeticOperator,
+                    LogicOp: tags$1.logicOperator,
+                    BitOp: tags$1.bitwiseOperator,
+                    CompareOp: tags$1.compareOperator,
+                    RegExp: tags$1.regexp,
+                    Equals: tags$1.definitionOperator,
+                    "Arrow : Spread": tags$1.punctuation,
+                    "( )": tags$1.paren,
+                    "[ ]": tags$1.squareBracket,
+                    "{ }": tags$1.brace,
+                    "InterpolationStart InterpolationEnd": /*@__PURE__*/tags$1.special(tags$1.brace),
+                    ".": tags$1.derefOperator,
+                    ", ;": tags$1.separator,
+                    TypeName: tags$1.typeName,
+                    TypeDefinition: /*@__PURE__*/tags$1.definition(tags$1.typeName),
+                    "type enum interface implements namespace module declare": tags$1.definitionKeyword,
+                    "abstract global Privacy readonly override": tags$1.modifier,
+                    "is keyof unique infer": tags$1.operatorKeyword,
+                    JSXAttributeValue: tags$1.attributeValue,
+                    JSXText: tags$1.content,
+                    "JSXStartTag JSXStartCloseTag JSXSelfCloseEndTag JSXEndTag": tags$1.angleBracket,
+                    "JSXIdentifier JSXNameSpacedName": tags$1.tagName,
+                    "JSXAttribute/JSXIdentifier JSXAttribute/JSXNameSpacedName": tags$1.attributeName
                 })
             ]
         }),
@@ -23271,6 +23788,3806 @@
         }));
     }
 
+    class CompositeBlock {
+        constructor(type, 
+        // Used for indentation in list items, markup character in lists
+        value, from, hash, end, children, positions) {
+            this.type = type;
+            this.value = value;
+            this.from = from;
+            this.hash = hash;
+            this.end = end;
+            this.children = children;
+            this.positions = positions;
+            this.hashProp = [[NodeProp.contextHash, hash]];
+        }
+        static create(type, value, from, parentHash, end) {
+            let hash = (parentHash + (parentHash << 8) + type + (value << 4)) | 0;
+            return new CompositeBlock(type, value, from, hash, end, [], []);
+        }
+        addChild(child, pos) {
+            if (child.prop(NodeProp.contextHash) != this.hash)
+                child = new Tree(child.type, child.children, child.positions, child.length, this.hashProp);
+            this.children.push(child);
+            this.positions.push(pos);
+        }
+        toTree(nodeSet, end = this.end) {
+            let last = this.children.length - 1;
+            if (last >= 0)
+                end = Math.max(end, this.positions[last] + this.children[last].length + this.from);
+            let tree = new Tree(nodeSet.types[this.type], this.children, this.positions, end - this.from).balance({
+                makeTree: (children, positions, length) => new Tree(NodeType.none, children, positions, length, this.hashProp)
+            });
+            return tree;
+        }
+    }
+    var Type;
+    (function (Type) {
+        Type[Type["Document"] = 1] = "Document";
+        Type[Type["CodeBlock"] = 2] = "CodeBlock";
+        Type[Type["FencedCode"] = 3] = "FencedCode";
+        Type[Type["Blockquote"] = 4] = "Blockquote";
+        Type[Type["HorizontalRule"] = 5] = "HorizontalRule";
+        Type[Type["BulletList"] = 6] = "BulletList";
+        Type[Type["OrderedList"] = 7] = "OrderedList";
+        Type[Type["ListItem"] = 8] = "ListItem";
+        Type[Type["ATXHeading1"] = 9] = "ATXHeading1";
+        Type[Type["ATXHeading2"] = 10] = "ATXHeading2";
+        Type[Type["ATXHeading3"] = 11] = "ATXHeading3";
+        Type[Type["ATXHeading4"] = 12] = "ATXHeading4";
+        Type[Type["ATXHeading5"] = 13] = "ATXHeading5";
+        Type[Type["ATXHeading6"] = 14] = "ATXHeading6";
+        Type[Type["SetextHeading1"] = 15] = "SetextHeading1";
+        Type[Type["SetextHeading2"] = 16] = "SetextHeading2";
+        Type[Type["HTMLBlock"] = 17] = "HTMLBlock";
+        Type[Type["LinkReference"] = 18] = "LinkReference";
+        Type[Type["Paragraph"] = 19] = "Paragraph";
+        Type[Type["CommentBlock"] = 20] = "CommentBlock";
+        Type[Type["ProcessingInstructionBlock"] = 21] = "ProcessingInstructionBlock";
+        // Inline
+        Type[Type["Escape"] = 22] = "Escape";
+        Type[Type["Entity"] = 23] = "Entity";
+        Type[Type["HardBreak"] = 24] = "HardBreak";
+        Type[Type["Emphasis"] = 25] = "Emphasis";
+        Type[Type["StrongEmphasis"] = 26] = "StrongEmphasis";
+        Type[Type["Link"] = 27] = "Link";
+        Type[Type["Image"] = 28] = "Image";
+        Type[Type["InlineCode"] = 29] = "InlineCode";
+        Type[Type["HTMLTag"] = 30] = "HTMLTag";
+        Type[Type["Comment"] = 31] = "Comment";
+        Type[Type["ProcessingInstruction"] = 32] = "ProcessingInstruction";
+        Type[Type["URL"] = 33] = "URL";
+        // Smaller tokens
+        Type[Type["HeaderMark"] = 34] = "HeaderMark";
+        Type[Type["QuoteMark"] = 35] = "QuoteMark";
+        Type[Type["ListMark"] = 36] = "ListMark";
+        Type[Type["LinkMark"] = 37] = "LinkMark";
+        Type[Type["EmphasisMark"] = 38] = "EmphasisMark";
+        Type[Type["CodeMark"] = 39] = "CodeMark";
+        Type[Type["CodeText"] = 40] = "CodeText";
+        Type[Type["CodeInfo"] = 41] = "CodeInfo";
+        Type[Type["LinkTitle"] = 42] = "LinkTitle";
+        Type[Type["LinkLabel"] = 43] = "LinkLabel";
+    })(Type || (Type = {}));
+    /// Data structure used to accumulate a block's content during [leaf
+    /// block parsing](#BlockParser.leaf).
+    class LeafBlock {
+        /// @internal
+        constructor(
+        /// The start position of the block.
+        start, 
+        /// The block's text content.
+        content) {
+            this.start = start;
+            this.content = content;
+            /// @internal
+            this.marks = [];
+            /// The block parsers active for this block.
+            this.parsers = [];
+        }
+    }
+    /// Data structure used during block-level per-line parsing.
+    class Line {
+        constructor() {
+            /// The line's full text.
+            this.text = "";
+            /// The base indent provided by the composite contexts (that have
+            /// been handled so far).
+            this.baseIndent = 0;
+            /// The string position corresponding to the base indent.
+            this.basePos = 0;
+            /// The number of contexts handled @internal
+            this.depth = 0;
+            /// Any markers (i.e. block quote markers) parsed for the contexts. @internal
+            this.markers = [];
+            /// The position of the next non-whitespace character beyond any
+            /// list, blockquote, or other composite block markers.
+            this.pos = 0;
+            /// The column of the next non-whitespace character.
+            this.indent = 0;
+            /// The character code of the character after `pos`.
+            this.next = -1;
+        }
+        /// @internal
+        forward() {
+            if (this.basePos > this.pos)
+                this.forwardInner();
+        }
+        /// @internal
+        forwardInner() {
+            let newPos = this.skipSpace(this.basePos);
+            this.indent = this.countIndent(newPos, this.pos, this.indent);
+            this.pos = newPos;
+            this.next = newPos == this.text.length ? -1 : this.text.charCodeAt(newPos);
+        }
+        /// Skip whitespace after the given position, return the position of
+        /// the next non-space character or the end of the line if there's
+        /// only space after `from`.
+        skipSpace(from) { return skipSpace(this.text, from); }
+        /// @internal
+        reset(text) {
+            this.text = text;
+            this.baseIndent = this.basePos = this.pos = this.indent = 0;
+            this.forwardInner();
+            this.depth = 1;
+            while (this.markers.length)
+                this.markers.pop();
+        }
+        /// Move the line's base position forward to the given position.
+        /// This should only be called by composite [block
+        /// parsers](#BlockParser.parse) or [markup skipping
+        /// functions](#NodeSpec.composite).
+        moveBase(to) {
+            this.basePos = to;
+            this.baseIndent = this.countIndent(to, this.pos, this.indent);
+        }
+        /// Move the line's base position forward to the given _column_.
+        moveBaseColumn(indent) {
+            this.baseIndent = indent;
+            this.basePos = this.findColumn(indent);
+        }
+        /// Store a composite-block-level marker. Should be called from
+        /// [markup skipping functions](#NodeSpec.composite) when they
+        /// consume any non-whitespace characters.
+        addMarker(elt) {
+            this.markers.push(elt);
+        }
+        /// Find the column position at `to`, optionally starting at a given
+        /// position and column.
+        countIndent(to, from = 0, indent = 0) {
+            for (let i = from; i < to; i++)
+                indent += this.text.charCodeAt(i) == 9 ? 4 - indent % 4 : 1;
+            return indent;
+        }
+        /// Find the position corresponding to the given column.
+        findColumn(goal) {
+            let i = 0;
+            for (let indent = 0; i < this.text.length && indent < goal; i++)
+                indent += this.text.charCodeAt(i) == 9 ? 4 - indent % 4 : 1;
+            return i;
+        }
+        /// @internal
+        scrub() {
+            if (!this.baseIndent)
+                return this.text;
+            let result = "";
+            for (let i = 0; i < this.basePos; i++)
+                result += " ";
+            return result + this.text.slice(this.basePos);
+        }
+    }
+    function skipForList(bl, cx, line) {
+        if (line.pos == line.text.length ||
+            (bl != cx.block && line.indent >= cx.stack[line.depth + 1].value + line.baseIndent))
+            return true;
+        if (line.indent >= line.baseIndent + 4)
+            return false;
+        let size = (bl.type == Type.OrderedList ? isOrderedList : isBulletList)(line, cx, false);
+        return size > 0 &&
+            (bl.type != Type.BulletList || isHorizontalRule(line, cx, false) < 0) &&
+            line.text.charCodeAt(line.pos + size - 1) == bl.value;
+    }
+    const DefaultSkipMarkup = {
+        [Type.Blockquote](bl, cx, line) {
+            if (line.next != 62 /* '>' */)
+                return false;
+            line.markers.push(elt(Type.QuoteMark, cx.lineStart + line.pos, cx.lineStart + line.pos + 1));
+            line.moveBase(line.pos + (space$1(line.text.charCodeAt(line.pos + 1)) ? 2 : 1));
+            bl.end = cx.lineStart + line.text.length;
+            return true;
+        },
+        [Type.ListItem](bl, _cx, line) {
+            if (line.indent < line.baseIndent + bl.value && line.next > -1)
+                return false;
+            line.moveBaseColumn(line.baseIndent + bl.value);
+            return true;
+        },
+        [Type.OrderedList]: skipForList,
+        [Type.BulletList]: skipForList,
+        [Type.Document]() { return true; }
+    };
+    function space$1(ch) { return ch == 32 || ch == 9 || ch == 10 || ch == 13; }
+    function skipSpace(line, i = 0) {
+        while (i < line.length && space$1(line.charCodeAt(i)))
+            i++;
+        return i;
+    }
+    function skipSpaceBack(line, i, to) {
+        while (i > to && space$1(line.charCodeAt(i - 1)))
+            i--;
+        return i;
+    }
+    function isFencedCode(line) {
+        if (line.next != 96 && line.next != 126 /* '`~' */)
+            return -1;
+        let pos = line.pos + 1;
+        while (pos < line.text.length && line.text.charCodeAt(pos) == line.next)
+            pos++;
+        if (pos < line.pos + 3)
+            return -1;
+        if (line.next == 96)
+            for (let i = pos; i < line.text.length; i++)
+                if (line.text.charCodeAt(i) == 96)
+                    return -1;
+        return pos;
+    }
+    function isBlockquote(line) {
+        return line.next != 62 /* '>' */ ? -1 : line.text.charCodeAt(line.pos + 1) == 32 ? 2 : 1;
+    }
+    function isHorizontalRule(line, cx, breaking) {
+        if (line.next != 42 && line.next != 45 && line.next != 95 /* '_-*' */)
+            return -1;
+        let count = 1;
+        for (let pos = line.pos + 1; pos < line.text.length; pos++) {
+            let ch = line.text.charCodeAt(pos);
+            if (ch == line.next)
+                count++;
+            else if (!space$1(ch))
+                return -1;
+        }
+        // Setext headers take precedence
+        if (breaking && line.next == 45 && isSetextUnderline(line) > -1 && line.depth == cx.stack.length)
+            return -1;
+        return count < 3 ? -1 : 1;
+    }
+    function inList(cx, type) {
+        for (let i = cx.stack.length - 1; i >= 0; i--)
+            if (cx.stack[i].type == type)
+                return true;
+        return false;
+    }
+    function isBulletList(line, cx, breaking) {
+        return (line.next == 45 || line.next == 43 || line.next == 42 /* '-+*' */) &&
+            (line.pos == line.text.length - 1 || space$1(line.text.charCodeAt(line.pos + 1))) &&
+            (!breaking || inList(cx, Type.BulletList) || line.skipSpace(line.pos + 2) < line.text.length) ? 1 : -1;
+    }
+    function isOrderedList(line, cx, breaking) {
+        let pos = line.pos, next = line.next;
+        for (;;) {
+            if (next >= 48 && next <= 57 /* '0-9' */)
+                pos++;
+            else
+                break;
+            if (pos == line.text.length)
+                return -1;
+            next = line.text.charCodeAt(pos);
+        }
+        if (pos == line.pos || pos > line.pos + 9 ||
+            (next != 46 && next != 41 /* '.)' */) ||
+            (pos < line.text.length - 1 && !space$1(line.text.charCodeAt(pos + 1))) ||
+            breaking && !inList(cx, Type.OrderedList) &&
+                (line.skipSpace(pos + 1) == line.text.length || pos > line.pos + 1 || line.next != 49 /* '1' */))
+            return -1;
+        return pos + 1 - line.pos;
+    }
+    function isAtxHeading(line) {
+        if (line.next != 35 /* '#' */)
+            return -1;
+        let pos = line.pos + 1;
+        while (pos < line.text.length && line.text.charCodeAt(pos) == 35)
+            pos++;
+        if (pos < line.text.length && line.text.charCodeAt(pos) != 32)
+            return -1;
+        let size = pos - line.pos;
+        return size > 6 ? -1 : size;
+    }
+    function isSetextUnderline(line) {
+        if (line.next != 45 && line.next != 61 /* '-=' */ || line.indent >= line.baseIndent + 4)
+            return -1;
+        let pos = line.pos + 1;
+        while (pos < line.text.length && line.text.charCodeAt(pos) == line.next)
+            pos++;
+        let end = pos;
+        while (pos < line.text.length && space$1(line.text.charCodeAt(pos)))
+            pos++;
+        return pos == line.text.length ? end : -1;
+    }
+    const EmptyLine = /^[ \t]*$/, CommentEnd = /-->/, ProcessingEnd = /\?>/;
+    const HTMLBlockStyle = [
+        [/^<(?:script|pre|style)(?:\s|>|$)/i, /<\/(?:script|pre|style)>/i],
+        [/^\s*<!--/, CommentEnd],
+        [/^\s*<\?/, ProcessingEnd],
+        [/^\s*<![A-Z]/, />/],
+        [/^\s*<!\[CDATA\[/, /\]\]>/],
+        [/^\s*<\/?(?:address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h1|h2|h3|h4|h5|h6|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|nav|noframes|ol|optgroup|option|p|param|section|source|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul)(?:\s|\/?>|$)/i, EmptyLine],
+        [/^\s*(?:<\/[a-z][\w-]*\s*>|<[a-z][\w-]*(\s+[a-z:_][\w-.]*(?:\s*=\s*(?:[^\s"'=<>`]+|'[^']*'|"[^"]*"))?)*\s*>)\s*$/i, EmptyLine]
+    ];
+    function isHTMLBlock(line, _cx, breaking) {
+        if (line.next != 60 /* '<' */)
+            return -1;
+        let rest = line.text.slice(line.pos);
+        for (let i = 0, e = HTMLBlockStyle.length - (breaking ? 1 : 0); i < e; i++)
+            if (HTMLBlockStyle[i][0].test(rest))
+                return i;
+        return -1;
+    }
+    function getListIndent(line, pos) {
+        let indentAfter = line.countIndent(pos, line.pos, line.indent);
+        let indented = line.countIndent(line.skipSpace(pos), pos, indentAfter);
+        return indented >= indentAfter + 5 ? indentAfter + 1 : indented;
+    }
+    function addCodeText(marks, from, to) {
+        let last = marks.length - 1;
+        if (last >= 0 && marks[last].to == from && marks[last].type == Type.CodeText)
+            marks[last].to = to;
+        else
+            marks.push(elt(Type.CodeText, from, to));
+    }
+    // Rules for parsing blocks. A return value of false means the rule
+    // doesn't apply here, true means it does. When true is returned and
+    // `p.line` has been updated, the rule is assumed to have consumed a
+    // leaf block. Otherwise, it is assumed to have opened a context.
+    const DefaultBlockParsers = {
+        LinkReference: undefined,
+        IndentedCode(cx, line) {
+            let base = line.baseIndent + 4;
+            if (line.indent < base)
+                return false;
+            let start = line.findColumn(base);
+            let from = cx.lineStart + start, to = cx.lineStart + line.text.length;
+            let marks = [], pendingMarks = [];
+            addCodeText(marks, from, to);
+            while (cx.nextLine() && line.depth >= cx.stack.length) {
+                if (line.pos == line.text.length) { // Empty
+                    addCodeText(pendingMarks, cx.lineStart - 1, cx.lineStart);
+                    for (let m of line.markers)
+                        pendingMarks.push(m);
+                }
+                else if (line.indent < base) {
+                    break;
+                }
+                else {
+                    if (pendingMarks.length) {
+                        for (let m of pendingMarks) {
+                            if (m.type == Type.CodeText)
+                                addCodeText(marks, m.from, m.to);
+                            else
+                                marks.push(m);
+                        }
+                        pendingMarks = [];
+                    }
+                    addCodeText(marks, cx.lineStart - 1, cx.lineStart);
+                    for (let m of line.markers)
+                        marks.push(m);
+                    to = cx.lineStart + line.text.length;
+                    let codeStart = cx.lineStart + line.findColumn(line.baseIndent + 4);
+                    if (codeStart < to)
+                        addCodeText(marks, codeStart, to);
+                }
+            }
+            if (pendingMarks.length) {
+                pendingMarks = pendingMarks.filter(m => m.type != Type.CodeText);
+                if (pendingMarks.length)
+                    line.markers = pendingMarks.concat(line.markers);
+            }
+            cx.addNode(cx.buffer.writeElements(marks, -from).finish(Type.CodeBlock, to - from), from);
+            return true;
+        },
+        FencedCode(cx, line) {
+            let fenceEnd = isFencedCode(line);
+            if (fenceEnd < 0)
+                return false;
+            let from = cx.lineStart + line.pos, ch = line.next, len = fenceEnd - line.pos;
+            let infoFrom = line.skipSpace(fenceEnd), infoTo = skipSpaceBack(line.text, line.text.length, infoFrom);
+            let marks = [elt(Type.CodeMark, from, from + len)];
+            if (infoFrom < infoTo)
+                marks.push(elt(Type.CodeInfo, cx.lineStart + infoFrom, cx.lineStart + infoTo));
+            for (let first = true; cx.nextLine() && line.depth >= cx.stack.length; first = false) {
+                let i = line.pos;
+                if (line.indent - line.baseIndent < 4)
+                    while (i < line.text.length && line.text.charCodeAt(i) == ch)
+                        i++;
+                if (i - line.pos >= len && line.skipSpace(i) == line.text.length) {
+                    for (let m of line.markers)
+                        marks.push(m);
+                    marks.push(elt(Type.CodeMark, cx.lineStart + line.pos, cx.lineStart + i));
+                    cx.nextLine();
+                    break;
+                }
+                else {
+                    if (!first)
+                        addCodeText(marks, cx.lineStart - 1, cx.lineStart);
+                    for (let m of line.markers)
+                        marks.push(m);
+                    let textStart = cx.lineStart + line.basePos, textEnd = cx.lineStart + line.text.length;
+                    if (textStart < textEnd)
+                        addCodeText(marks, textStart, textEnd);
+                }
+            }
+            cx.addNode(cx.buffer.writeElements(marks, -from)
+                .finish(Type.FencedCode, cx.prevLineEnd() - from), from);
+            return true;
+        },
+        Blockquote(cx, line) {
+            let size = isBlockquote(line);
+            if (size < 0)
+                return false;
+            cx.startContext(Type.Blockquote, line.pos);
+            cx.addNode(Type.QuoteMark, cx.lineStart + line.pos, cx.lineStart + line.pos + 1);
+            line.moveBase(line.pos + size);
+            return null;
+        },
+        HorizontalRule(cx, line) {
+            if (isHorizontalRule(line, cx, false) < 0)
+                return false;
+            let from = cx.lineStart + line.pos;
+            cx.nextLine();
+            cx.addNode(Type.HorizontalRule, from);
+            return true;
+        },
+        BulletList(cx, line) {
+            let size = isBulletList(line, cx, false);
+            if (size < 0)
+                return false;
+            if (cx.block.type != Type.BulletList)
+                cx.startContext(Type.BulletList, line.basePos, line.next);
+            let newBase = getListIndent(line, line.pos + 1);
+            cx.startContext(Type.ListItem, line.basePos, newBase - line.baseIndent);
+            cx.addNode(Type.ListMark, cx.lineStart + line.pos, cx.lineStart + line.pos + size);
+            line.moveBaseColumn(newBase);
+            return null;
+        },
+        OrderedList(cx, line) {
+            let size = isOrderedList(line, cx, false);
+            if (size < 0)
+                return false;
+            if (cx.block.type != Type.OrderedList)
+                cx.startContext(Type.OrderedList, line.basePos, line.text.charCodeAt(line.pos + size - 1));
+            let newBase = getListIndent(line, line.pos + size);
+            cx.startContext(Type.ListItem, line.basePos, newBase - line.baseIndent);
+            cx.addNode(Type.ListMark, cx.lineStart + line.pos, cx.lineStart + line.pos + size);
+            line.moveBaseColumn(newBase);
+            return null;
+        },
+        ATXHeading(cx, line) {
+            let size = isAtxHeading(line);
+            if (size < 0)
+                return false;
+            let off = line.pos, from = cx.lineStart + off;
+            let endOfSpace = skipSpaceBack(line.text, line.text.length, off), after = endOfSpace;
+            while (after > off && line.text.charCodeAt(after - 1) == line.next)
+                after--;
+            if (after == endOfSpace || after == off || !space$1(line.text.charCodeAt(after - 1)))
+                after = line.text.length;
+            let buf = cx.buffer
+                .write(Type.HeaderMark, 0, size)
+                .writeElements(cx.parser.parseInline(line.text.slice(off + size + 1, after), from + size + 1), -from);
+            if (after < line.text.length)
+                buf.write(Type.HeaderMark, after - off, endOfSpace - off);
+            let node = buf.finish(Type.ATXHeading1 - 1 + size, line.text.length - off);
+            cx.nextLine();
+            cx.addNode(node, from);
+            return true;
+        },
+        HTMLBlock(cx, line) {
+            let type = isHTMLBlock(line, cx, false);
+            if (type < 0)
+                return false;
+            let from = cx.lineStart + line.pos, end = HTMLBlockStyle[type][1];
+            let marks = [], trailing = end != EmptyLine;
+            while (!end.test(line.text) && cx.nextLine()) {
+                if (line.depth < cx.stack.length) {
+                    trailing = false;
+                    break;
+                }
+                for (let m of line.markers)
+                    marks.push(m);
+            }
+            if (trailing)
+                cx.nextLine();
+            let nodeType = end == CommentEnd ? Type.CommentBlock : end == ProcessingEnd ? Type.ProcessingInstructionBlock : Type.HTMLBlock;
+            let to = cx.prevLineEnd();
+            cx.addNode(cx.buffer.writeElements(marks, -from).finish(nodeType, to - from), from);
+            return true;
+        },
+        SetextHeading: undefined // Specifies relative precedence for block-continue function
+    };
+    // This implements a state machine that incrementally parses link references. At each
+    // next line, it looks ahead to see if the line continues the reference or not. If it
+    // doesn't and a valid link is available ending before that line, it finishes that.
+    // Similarly, on `finish` (when the leaf is terminated by external circumstances), it
+    // creates a link reference if there's a valid reference up to the current point.
+    class LinkReferenceParser {
+        constructor(leaf) {
+            this.stage = 0 /* Start */;
+            this.elts = [];
+            this.pos = 0;
+            this.start = leaf.start;
+            this.advance(leaf.content);
+        }
+        nextLine(cx, line, leaf) {
+            if (this.stage == -1 /* Failed */)
+                return false;
+            let content = leaf.content + "\n" + line.scrub();
+            let finish = this.advance(content);
+            if (finish > -1 && finish < content.length)
+                return this.complete(cx, leaf, finish);
+            return false;
+        }
+        finish(cx, leaf) {
+            if ((this.stage == 2 /* Link */ || this.stage == 3 /* Title */) && skipSpace(leaf.content, this.pos) == leaf.content.length)
+                return this.complete(cx, leaf, leaf.content.length);
+            return false;
+        }
+        complete(cx, leaf, len) {
+            cx.addLeafElement(leaf, elt(Type.LinkReference, this.start, this.start + len, this.elts));
+            return true;
+        }
+        nextStage(elt) {
+            if (elt) {
+                this.pos = elt.to - this.start;
+                this.elts.push(elt);
+                this.stage++;
+                return true;
+            }
+            if (elt === false)
+                this.stage = -1 /* Failed */;
+            return false;
+        }
+        advance(content) {
+            for (;;) {
+                if (this.stage == -1 /* Failed */) {
+                    return -1;
+                }
+                else if (this.stage == 0 /* Start */) {
+                    if (!this.nextStage(parseLinkLabel(content, this.pos, this.start, true)))
+                        return -1;
+                    if (content.charCodeAt(this.pos) != 58 /* ':' */)
+                        return this.stage = -1 /* Failed */;
+                    this.elts.push(elt(Type.LinkMark, this.pos + this.start, this.pos + this.start + 1));
+                    this.pos++;
+                }
+                else if (this.stage == 1 /* Label */) {
+                    if (!this.nextStage(parseURL(content, skipSpace(content, this.pos), this.start)))
+                        return -1;
+                }
+                else if (this.stage == 2 /* Link */) {
+                    let skip = skipSpace(content, this.pos), end = 0;
+                    if (skip > this.pos) {
+                        let title = parseLinkTitle(content, skip, this.start);
+                        if (title) {
+                            let titleEnd = lineEnd(content, title.to - this.start);
+                            if (titleEnd > 0) {
+                                this.nextStage(title);
+                                end = titleEnd;
+                            }
+                        }
+                    }
+                    if (!end)
+                        end = lineEnd(content, this.pos);
+                    return end > 0 && end < content.length ? end : -1;
+                }
+                else { // RefStage.Title
+                    return lineEnd(content, this.pos);
+                }
+            }
+        }
+    }
+    function lineEnd(text, pos) {
+        for (; pos < text.length; pos++) {
+            let next = text.charCodeAt(pos);
+            if (next == 10)
+                break;
+            if (!space$1(next))
+                return -1;
+        }
+        return pos;
+    }
+    class SetextHeadingParser {
+        nextLine(cx, line, leaf) {
+            let underline = line.depth < cx.stack.length ? -1 : isSetextUnderline(line);
+            let next = line.next;
+            if (underline < 0)
+                return false;
+            let underlineMark = elt(Type.HeaderMark, cx.lineStart + line.pos, cx.lineStart + underline);
+            cx.nextLine();
+            cx.addLeafElement(leaf, elt(next == 61 ? Type.SetextHeading1 : Type.SetextHeading2, leaf.start, cx.prevLineEnd(), [
+                ...cx.parser.parseInline(leaf.content, leaf.start),
+                underlineMark
+            ]));
+            return true;
+        }
+        finish() {
+            return false;
+        }
+    }
+    const DefaultLeafBlocks = {
+        LinkReference(_, leaf) { return leaf.content.charCodeAt(0) == 91 /* '[' */ ? new LinkReferenceParser(leaf) : null; },
+        SetextHeading() { return new SetextHeadingParser; }
+    };
+    const DefaultEndLeaf = [
+        (_, line) => isAtxHeading(line) >= 0,
+        (_, line) => isFencedCode(line) >= 0,
+        (_, line) => isBlockquote(line) >= 0,
+        (p, line) => isBulletList(line, p, true) >= 0,
+        (p, line) => isOrderedList(line, p, true) >= 0,
+        (p, line) => isHorizontalRule(line, p, true) >= 0,
+        (p, line) => isHTMLBlock(line, p, true) >= 0
+    ];
+    const scanLineResult = { text: "", end: 0 };
+    /// Block-level parsing functions get access to this context object.
+    class BlockContext {
+        /// @internal
+        constructor(
+        /// The parser configuration used.
+        parser, 
+        /// @internal
+        input, fragments, 
+        /// @internal
+        ranges) {
+            this.parser = parser;
+            this.input = input;
+            this.ranges = ranges;
+            this.line = new Line();
+            this.atEnd = false;
+            /// @internal
+            this.dontInject = new Set;
+            this.stoppedAt = null;
+            /// The range index that absoluteLineStart points into @internal
+            this.rangeI = 0;
+            this.to = ranges[ranges.length - 1].to;
+            this.lineStart = this.absoluteLineStart = this.absoluteLineEnd = ranges[0].from;
+            this.block = CompositeBlock.create(Type.Document, 0, this.lineStart, 0, 0);
+            this.stack = [this.block];
+            this.fragments = fragments.length ? new FragmentCursor(fragments, input) : null;
+            this.readLine();
+        }
+        get parsedPos() {
+            return this.absoluteLineStart;
+        }
+        advance() {
+            if (this.stoppedAt != null && this.absoluteLineStart > this.stoppedAt)
+                return this.finish();
+            let { line } = this;
+            for (;;) {
+                while (line.depth < this.stack.length)
+                    this.finishContext();
+                for (let mark of line.markers)
+                    this.addNode(mark.type, mark.from, mark.to);
+                if (line.pos < line.text.length)
+                    break;
+                // Empty line
+                if (!this.nextLine())
+                    return this.finish();
+            }
+            if (this.fragments && this.reuseFragment(line.basePos))
+                return null;
+            start: for (;;) {
+                for (let type of this.parser.blockParsers)
+                    if (type) {
+                        let result = type(this, line);
+                        if (result != false) {
+                            if (result == true)
+                                return null;
+                            line.forward();
+                            continue start;
+                        }
+                    }
+                break;
+            }
+            let leaf = new LeafBlock(this.lineStart + line.pos, line.text.slice(line.pos));
+            for (let parse of this.parser.leafBlockParsers)
+                if (parse) {
+                    let parser = parse(this, leaf);
+                    if (parser)
+                        leaf.parsers.push(parser);
+                }
+            lines: while (this.nextLine()) {
+                if (line.pos == line.text.length)
+                    break;
+                if (line.indent < line.baseIndent + 4) {
+                    for (let stop of this.parser.endLeafBlock)
+                        if (stop(this, line, leaf))
+                            break lines;
+                }
+                for (let parser of leaf.parsers)
+                    if (parser.nextLine(this, line, leaf))
+                        return null;
+                leaf.content += "\n" + line.scrub();
+                for (let m of line.markers)
+                    leaf.marks.push(m);
+            }
+            this.finishLeaf(leaf);
+            return null;
+        }
+        stopAt(pos) {
+            if (this.stoppedAt != null && this.stoppedAt < pos)
+                throw new RangeError("Can't move stoppedAt forward");
+            this.stoppedAt = pos;
+        }
+        reuseFragment(start) {
+            if (!this.fragments.moveTo(this.absoluteLineStart + start, this.absoluteLineStart) ||
+                !this.fragments.matches(this.block.hash))
+                return false;
+            let taken = this.fragments.takeNodes(this);
+            if (!taken)
+                return false;
+            let withoutGaps = taken, end = this.absoluteLineStart + taken;
+            for (let i = 1; i < this.ranges.length; i++) {
+                let gapFrom = this.ranges[i - 1].to, gapTo = this.ranges[i].from;
+                if (gapFrom >= this.lineStart && gapTo < end)
+                    withoutGaps -= gapTo - gapFrom;
+            }
+            this.lineStart += withoutGaps;
+            this.absoluteLineStart += taken;
+            this.moveRangeI();
+            if (this.absoluteLineStart < this.to) {
+                this.lineStart++;
+                this.absoluteLineStart++;
+                this.readLine();
+            }
+            else {
+                this.atEnd = true;
+                this.readLine();
+            }
+            return true;
+        }
+        /// The number of parent blocks surrounding the current block.
+        get depth() {
+            return this.stack.length;
+        }
+        /// Get the type of the parent block at the given depth. When no
+        /// depth is passed, return the type of the innermost parent.
+        parentType(depth = this.depth - 1) {
+            return this.parser.nodeSet.types[this.stack[depth].type];
+        }
+        /// Move to the next input line. This should only be called by
+        /// (non-composite) [block parsers](#BlockParser.parse) that consume
+        /// the line directly, or leaf block parser
+        /// [`nextLine`](#LeafBlockParser.nextLine) methods when they
+        /// consume the current line (and return true).
+        nextLine() {
+            this.lineStart += this.line.text.length;
+            if (this.absoluteLineEnd >= this.to) {
+                this.absoluteLineStart = this.absoluteLineEnd;
+                this.atEnd = true;
+                this.readLine();
+                return false;
+            }
+            else {
+                this.lineStart++;
+                this.absoluteLineStart = this.absoluteLineEnd + 1;
+                this.moveRangeI();
+                this.readLine();
+                return true;
+            }
+        }
+        moveRangeI() {
+            while (this.rangeI < this.ranges.length - 1 && this.absoluteLineStart >= this.ranges[this.rangeI].to)
+                this.rangeI++;
+        }
+        /// @internal
+        scanLine(start) {
+            let r = scanLineResult;
+            r.end = start;
+            if (start >= this.to) {
+                r.text = "";
+            }
+            else {
+                r.text = this.lineChunkAt(r.end);
+                r.end += r.text.length;
+                if (this.ranges.length > 1) {
+                    let textOffset = this.absoluteLineStart, rangeI = this.rangeI;
+                    while (this.ranges[rangeI].to < r.end) {
+                        rangeI++;
+                        let nextFrom = this.ranges[rangeI].from;
+                        let after = this.lineChunkAt(nextFrom);
+                        r.end = nextFrom + after.length;
+                        r.text = r.text.slice(0, this.ranges[rangeI - 1].to - textOffset) + after;
+                        textOffset = r.end - r.text.length;
+                    }
+                }
+            }
+            return r;
+        }
+        /// @internal
+        readLine() {
+            let { line } = this, { text, end } = this.scanLine(this.absoluteLineStart);
+            this.absoluteLineEnd = end;
+            line.reset(text);
+            for (; line.depth < this.stack.length; line.depth++) {
+                let cx = this.stack[line.depth], handler = this.parser.skipContextMarkup[cx.type];
+                if (!handler)
+                    throw new Error("Unhandled block context " + Type[cx.type]);
+                if (!handler(cx, this, line))
+                    break;
+                line.forward();
+            }
+        }
+        lineChunkAt(pos) {
+            let next = this.input.chunk(pos), text;
+            if (!this.input.lineChunks) {
+                let eol = next.indexOf("\n");
+                text = eol < 0 ? next : next.slice(0, eol);
+            }
+            else {
+                text = next == "\n" ? "" : next;
+            }
+            return pos + text.length > this.to ? text.slice(0, this.to - pos) : text;
+        }
+        /// The end position of the previous line.
+        prevLineEnd() { return this.atEnd ? this.lineStart : this.lineStart - 1; }
+        /// @internal
+        startContext(type, start, value = 0) {
+            this.block = CompositeBlock.create(type, value, this.lineStart + start, this.block.hash, this.lineStart + this.line.text.length);
+            this.stack.push(this.block);
+        }
+        /// Start a composite block. Should only be called from [block
+        /// parser functions](#BlockParser.parse) that return null.
+        startComposite(type, start, value = 0) {
+            this.startContext(this.parser.getNodeType(type), start, value);
+        }
+        /// @internal
+        addNode(block, from, to) {
+            if (typeof block == "number")
+                block = new Tree(this.parser.nodeSet.types[block], none, none, (to !== null && to !== void 0 ? to : this.prevLineEnd()) - from);
+            this.block.addChild(block, from - this.block.from);
+        }
+        /// Add a block element. Can be called by [block
+        /// parsers](#BlockParser.parse).
+        addElement(elt) {
+            this.block.addChild(elt.toTree(this.parser.nodeSet), elt.from - this.block.from);
+        }
+        /// Add a block element from a [leaf parser](#LeafBlockParser). This
+        /// makes sure any extra composite block markup (such as blockquote
+        /// markers) inside the block are also added to the syntax tree.
+        addLeafElement(leaf, elt) {
+            this.addNode(this.buffer
+                .writeElements(injectMarks(elt.children, leaf.marks), -elt.from)
+                .finish(elt.type, elt.to - elt.from), elt.from);
+        }
+        /// @internal
+        finishContext() {
+            let cx = this.stack.pop();
+            let top = this.stack[this.stack.length - 1];
+            top.addChild(cx.toTree(this.parser.nodeSet), cx.from - top.from);
+            this.block = top;
+        }
+        finish() {
+            while (this.stack.length > 1)
+                this.finishContext();
+            return this.addGaps(this.block.toTree(this.parser.nodeSet, this.lineStart));
+        }
+        addGaps(tree) {
+            return this.ranges.length > 1 ? injectGaps(this.ranges, 0, tree.topNode, this.ranges[0].from, this.dontInject) : tree;
+        }
+        /// @internal
+        finishLeaf(leaf) {
+            for (let parser of leaf.parsers)
+                if (parser.finish(this, leaf))
+                    return;
+            let inline = injectMarks(this.parser.parseInline(leaf.content, leaf.start), leaf.marks);
+            this.addNode(this.buffer
+                .writeElements(inline, -leaf.start)
+                .finish(Type.Paragraph, leaf.content.length), leaf.start);
+        }
+        elt(type, from, to, children) {
+            if (typeof type == "string")
+                return elt(this.parser.getNodeType(type), from, to, children);
+            return new TreeElement(type, from);
+        }
+        /// @internal
+        get buffer() { return new Buffer(this.parser.nodeSet); }
+    }
+    function injectGaps(ranges, rangeI, tree, offset, dont) {
+        if (dont.has(tree.tree))
+            return tree.tree;
+        let rangeEnd = ranges[rangeI].to;
+        let children = [], positions = [], start = tree.from + offset;
+        function movePastNext(upto, inclusive) {
+            while (inclusive ? upto >= rangeEnd : upto > rangeEnd) {
+                let size = ranges[rangeI + 1].from - rangeEnd;
+                offset += size;
+                upto += size;
+                rangeI++;
+                rangeEnd = ranges[rangeI].to;
+            }
+        }
+        for (let ch = tree.firstChild; ch; ch = ch.nextSibling) {
+            movePastNext(ch.from + offset, true);
+            let from = ch.from + offset, node;
+            if (ch.to + offset > rangeEnd) {
+                node = injectGaps(ranges, rangeI, ch, offset, dont);
+                movePastNext(ch.to + offset, false);
+            }
+            else {
+                node = ch.toTree();
+            }
+            children.push(node);
+            positions.push(from - start);
+        }
+        movePastNext(tree.to + offset, false);
+        return new Tree(tree.type, children, positions, tree.to + offset - start, tree.tree ? tree.tree.propValues : undefined);
+    }
+    /// A Markdown parser configuration.
+    class MarkdownParser extends Parser {
+        /// @internal
+        constructor(
+        /// The parser's syntax [node
+        /// types](https://lezer.codemirror.net/docs/ref/#common.NodeSet).
+        nodeSet, 
+        /// @internal
+        blockParsers, 
+        /// @internal
+        leafBlockParsers, 
+        /// @internal
+        blockNames, 
+        /// @internal
+        endLeafBlock, 
+        /// @internal
+        skipContextMarkup, 
+        /// @internal
+        inlineParsers, 
+        /// @internal
+        inlineNames, 
+        /// @internal
+        wrappers) {
+            super();
+            this.nodeSet = nodeSet;
+            this.blockParsers = blockParsers;
+            this.leafBlockParsers = leafBlockParsers;
+            this.blockNames = blockNames;
+            this.endLeafBlock = endLeafBlock;
+            this.skipContextMarkup = skipContextMarkup;
+            this.inlineParsers = inlineParsers;
+            this.inlineNames = inlineNames;
+            this.wrappers = wrappers;
+            /// @internal
+            this.nodeTypes = Object.create(null);
+            for (let t of nodeSet.types)
+                this.nodeTypes[t.name] = t.id;
+        }
+        createParse(input, fragments, ranges) {
+            let parse = new BlockContext(this, input, fragments, ranges);
+            for (let w of this.wrappers)
+                parse = w(parse, input, fragments, ranges);
+            return parse;
+        }
+        /// Reconfigure the parser.
+        configure(spec) {
+            let config = resolveConfig(spec);
+            if (!config)
+                return this;
+            let { nodeSet, skipContextMarkup } = this;
+            let blockParsers = this.blockParsers.slice(), leafBlockParsers = this.leafBlockParsers.slice(), blockNames = this.blockNames.slice(), inlineParsers = this.inlineParsers.slice(), inlineNames = this.inlineNames.slice(), endLeafBlock = this.endLeafBlock.slice(), wrappers = this.wrappers;
+            if (nonEmpty(config.defineNodes)) {
+                skipContextMarkup = Object.assign({}, skipContextMarkup);
+                let nodeTypes = nodeSet.types.slice();
+                for (let s of config.defineNodes) {
+                    let { name, block, composite } = typeof s == "string" ? { name: s } : s;
+                    if (nodeTypes.some(t => t.name == name))
+                        continue;
+                    if (composite)
+                        skipContextMarkup[nodeTypes.length] =
+                            (bl, cx, line) => composite(cx, line, bl.value);
+                    let id = nodeTypes.length;
+                    let group = composite ? ["Block", "BlockContext"] : !block ? undefined
+                        : id >= Type.ATXHeading1 && id <= Type.SetextHeading2 ? ["Block", "LeafBlock", "Heading"] : ["Block", "LeafBlock"];
+                    nodeTypes.push(NodeType.define({
+                        id,
+                        name,
+                        props: group && [[NodeProp.group, group]]
+                    }));
+                }
+                nodeSet = new NodeSet(nodeTypes);
+            }
+            if (nonEmpty(config.props))
+                nodeSet = nodeSet.extend(...config.props);
+            if (nonEmpty(config.remove)) {
+                for (let rm of config.remove) {
+                    let block = this.blockNames.indexOf(rm), inline = this.inlineNames.indexOf(rm);
+                    if (block > -1)
+                        blockParsers[block] = leafBlockParsers[block] = undefined;
+                    if (inline > -1)
+                        inlineParsers[inline] = undefined;
+                }
+            }
+            if (nonEmpty(config.parseBlock)) {
+                for (let spec of config.parseBlock) {
+                    let found = blockNames.indexOf(spec.name);
+                    if (found > -1) {
+                        blockParsers[found] = spec.parse;
+                        leafBlockParsers[found] = spec.leaf;
+                    }
+                    else {
+                        let pos = spec.before ? findName(blockNames, spec.before)
+                            : spec.after ? findName(blockNames, spec.after) + 1 : blockNames.length - 1;
+                        blockParsers.splice(pos, 0, spec.parse);
+                        leafBlockParsers.splice(pos, 0, spec.leaf);
+                        blockNames.splice(pos, 0, spec.name);
+                    }
+                    if (spec.endLeaf)
+                        endLeafBlock.push(spec.endLeaf);
+                }
+            }
+            if (nonEmpty(config.parseInline)) {
+                for (let spec of config.parseInline) {
+                    let found = inlineNames.indexOf(spec.name);
+                    if (found > -1) {
+                        inlineParsers[found] = spec.parse;
+                    }
+                    else {
+                        let pos = spec.before ? findName(inlineNames, spec.before)
+                            : spec.after ? findName(inlineNames, spec.after) + 1 : inlineNames.length - 1;
+                        inlineParsers.splice(pos, 0, spec.parse);
+                        inlineNames.splice(pos, 0, spec.name);
+                    }
+                }
+            }
+            if (config.wrap)
+                wrappers = wrappers.concat(config.wrap);
+            return new MarkdownParser(nodeSet, blockParsers, leafBlockParsers, blockNames, endLeafBlock, skipContextMarkup, inlineParsers, inlineNames, wrappers);
+        }
+        /// @internal
+        getNodeType(name) {
+            let found = this.nodeTypes[name];
+            if (found == null)
+                throw new RangeError(`Unknown node type '${name}'`);
+            return found;
+        }
+        /// Parse the given piece of inline text at the given offset,
+        /// returning an array of [`Element`](#Element) objects representing
+        /// the inline content.
+        parseInline(text, offset) {
+            let cx = new InlineContext(this, text, offset);
+            outer: for (let pos = offset; pos < cx.end;) {
+                let next = cx.char(pos);
+                for (let token of this.inlineParsers)
+                    if (token) {
+                        let result = token(cx, next, pos);
+                        if (result >= 0) {
+                            pos = result;
+                            continue outer;
+                        }
+                    }
+                pos++;
+            }
+            return cx.resolveMarkers(0);
+        }
+    }
+    function nonEmpty(a) {
+        return a != null && a.length > 0;
+    }
+    function resolveConfig(spec) {
+        if (!Array.isArray(spec))
+            return spec;
+        if (spec.length == 0)
+            return null;
+        let conf = resolveConfig(spec[0]);
+        if (spec.length == 1)
+            return conf;
+        let rest = resolveConfig(spec.slice(1));
+        if (!rest || !conf)
+            return conf || rest;
+        let conc = (a, b) => (a || none).concat(b || none);
+        let wrapA = conf.wrap, wrapB = rest.wrap;
+        return {
+            props: conc(conf.props, rest.props),
+            defineNodes: conc(conf.defineNodes, rest.defineNodes),
+            parseBlock: conc(conf.parseBlock, rest.parseBlock),
+            parseInline: conc(conf.parseInline, rest.parseInline),
+            remove: conc(conf.remove, rest.remove),
+            wrap: !wrapA ? wrapB : !wrapB ? wrapA :
+                (inner, input, fragments, ranges) => wrapA(wrapB(inner, input, fragments, ranges), input, fragments, ranges)
+        };
+    }
+    function findName(names, name) {
+        let found = names.indexOf(name);
+        if (found < 0)
+            throw new RangeError(`Position specified relative to unknown parser ${name}`);
+        return found;
+    }
+    let nodeTypes = [NodeType.none];
+    for (let i = 1, name; name = Type[i]; i++) {
+        nodeTypes[i] = NodeType.define({
+            id: i,
+            name,
+            props: i >= Type.Escape ? [] : [[NodeProp.group, i in DefaultSkipMarkup ? ["Block", "BlockContext"] : ["Block", "LeafBlock"]]]
+        });
+    }
+    const none = [];
+    class Buffer {
+        constructor(nodeSet) {
+            this.nodeSet = nodeSet;
+            this.content = [];
+            this.nodes = [];
+        }
+        write(type, from, to, children = 0) {
+            this.content.push(type, from, to, 4 + children * 4);
+            return this;
+        }
+        writeElements(elts, offset = 0) {
+            for (let e of elts)
+                e.writeTo(this, offset);
+            return this;
+        }
+        finish(type, length) {
+            return Tree.build({
+                buffer: this.content,
+                nodeSet: this.nodeSet,
+                reused: this.nodes,
+                topID: type,
+                length
+            });
+        }
+    }
+    /// Elements are used to compose syntax nodes during parsing.
+    class Element$3 {
+        /// @internal
+        constructor(
+        /// The node's
+        /// [id](https://lezer.codemirror.net/docs/ref/#common.NodeType.id).
+        type, 
+        /// The start of the node, as an offset from the start of the document.
+        from, 
+        /// The end of the node.
+        to, 
+        /// The node's child nodes @internal
+        children = none) {
+            this.type = type;
+            this.from = from;
+            this.to = to;
+            this.children = children;
+        }
+        /// @internal
+        writeTo(buf, offset) {
+            let startOff = buf.content.length;
+            buf.writeElements(this.children, offset);
+            buf.content.push(this.type, this.from + offset, this.to + offset, buf.content.length + 4 - startOff);
+        }
+        /// @internal
+        toTree(nodeSet) {
+            return new Buffer(nodeSet).writeElements(this.children, -this.from).finish(this.type, this.to - this.from);
+        }
+    }
+    class TreeElement {
+        constructor(tree, from) {
+            this.tree = tree;
+            this.from = from;
+        }
+        get to() { return this.from + this.tree.length; }
+        get type() { return this.tree.type.id; }
+        get children() { return none; }
+        writeTo(buf, offset) {
+            buf.nodes.push(this.tree);
+            buf.content.push(buf.nodes.length - 1, this.from + offset, this.to + offset, -1);
+        }
+        toTree() { return this.tree; }
+    }
+    function elt(type, from, to, children) {
+        return new Element$3(type, from, to, children);
+    }
+    const EmphasisUnderscore = { resolve: "Emphasis", mark: "EmphasisMark" };
+    const EmphasisAsterisk = { resolve: "Emphasis", mark: "EmphasisMark" };
+    const LinkStart = {}, ImageStart = {};
+    class InlineDelimiter {
+        constructor(type, from, to, side) {
+            this.type = type;
+            this.from = from;
+            this.to = to;
+            this.side = side;
+        }
+    }
+    const Escapable = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+    let Punctuation = /[!"#$%&'()*+,\-.\/:;<=>?@\[\\\]^_`{|}~\xA1\u2010-\u2027]/;
+    try {
+        Punctuation = new RegExp("[\\p{Pc}|\\p{Pd}|\\p{Pe}|\\p{Pf}|\\p{Pi}|\\p{Po}|\\p{Ps}]", "u");
+    }
+    catch (_) { }
+    const DefaultInline = {
+        Escape(cx, next, start) {
+            if (next != 92 /* '\\' */ || start == cx.end - 1)
+                return -1;
+            let escaped = cx.char(start + 1);
+            for (let i = 0; i < Escapable.length; i++)
+                if (Escapable.charCodeAt(i) == escaped)
+                    return cx.append(elt(Type.Escape, start, start + 2));
+            return -1;
+        },
+        Entity(cx, next, start) {
+            if (next != 38 /* '&' */)
+                return -1;
+            let m = /^(?:#\d+|#x[a-f\d]+|\w+);/i.exec(cx.slice(start + 1, start + 31));
+            return m ? cx.append(elt(Type.Entity, start, start + 1 + m[0].length)) : -1;
+        },
+        InlineCode(cx, next, start) {
+            if (next != 96 /* '`' */ || start && cx.char(start - 1) == 96)
+                return -1;
+            let pos = start + 1;
+            while (pos < cx.end && cx.char(pos) == 96)
+                pos++;
+            let size = pos - start, curSize = 0;
+            for (; pos < cx.end; pos++) {
+                if (cx.char(pos) == 96) {
+                    curSize++;
+                    if (curSize == size && cx.char(pos + 1) != 96)
+                        return cx.append(elt(Type.InlineCode, start, pos + 1, [
+                            elt(Type.CodeMark, start, start + size),
+                            elt(Type.CodeMark, pos + 1 - size, pos + 1)
+                        ]));
+                }
+                else {
+                    curSize = 0;
+                }
+            }
+            return -1;
+        },
+        HTMLTag(cx, next, start) {
+            if (next != 60 /* '<' */ || start == cx.end - 1)
+                return -1;
+            let after = cx.slice(start + 1, cx.end);
+            let url = /^(?:[a-z][-\w+.]+:[^\s>]+|[a-z\d.!#$%&'*+/=?^_`{|}~-]+@[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?(?:\.[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?)*)>/i.exec(after);
+            if (url)
+                return cx.append(elt(Type.URL, start, start + 1 + url[0].length));
+            let comment = /^!--[^>](?:-[^-]|[^-])*?-->/i.exec(after);
+            if (comment)
+                return cx.append(elt(Type.Comment, start, start + 1 + comment[0].length));
+            let procInst = /^\?[^]*?\?>/.exec(after);
+            if (procInst)
+                return cx.append(elt(Type.ProcessingInstruction, start, start + 1 + procInst[0].length));
+            let m = /^(?:![A-Z][^]*?>|!\[CDATA\[[^]*?\]\]>|\/\s*[a-zA-Z][\w-]*\s*>|\s*[a-zA-Z][\w-]*(\s+[a-zA-Z:_][\w-.:]*(?:\s*=\s*(?:[^\s"'=<>`]+|'[^']*'|"[^"]*"))?)*\s*(\/\s*)?>)/.exec(after);
+            if (!m)
+                return -1;
+            return cx.append(elt(Type.HTMLTag, start, start + 1 + m[0].length));
+        },
+        Emphasis(cx, next, start) {
+            if (next != 95 && next != 42)
+                return -1;
+            let pos = start + 1;
+            while (cx.char(pos) == next)
+                pos++;
+            let before = cx.slice(start - 1, start), after = cx.slice(pos, pos + 1);
+            let pBefore = Punctuation.test(before), pAfter = Punctuation.test(after);
+            let sBefore = /\s|^$/.test(before), sAfter = /\s|^$/.test(after);
+            let leftFlanking = !sAfter && (!pAfter || sBefore || pBefore);
+            let rightFlanking = !sBefore && (!pBefore || sAfter || pAfter);
+            let canOpen = leftFlanking && (next == 42 || !rightFlanking || pBefore);
+            let canClose = rightFlanking && (next == 42 || !leftFlanking || pAfter);
+            return cx.append(new InlineDelimiter(next == 95 ? EmphasisUnderscore : EmphasisAsterisk, start, pos, (canOpen ? 1 /* Open */ : 0) | (canClose ? 2 /* Close */ : 0)));
+        },
+        HardBreak(cx, next, start) {
+            if (next == 92 /* '\\' */ && cx.char(start + 1) == 10 /* '\n' */)
+                return cx.append(elt(Type.HardBreak, start, start + 2));
+            if (next == 32) {
+                let pos = start + 1;
+                while (cx.char(pos) == 32)
+                    pos++;
+                if (cx.char(pos) == 10 && pos >= start + 2)
+                    return cx.append(elt(Type.HardBreak, start, pos + 1));
+            }
+            return -1;
+        },
+        Link(cx, next, start) {
+            return next == 91 /* '[' */ ? cx.append(new InlineDelimiter(LinkStart, start, start + 1, 1 /* Open */)) : -1;
+        },
+        Image(cx, next, start) {
+            return next == 33 /* '!' */ && cx.char(start + 1) == 91 /* '[' */
+                ? cx.append(new InlineDelimiter(ImageStart, start, start + 2, 1 /* Open */)) : -1;
+        },
+        LinkEnd(cx, next, start) {
+            if (next != 93 /* ']' */)
+                return -1;
+            // Scanning back to the next link/image start marker
+            for (let i = cx.parts.length - 1; i >= 0; i--) {
+                let part = cx.parts[i];
+                if (part instanceof InlineDelimiter && (part.type == LinkStart || part.type == ImageStart)) {
+                    // If this one has been set invalid (because it would produce
+                    // a nested link) or there's no valid link here ignore both.
+                    if (!part.side || cx.skipSpace(part.to) == start && !/[(\[]/.test(cx.slice(start + 1, start + 2))) {
+                        cx.parts[i] = null;
+                        return -1;
+                    }
+                    // Finish the content and replace the entire range in
+                    // this.parts with the link/image node.
+                    let content = cx.takeContent(i);
+                    let link = cx.parts[i] = finishLink(cx, content, part.type == LinkStart ? Type.Link : Type.Image, part.from, start + 1);
+                    // Set any open-link markers before this link to invalid.
+                    if (part.type == LinkStart)
+                        for (let j = 0; j < i; j++) {
+                            let p = cx.parts[j];
+                            if (p instanceof InlineDelimiter && p.type == LinkStart)
+                                p.side = 0;
+                        }
+                    return link.to;
+                }
+            }
+            return -1;
+        }
+    };
+    function finishLink(cx, content, type, start, startPos) {
+        let { text } = cx, next = cx.char(startPos), endPos = startPos;
+        content.unshift(elt(Type.LinkMark, start, start + (type == Type.Image ? 2 : 1)));
+        content.push(elt(Type.LinkMark, startPos - 1, startPos));
+        if (next == 40 /* '(' */) {
+            let pos = cx.skipSpace(startPos + 1);
+            let dest = parseURL(text, pos - cx.offset, cx.offset), title;
+            if (dest) {
+                pos = cx.skipSpace(dest.to);
+                title = parseLinkTitle(text, pos - cx.offset, cx.offset);
+                if (title)
+                    pos = cx.skipSpace(title.to);
+            }
+            if (cx.char(pos) == 41 /* ')' */) {
+                content.push(elt(Type.LinkMark, startPos, startPos + 1));
+                endPos = pos + 1;
+                if (dest)
+                    content.push(dest);
+                if (title)
+                    content.push(title);
+                content.push(elt(Type.LinkMark, pos, endPos));
+            }
+        }
+        else if (next == 91 /* '[' */) {
+            let label = parseLinkLabel(text, startPos - cx.offset, cx.offset, false);
+            if (label) {
+                content.push(label);
+                endPos = label.to;
+            }
+        }
+        return elt(type, start, endPos, content);
+    }
+    // These return `null` when falling off the end of the input, `false`
+    // when parsing fails otherwise (for use in the incremental link
+    // reference parser).
+    function parseURL(text, start, offset) {
+        let next = text.charCodeAt(start);
+        if (next == 60 /* '<' */) {
+            for (let pos = start + 1; pos < text.length; pos++) {
+                let ch = text.charCodeAt(pos);
+                if (ch == 62 /* '>' */)
+                    return elt(Type.URL, start + offset, pos + 1 + offset);
+                if (ch == 60 || ch == 10 /* '<\n' */)
+                    return false;
+            }
+            return null;
+        }
+        else {
+            let depth = 0, pos = start;
+            for (let escaped = false; pos < text.length; pos++) {
+                let ch = text.charCodeAt(pos);
+                if (space$1(ch)) {
+                    break;
+                }
+                else if (escaped) {
+                    escaped = false;
+                }
+                else if (ch == 40 /* '(' */) {
+                    depth++;
+                }
+                else if (ch == 41 /* ')' */) {
+                    if (!depth)
+                        break;
+                    depth--;
+                }
+                else if (ch == 92 /* '\\' */) {
+                    escaped = true;
+                }
+            }
+            return pos > start ? elt(Type.URL, start + offset, pos + offset) : pos == text.length ? null : false;
+        }
+    }
+    function parseLinkTitle(text, start, offset) {
+        let next = text.charCodeAt(start);
+        if (next != 39 && next != 34 && next != 40 /* '"\'(' */)
+            return false;
+        let end = next == 40 ? 41 : next;
+        for (let pos = start + 1, escaped = false; pos < text.length; pos++) {
+            let ch = text.charCodeAt(pos);
+            if (escaped)
+                escaped = false;
+            else if (ch == end)
+                return elt(Type.LinkTitle, start + offset, pos + 1 + offset);
+            else if (ch == 92 /* '\\' */)
+                escaped = true;
+        }
+        return null;
+    }
+    function parseLinkLabel(text, start, offset, requireNonWS) {
+        for (let escaped = false, pos = start + 1, end = Math.min(text.length, pos + 999); pos < end; pos++) {
+            let ch = text.charCodeAt(pos);
+            if (escaped)
+                escaped = false;
+            else if (ch == 93 /* ']' */)
+                return requireNonWS ? false : elt(Type.LinkLabel, start + offset, pos + 1 + offset);
+            else {
+                if (requireNonWS && !space$1(ch))
+                    requireNonWS = false;
+                if (ch == 91 /* '[' */)
+                    return false;
+                else if (ch == 92 /* '\\' */)
+                    escaped = true;
+            }
+        }
+        return null;
+    }
+    /// Inline parsing functions get access to this context, and use it to
+    /// read the content and emit syntax nodes.
+    class InlineContext {
+        /// @internal
+        constructor(
+        /// The parser that is being used.
+        parser, 
+        /// The text of this inline section.
+        text, 
+        /// The starting offset of the section in the document.
+        offset) {
+            this.parser = parser;
+            this.text = text;
+            this.offset = offset;
+            /// @internal
+            this.parts = [];
+        }
+        /// Get the character code at the given (document-relative)
+        /// position.
+        char(pos) { return pos >= this.end ? -1 : this.text.charCodeAt(pos - this.offset); }
+        /// The position of the end of this inline section.
+        get end() { return this.offset + this.text.length; }
+        /// Get a substring of this inline section. Again uses
+        /// document-relative positions.
+        slice(from, to) { return this.text.slice(from - this.offset, to - this.offset); }
+        /// @internal
+        append(elt) {
+            this.parts.push(elt);
+            return elt.to;
+        }
+        /// Add a [delimiter](#DelimiterType) at this given position. `open`
+        /// and `close` indicate whether this delimiter is opening, closing,
+        /// or both. Returns the end of the delimiter, for convenient
+        /// returning from [parse functions](#InlineParser.parse).
+        addDelimiter(type, from, to, open, close) {
+            return this.append(new InlineDelimiter(type, from, to, (open ? 1 /* Open */ : 0) | (close ? 2 /* Close */ : 0)));
+        }
+        /// Add an inline element. Returns the end of the element.
+        addElement(elt) {
+            return this.append(elt);
+        }
+        /// @internal
+        resolveMarkers(from) {
+            for (let i = from; i < this.parts.length; i++) {
+                let close = this.parts[i];
+                if (!(close instanceof InlineDelimiter && close.type.resolve && (close.side & 2 /* Close */)))
+                    continue;
+                let emp = close.type == EmphasisUnderscore || close.type == EmphasisAsterisk;
+                let closeSize = close.to - close.from;
+                let open, j = i - 1;
+                for (; j >= from; j--) {
+                    let part = this.parts[j];
+                    if (!(part instanceof InlineDelimiter && (part.side & 1 /* Open */) && part.type == close.type) ||
+                        emp && ((close.side & 1 /* Open */) || (part.side & 2 /* Close */)) &&
+                            (part.to - part.from + closeSize) % 3 == 0 && ((part.to - part.from) % 3 || closeSize % 3))
+                        continue;
+                    open = part;
+                    break;
+                }
+                if (!open)
+                    continue;
+                let type = close.type.resolve, content = [];
+                let start = open.from, end = close.to;
+                if (emp) {
+                    let size = Math.min(2, open.to - open.from, closeSize);
+                    start = open.to - size;
+                    end = close.from + size;
+                    type = size == 1 ? "Emphasis" : "StrongEmphasis";
+                }
+                if (open.type.mark)
+                    content.push(this.elt(open.type.mark, start, open.to));
+                for (let k = j + 1; k < i; k++) {
+                    if (this.parts[k] instanceof Element$3)
+                        content.push(this.parts[k]);
+                    this.parts[k] = null;
+                }
+                if (close.type.mark)
+                    content.push(this.elt(close.type.mark, close.from, end));
+                let element = this.elt(type, start, end, content);
+                this.parts[j] = emp && open.from != start ? new InlineDelimiter(open.type, open.from, start, open.side) : null;
+                let keep = this.parts[i] = emp && close.to != end ? new InlineDelimiter(close.type, end, close.to, close.side) : null;
+                if (keep)
+                    this.parts.splice(i, 0, element);
+                else
+                    this.parts[i] = element;
+            }
+            let result = [];
+            for (let i = from; i < this.parts.length; i++) {
+                let part = this.parts[i];
+                if (part instanceof Element$3)
+                    result.push(part);
+            }
+            return result;
+        }
+        /// Find an opening delimiter of the given type. Returns `null` if
+        /// no delimiter is found, or an index that can be passed to
+        /// [`takeContent`](#InlineContext.takeContent) otherwise.
+        findOpeningDelimiter(type) {
+            for (let i = this.parts.length - 1; i >= 0; i--) {
+                let part = this.parts[i];
+                if (part instanceof InlineDelimiter && part.type == type)
+                    return i;
+            }
+            return null;
+        }
+        /// Remove all inline elements and delimiters starting from the
+        /// given index (which you should get from
+        /// [`findOpeningDelimiter`](#InlineContext.findOpeningDelimiter),
+        /// resolve delimiters inside of them, and return them as an array
+        /// of elements.
+        takeContent(startIndex) {
+            let content = this.resolveMarkers(startIndex);
+            this.parts.length = startIndex;
+            return content;
+        }
+        /// Skip space after the given (document) position, returning either
+        /// the position of the next non-space character or the end of the
+        /// section.
+        skipSpace(from) { return skipSpace(this.text, from - this.offset) + this.offset; }
+        elt(type, from, to, children) {
+            if (typeof type == "string")
+                return elt(this.parser.getNodeType(type), from, to, children);
+            return new TreeElement(type, from);
+        }
+    }
+    function injectMarks(elements, marks) {
+        if (!marks.length)
+            return elements;
+        if (!elements.length)
+            return marks;
+        let elts = elements.slice(), eI = 0;
+        for (let mark of marks) {
+            while (eI < elts.length && elts[eI].to < mark.to)
+                eI++;
+            if (eI < elts.length && elts[eI].from < mark.from) {
+                let e = elts[eI];
+                if (e instanceof Element$3)
+                    elts[eI] = new Element$3(e.type, e.from, e.to, injectMarks(e.children, [mark]));
+            }
+            else {
+                elts.splice(eI++, 0, mark);
+            }
+        }
+        return elts;
+    }
+    // These are blocks that can span blank lines, and should thus only be
+    // reused if their next sibling is also being reused.
+    const NotLast = [Type.CodeBlock, Type.ListItem, Type.OrderedList, Type.BulletList];
+    class FragmentCursor {
+        constructor(fragments, input) {
+            this.fragments = fragments;
+            this.input = input;
+            // Index into fragment array
+            this.i = 0;
+            // Active fragment
+            this.fragment = null;
+            this.fragmentEnd = -1;
+            // Cursor into the current fragment, if any. When `moveTo` returns
+            // true, this points at the first block after `pos`.
+            this.cursor = null;
+            if (fragments.length)
+                this.fragment = fragments[this.i++];
+        }
+        nextFragment() {
+            this.fragment = this.i < this.fragments.length ? this.fragments[this.i++] : null;
+            this.cursor = null;
+            this.fragmentEnd = -1;
+        }
+        moveTo(pos, lineStart) {
+            while (this.fragment && this.fragment.to <= pos)
+                this.nextFragment();
+            if (!this.fragment || this.fragment.from > (pos ? pos - 1 : 0))
+                return false;
+            if (this.fragmentEnd < 0) {
+                let end = this.fragment.to;
+                while (end > 0 && this.input.read(end - 1, end) != "\n")
+                    end--;
+                this.fragmentEnd = end ? end - 1 : 0;
+            }
+            let c = this.cursor;
+            if (!c) {
+                c = this.cursor = this.fragment.tree.cursor();
+                c.firstChild();
+            }
+            let rPos = pos + this.fragment.offset;
+            while (c.to <= rPos)
+                if (!c.parent())
+                    return false;
+            for (;;) {
+                if (c.from >= rPos)
+                    return this.fragment.from <= lineStart;
+                if (!c.childAfter(rPos))
+                    return false;
+            }
+        }
+        matches(hash) {
+            let tree = this.cursor.tree;
+            return tree && tree.prop(NodeProp.contextHash) == hash;
+        }
+        takeNodes(cx) {
+            let cur = this.cursor, off = this.fragment.offset, fragEnd = this.fragmentEnd - (this.fragment.openEnd ? 1 : 0);
+            let start = cx.absoluteLineStart, end = start, blockI = cx.block.children.length;
+            let prevEnd = end, prevI = blockI;
+            for (;;) {
+                if (cur.to - off > fragEnd) {
+                    if (cur.type.isAnonymous && cur.firstChild())
+                        continue;
+                    break;
+                }
+                cx.dontInject.add(cur.tree);
+                cx.addNode(cur.tree, cur.from - off);
+                // Taken content must always end in a block, because incremental
+                // parsing happens on block boundaries. Never stop directly
+                // after an indented code block, since those can continue after
+                // any number of blank lines.
+                if (cur.type.is("Block")) {
+                    if (NotLast.indexOf(cur.type.id) < 0) {
+                        end = cur.to - off;
+                        blockI = cx.block.children.length;
+                    }
+                    else {
+                        end = prevEnd;
+                        blockI = prevI;
+                        prevEnd = cur.to - off;
+                        prevI = cx.block.children.length;
+                    }
+                }
+                if (!cur.nextSibling())
+                    break;
+            }
+            while (cx.block.children.length > blockI) {
+                cx.block.children.pop();
+                cx.block.positions.pop();
+            }
+            return end - start;
+        }
+    }
+    /// The default CommonMark parser.
+    const parser$4 = new MarkdownParser(new NodeSet(nodeTypes), Object.keys(DefaultBlockParsers).map(n => DefaultBlockParsers[n]), Object.keys(DefaultBlockParsers).map(n => DefaultLeafBlocks[n]), Object.keys(DefaultBlockParsers), DefaultEndLeaf, DefaultSkipMarkup, Object.keys(DefaultInline).map(n => DefaultInline[n]), Object.keys(DefaultInline), []);
+
+    function leftOverSpace(node, from, to) {
+        let ranges = [];
+        for (let n = node.firstChild, pos = from;; n = n.nextSibling) {
+            let nextPos = n ? n.from : to;
+            if (nextPos > pos)
+                ranges.push({ from: pos, to: nextPos });
+            if (!n)
+                break;
+            pos = n.to;
+        }
+        return ranges;
+    }
+    /// Create a Markdown extension to enable nested parsing on code
+    /// blocks and/or embedded HTML.
+    function parseCode(config) {
+        let { codeParser, htmlParser } = config;
+        let wrap = parseMixed((node, input) => {
+            let id = node.type.id;
+            if (codeParser && (id == Type.CodeBlock || id == Type.FencedCode)) {
+                let info = "";
+                if (id == Type.FencedCode) {
+                    let infoNode = node.node.getChild(Type.CodeInfo);
+                    if (infoNode)
+                        info = input.read(infoNode.from, infoNode.to);
+                }
+                let parser = codeParser(info);
+                if (parser)
+                    return { parser, overlay: node => node.type.id == Type.CodeText };
+            }
+            else if (htmlParser && (id == Type.HTMLBlock || id == Type.HTMLTag)) {
+                return { parser: htmlParser, overlay: leftOverSpace(node.node, node.from, node.to) };
+            }
+            return null;
+        });
+        return { wrap };
+    }
+
+    const StrikethroughDelim = { resolve: "Strikethrough", mark: "StrikethroughMark" };
+    /// An extension that implements
+    /// [GFM-style](https://github.github.com/gfm/#strikethrough-extension-)
+    /// Strikethrough syntax using `~~` delimiters.
+    const Strikethrough = {
+        defineNodes: ["Strikethrough", "StrikethroughMark"],
+        parseInline: [{
+                name: "Strikethrough",
+                parse(cx, next, pos) {
+                    if (next != 126 /* '~' */ || cx.char(pos + 1) != 126)
+                        return -1;
+                    return cx.addDelimiter(StrikethroughDelim, pos, pos + 2, true, true);
+                },
+                after: "Emphasis"
+            }]
+    };
+    function parseRow(cx, line, startI = 0, elts, offset = 0) {
+        let count = 0, first = true, cellStart = -1, cellEnd = -1, esc = false;
+        let parseCell = () => {
+            elts.push(cx.elt("TableCell", offset + cellStart, offset + cellEnd, cx.parser.parseInline(line.slice(cellStart, cellEnd), offset + cellStart)));
+        };
+        for (let i = startI; i < line.length; i++) {
+            let next = line.charCodeAt(i);
+            if (next == 124 /* '|' */ && !esc) {
+                if (!first || cellStart > -1)
+                    count++;
+                first = false;
+                if (elts) {
+                    if (cellStart > -1)
+                        parseCell();
+                    elts.push(cx.elt("TableDelimiter", i + offset, i + offset + 1));
+                }
+                cellStart = cellEnd = -1;
+            }
+            else if (esc || next != 32 && next != 9) {
+                if (cellStart < 0)
+                    cellStart = i;
+                cellEnd = i + 1;
+            }
+            esc = !esc && next == 92;
+        }
+        if (cellStart > -1) {
+            count++;
+            if (elts)
+                parseCell();
+        }
+        return count;
+    }
+    function hasPipe(str, start) {
+        for (let i = start; i < str.length; i++) {
+            let next = str.charCodeAt(i);
+            if (next == 124 /* '|' */)
+                return true;
+            if (next == 92 /* '\\' */)
+                i++;
+        }
+        return false;
+    }
+    const delimiterLine = /^\|?(\s*:?-+:?\s*\|)+(\s*:?-+:?\s*)?$/;
+    class TableParser {
+        constructor() {
+            // Null means we haven't seen the second line yet, false means this
+            // isn't a table, and an array means this is a table and we've
+            // parsed the given rows so far.
+            this.rows = null;
+        }
+        nextLine(cx, line, leaf) {
+            if (this.rows == null) { // Second line
+                this.rows = false;
+                let lineText;
+                if ((line.next == 45 || line.next == 58 || line.next == 124 /* '-:|' */) &&
+                    delimiterLine.test(lineText = line.text.slice(line.pos))) {
+                    let firstRow = [], firstCount = parseRow(cx, leaf.content, 0, firstRow, leaf.start);
+                    if (firstCount == parseRow(cx, lineText, line.pos))
+                        this.rows = [cx.elt("TableHeader", leaf.start, leaf.start + leaf.content.length, firstRow),
+                            cx.elt("TableDelimiter", cx.lineStart + line.pos, cx.lineStart + line.text.length)];
+                }
+            }
+            else if (this.rows) { // Line after the second
+                let content = [];
+                parseRow(cx, line.text, line.pos, content, cx.lineStart);
+                this.rows.push(cx.elt("TableRow", cx.lineStart + line.pos, cx.lineStart + line.text.length, content));
+            }
+            return false;
+        }
+        finish(cx, leaf) {
+            if (!this.rows)
+                return false;
+            cx.addLeafElement(leaf, cx.elt("Table", leaf.start, leaf.start + leaf.content.length, this.rows));
+            return true;
+        }
+    }
+    /// This extension provides
+    /// [GFM-style](https://github.github.com/gfm/#tables-extension-)
+    /// tables, using syntax like this:
+    ///
+    /// ```
+    /// | head 1 | head 2 |
+    /// | ---    | ---    |
+    /// | cell 1 | cell 2 |
+    /// ```
+    const Table = {
+        defineNodes: [
+            { name: "Table", block: true },
+            "TableHeader",
+            "TableRow",
+            "TableCell",
+            "TableDelimiter"
+        ],
+        parseBlock: [{
+                name: "Table",
+                leaf(_, leaf) { return hasPipe(leaf.content, 0) ? new TableParser : null; },
+                endLeaf(cx, line, leaf) {
+                    if (leaf.parsers.some(p => p instanceof TableParser) || !hasPipe(line.text, line.basePos))
+                        return false;
+                    let next = cx.scanLine(cx.absoluteLineEnd + 1).text;
+                    return delimiterLine.test(next) && parseRow(cx, line.text, line.basePos) == parseRow(cx, next, line.basePos);
+                },
+                before: "SetextHeading"
+            }]
+    };
+    class TaskParser {
+        nextLine() { return false; }
+        finish(cx, leaf) {
+            cx.addLeafElement(leaf, cx.elt("Task", leaf.start, leaf.start + leaf.content.length, [
+                cx.elt("TaskMarker", leaf.start, leaf.start + 3),
+                ...cx.parser.parseInline(leaf.content.slice(3), leaf.start + 3)
+            ]));
+            return true;
+        }
+    }
+    /// Extension providing
+    /// [GFM-style](https://github.github.com/gfm/#task-list-items-extension-)
+    /// task list items, where list items can be prefixed with `[ ]` or
+    /// `[x]` to add a checkbox.
+    const TaskList = {
+        defineNodes: [
+            { name: "Task", block: true },
+            "TaskMarker"
+        ],
+        parseBlock: [{
+                name: "TaskList",
+                leaf(cx, leaf) {
+                    return /^\[[ xX]\]/.test(leaf.content) && cx.parentType().name == "ListItem" ? new TaskParser : null;
+                },
+                after: "SetextHeading"
+            }]
+    };
+    /// Extension bundle containing [`Table`](#Table),
+    /// [`TaskList`](#TaskList) and [`Strikethrough`](#Strikethrough).
+    const GFM = [Table, TaskList, Strikethrough];
+    function parseSubSuper(ch, node, mark) {
+        return (cx, next, pos) => {
+            if (next != ch || cx.char(pos + 1) == ch)
+                return -1;
+            let elts = [cx.elt(mark, pos, pos + 1)];
+            for (let i = pos + 1; i < cx.end; i++) {
+                let next = cx.char(i);
+                if (next == ch)
+                    return cx.addElement(cx.elt(node, pos, i + 1, elts.concat(cx.elt(mark, i, i + 1))));
+                if (next == 92 /* '\\' */)
+                    elts.push(cx.elt("Escape", i, i++ + 2));
+                if (space$1(next))
+                    break;
+            }
+            return -1;
+        };
+    }
+    /// Extension providing
+    /// [Pandoc-style](https://pandoc.org/MANUAL.html#superscripts-and-subscripts)
+    /// superscript using `^` markers.
+    const Superscript = {
+        defineNodes: ["Superscript", "SuperscriptMark"],
+        parseInline: [{
+                name: "Superscript",
+                parse: parseSubSuper(94 /* '^' */, "Superscript", "SuperscriptMark")
+            }]
+    };
+    /// Extension providing
+    /// [Pandoc-style](https://pandoc.org/MANUAL.html#superscripts-and-subscripts)
+    /// subscript using `~` markers.
+    const Subscript = {
+        defineNodes: ["Subscript", "SubscriptMark"],
+        parseInline: [{
+                name: "Subscript",
+                parse: parseSubSuper(126 /* '~' */, "Subscript", "SubscriptMark")
+            }]
+    };
+    /// Extension that parses two colons with only letters, underscores,
+    /// and numbers between them as `Emoji` nodes.
+    const Emoji = {
+        defineNodes: ["Emoji"],
+        parseInline: [{
+                name: "Emoji",
+                parse(cx, next, pos) {
+                    let match;
+                    if (next != 58 /* ':' */ || !(match = /^[a-zA-Z_0-9]+:/.exec(cx.slice(pos + 1, cx.end))))
+                        return -1;
+                    return cx.addElement(cx.elt("Emoji", pos, pos + 1 + match[0].length));
+                }
+            }]
+    };
+
+    // This file was generated by lezer-generator. You probably shouldn't edit it.
+    const scriptText = 53,
+      StartCloseScriptTag = 1,
+      styleText = 54,
+      StartCloseStyleTag = 2,
+      textareaText = 55,
+      StartCloseTextareaTag = 3,
+      StartTag$1 = 4,
+      StartScriptTag = 5,
+      StartStyleTag = 6,
+      StartTextareaTag = 7,
+      StartSelfClosingTag = 8,
+      StartCloseTag$1 = 9,
+      NoMatchStartCloseTag = 10,
+      MismatchedStartCloseTag = 11,
+      missingCloseTag = 56,
+      IncompleteCloseTag = 12,
+      commentContent$1$1 = 57,
+      Element$2 = 18,
+      ScriptText = 27,
+      StyleText = 30,
+      TextareaText = 33,
+      OpenTag$1 = 35,
+      Dialect_noMatch = 0;
+
+    /* Hand-written tokenizers for HTML. */
+
+    const selfClosers = {
+      area: true, base: true, br: true, col: true, command: true,
+      embed: true, frame: true, hr: true, img: true, input: true,
+      keygen: true, link: true, meta: true, param: true, source: true,
+      track: true, wbr: true, menuitem: true
+    };
+
+    const implicitlyClosed = {
+      dd: true, li: true, optgroup: true, option: true, p: true,
+      rp: true, rt: true, tbody: true, td: true, tfoot: true,
+      th: true, tr: true
+    };
+
+    const closeOnOpen = {
+      dd: {dd: true, dt: true},
+      dt: {dd: true, dt: true},
+      li: {li: true},
+      option: {option: true, optgroup: true},
+      optgroup: {optgroup: true},
+      p: {
+        address: true, article: true, aside: true, blockquote: true, dir: true,
+        div: true, dl: true, fieldset: true, footer: true, form: true,
+        h1: true, h2: true, h3: true, h4: true, h5: true, h6: true,
+        header: true, hgroup: true, hr: true, menu: true, nav: true, ol: true,
+        p: true, pre: true, section: true, table: true, ul: true
+      },
+      rp: {rp: true, rt: true},
+      rt: {rp: true, rt: true},
+      tbody: {tbody: true, tfoot: true},
+      td: {td: true, th: true},
+      tfoot: {tbody: true},
+      th: {td: true, th: true},
+      thead: {tbody: true, tfoot: true},
+      tr: {tr: true}
+    };
+
+    function nameChar$1(ch) {
+      return ch == 45 || ch == 46 || ch == 58 || ch >= 65 && ch <= 90 || ch == 95 || ch >= 97 && ch <= 122 || ch >= 161
+    }
+
+    function isSpace$1(ch) {
+      return ch == 9 || ch == 10 || ch == 13 || ch == 32
+    }
+
+    let cachedName$1 = null, cachedInput$1 = null, cachedPos$1 = 0;
+    function tagNameAfter$1(input, offset) {
+      let pos = input.pos + offset;
+      if (cachedPos$1 == pos && cachedInput$1 == input) return cachedName$1
+      let next = input.peek(offset);
+      while (isSpace$1(next)) next = input.peek(++offset);
+      let name = "";
+      for (;;) {
+        if (!nameChar$1(next)) break
+        name += String.fromCharCode(next);
+        next = input.peek(++offset);
+      }
+      // Undefined to signal there's a <? or <!, null for just missing
+      cachedInput$1 = input; cachedPos$1 = pos;
+      return cachedName$1 = name ? name.toLowerCase() : next == question || next == bang ? undefined : null
+    }
+
+    const lessThan = 60, greaterThan = 62, slash = 47, question = 63, bang = 33;
+
+    function ElementContext$1(name, parent) {
+      this.name = name;
+      this.parent = parent;
+      this.hash = parent ? parent.hash : 0;
+      for (let i = 0; i < name.length; i++) this.hash += (this.hash << 4) + name.charCodeAt(i) + (name.charCodeAt(i) << 8);
+    }
+
+    const startTagTerms = [StartTag$1, StartSelfClosingTag, StartScriptTag, StartStyleTag, StartTextareaTag];
+
+    const elementContext$1 = new ContextTracker({
+      start: null,
+      shift(context, term, stack, input) {
+        return startTagTerms.indexOf(term) > -1 ? new ElementContext$1(tagNameAfter$1(input, 1) || "", context) : context
+      },
+      reduce(context, term) {
+        return term == Element$2 && context ? context.parent : context
+      },
+      reuse(context, node, stack, input) {
+        let type = node.type.id;
+        return type == StartTag$1 || type == OpenTag$1
+          ? new ElementContext$1(tagNameAfter$1(input, 1) || "", context) : context
+      },
+      hash(context) { return context ? context.hash : 0 },
+      strict: false
+    });
+
+    const tagStart = new ExternalTokenizer((input, stack) => {
+      if (input.next != lessThan) {
+        // End of file, close any open tags
+        if (input.next < 0 && stack.context) input.acceptToken(missingCloseTag);
+        return
+      }
+      input.advance();
+      let close = input.next == slash;
+      if (close) input.advance();
+      let name = tagNameAfter$1(input, 0);
+      if (name === undefined) return
+      if (!name) return input.acceptToken(close ? IncompleteCloseTag : StartTag$1)
+
+      let parent = stack.context ? stack.context.name : null;
+      if (close) {
+        if (name == parent) return input.acceptToken(StartCloseTag$1)
+        if (parent && implicitlyClosed[parent]) return input.acceptToken(missingCloseTag, -2)
+        if (stack.dialectEnabled(Dialect_noMatch)) return input.acceptToken(NoMatchStartCloseTag)
+        for (let cx = stack.context; cx; cx = cx.parent) if (cx.name == name) return
+        input.acceptToken(MismatchedStartCloseTag);
+      } else {
+        if (name == "script") return input.acceptToken(StartScriptTag)
+        if (name == "style") return input.acceptToken(StartStyleTag)
+        if (name == "textarea") return input.acceptToken(StartTextareaTag)
+        if (selfClosers.hasOwnProperty(name)) return input.acceptToken(StartSelfClosingTag)
+        if (parent && closeOnOpen[parent] && closeOnOpen[parent][name]) input.acceptToken(missingCloseTag, -1);
+        else input.acceptToken(StartTag$1);
+      }
+    }, {contextual: true});
+
+    const commentContent$2 = new ExternalTokenizer(input => {
+      for (let endPos = 0, i = 0;; i++) {
+        if (input.next < 0) {
+          if (i) input.acceptToken(commentContent$1$1);
+          break
+        }
+        if (input.next == "-->".charCodeAt(endPos)) {
+          endPos++;
+          if (endPos == 3) {
+            if (i > 3) input.acceptToken(commentContent$1$1, -2);
+            break
+          }
+        } else {
+          endPos = 0;
+        }
+        input.advance();
+      }
+    });
+
+    function contentTokenizer(tag, textToken, endToken) {
+      let lastState = 2 + tag.length;
+      return new ExternalTokenizer(input => {
+        // state means:
+        // - 0 nothing matched
+        // - 1 '<' matched
+        // - 2 '</' + possibly whitespace matched
+        // - 3-(1+tag.length) part of the tag matched
+        // - lastState whole tag + possibly whitespace matched
+        for (let state = 0, matchedLen = 0, i = 0;; i++) {
+          if (input.next < 0) {
+            if (i) input.acceptToken(textToken);
+            break
+          }
+          if (state == 0 && input.next == lessThan ||
+              state == 1 && input.next == slash ||
+              state >= 2 && state < lastState && input.next == tag.charCodeAt(state - 2)) {
+            state++;
+            matchedLen++;
+          } else if ((state == 2 || state == lastState) && isSpace$1(input.next)) {
+            matchedLen++;
+          } else if (state == lastState && input.next == greaterThan) {
+            if (i > matchedLen)
+              input.acceptToken(textToken, -matchedLen);
+            else
+              input.acceptToken(endToken, -(matchedLen - 2));
+            break
+          } else if ((input.next == 10 /* '\n' */ || input.next == 13 /* '\r' */) && i) {
+            input.acceptToken(textToken, 1);
+            break
+          } else {
+            state = matchedLen = 0;
+          }
+          input.advance();
+        }
+      })
+    }
+
+    const scriptTokens = contentTokenizer("script", scriptText, StartCloseScriptTag);
+
+    const styleTokens = contentTokenizer("style", styleText, StartCloseStyleTag);
+
+    const textareaTokens = contentTokenizer("textarea", textareaText, StartCloseTextareaTag);
+
+    // This file was generated by lezer-generator. You probably shouldn't edit it.
+    const parser$3 = LRParser.deserialize({
+      version: 13,
+      states: ",xOVOxOOO!WQ!bO'#CoO!]Q!bO'#CyO!bQ!bO'#C|O!gQ!bO'#DPO!lQ!bO'#DRO!qOXO'#CnO!|OYO'#CnO#XO[O'#CnO$eOxO'#CnOOOW'#Cn'#CnO$lO!rO'#DSO$tQ!bO'#DUO$yQ!bO'#DVOOOW'#Dj'#DjOOOW'#DX'#DXQVOxOOO%OQ#tO,59ZO%WQ#tO,59eO%`Q#tO,59hO%hQ#tO,59kO%pQ#tO,59mOOOX'#D]'#D]O%xOXO'#CwO&TOXO,59YOOOY'#D^'#D^O&]OYO'#CzO&hOYO,59YOOO['#D_'#D_O&pO[O'#C}O&{O[O,59YOOOW'#D`'#D`O'TOxO,59YO'[Q!bO'#DQOOOW,59Y,59YOOO`'#Da'#DaO'aO!rO,59nOOOW,59n,59nO'iQ!bO,59pO'nQ!bO,59qOOOW-E7V-E7VO'sQ#tO'#CqOOQO'#DY'#DYO(OQ#tO1G.uOOOX1G.u1G.uO(WQ#tO1G/POOOY1G/P1G/PO(`Q#tO1G/SOOO[1G/S1G/SO(hQ#tO1G/VOOOW1G/V1G/VO(pQ#tO1G/XOOOW1G/X1G/XOOOX-E7Z-E7ZO(xQ!bO'#CxOOOW1G.t1G.tOOOY-E7[-E7[O(}Q!bO'#C{OOO[-E7]-E7]O)SQ!bO'#DOOOOW-E7^-E7^O)XQ!bO,59lOOO`-E7_-E7_OOOW1G/Y1G/YOOOW1G/[1G/[OOOW1G/]1G/]O)^Q&jO,59]OOQO-E7W-E7WOOOX7+$a7+$aOOOY7+$k7+$kOOO[7+$n7+$nOOOW7+$q7+$qOOOW7+$s7+$sO)iQ!bO,59dO)nQ!bO,59gO)sQ!bO,59jOOOW1G/W1G/WO)xO,UO'#CtO*WO7[O'#CtOOQO1G.w1G.wOOOW1G/O1G/OOOOW1G/R1G/ROOOW1G/U1G/UOOOO'#DZ'#DZO*fO,UO,59`OOQO,59`,59`OOOO'#D['#D[O*tO7[O,59`OOOO-E7X-E7XOOQO1G.z1G.zOOOO-E7Y-E7Y",
+      stateData: "+[~O!]OS~OSSOTPOUQOVROWTOY]OZ[O[^O^^O_^O`^Oa^Ow^Oz_O!cZO~OdaO~OdbO~OdcO~OddO~OdeO~O!VfOPkP!YkP~O!WiOQnP!YnP~O!XlORqP!YqP~OSSOTPOUQOVROWTOXqOY]OZ[O[^O^^O_^O`^Oa^Ow^O!cZO~O!YrO~P#dO!ZsO!duO~OdvO~OdwO~OfyOj|O~OfyOj!OO~OfyOj!QO~OfyOj!SO~OfyOj!UO~O!VfOPkX!YkX~OP!WO!Y!XO~O!WiOQnX!YnX~OQ!ZO!Y!XO~O!XlORqX!YqX~OR!]O!Y!XO~O!Y!XO~P#dOd!_O~O!ZsO!d!aO~Oj!bO~Oj!cO~Og!dOfeXjeX~OfyOj!fO~OfyOj!gO~OfyOj!hO~OfyOj!iO~OfyOj!jO~Od!kO~Od!lO~Od!mO~Oj!nO~Oi!qO!_!oO!a!pO~Oj!rO~Oj!sO~Oj!tO~O_!uO`!uO!_!wO!`!uO~O_!xO`!xO!a!wO!b!xO~O_!uO`!uO!_!{O!`!uO~O_!xO`!xO!a!{O!b!xO~O`_a!cwz!c~",
+      goto: "%o!_PPPPPPPPPPPPPPPPPP!`!fP!lPP!xPP!{#O#R#X#[#_#e#h#k#q#w!`P!`!`P#}$T$k$q$w$}%T%Z%aPPPPPPPP%gX^OX`pXUOX`pezabcde{}!P!R!TR!q!dRhUR!XhXVOX`pRkVR!XkXWOX`pRnWR!XnXXOX`pQrXR!XpXYOX`pQ`ORx`Q{aQ}bQ!PcQ!RdQ!TeZ!e{}!P!R!TQ!v!oR!z!vQ!y!pR!|!yQgUR!VgQjVR!YjQmWR![mQpXR!^pQtZR!`tS_O`ToXp",
+      nodeNames: "⚠ StartCloseTag StartCloseTag StartCloseTag StartTag StartTag StartTag StartTag StartTag StartCloseTag StartCloseTag StartCloseTag IncompleteCloseTag Document Text EntityReference CharacterReference InvalidEntity Element OpenTag TagName Attribute AttributeName Is AttributeValue UnquotedAttributeValue EndTag ScriptText CloseTag OpenTag StyleText CloseTag OpenTag TextareaText CloseTag OpenTag CloseTag SelfClosingTag Comment ProcessingInst MismatchedCloseTag CloseTag DoctypeDecl",
+      maxTerm: 66,
+      context: elementContext$1,
+      nodeProps: [
+        [NodeProp.closedBy, -11,1,2,3,4,5,6,7,8,9,10,11,"EndTag",-4,19,29,32,35,"CloseTag"],
+        [NodeProp.group, -9,12,15,16,17,18,38,39,40,41,"Entity",14,"Entity TextContent",-3,27,30,33,"TextContent Entity"],
+        [NodeProp.openedBy, 26,"StartTag StartCloseTag",-4,28,31,34,36,"OpenTag"]
+      ],
+      skippedNodes: [0],
+      repeatNodeCount: 9,
+      tokenData: "!#b!aR!WOX$kXY)sYZ)sZ]$k]^)s^p$kpq)sqr$krs*zsv$kvw+dwx2yx}$k}!O3f!O!P$k!P!Q7_!Q![$k![!]8u!]!^$k!^!_>b!_!`!!p!`!a8T!a!c$k!c!}8u!}#R$k#R#S8u#S#T$k#T#o8u#o$f$k$f$g&R$g%W$k%W%o8u%o%p$k%p&a8u&a&b$k&b1p8u1p4U$k4U4d8u4d4e$k4e$IS8u$IS$I`$k$I`$Ib8u$Ib$Kh$k$Kh%#t8u%#t&/x$k&/x&Et8u&Et&FV$k&FV;'S8u;'S;:j<t;:j?&r$k?&r?Ah8u?Ah?BY$k?BY?Mn8u?Mn~$k!Z$vc^PiW!``!bpOX$kXZ&RZ]$k]^&R^p$kpq&Rqr$krs&qsv$kvw)Rwx'rx!P$k!P!Q&R!Q!^$k!^!_(k!_!a&R!a$f$k$f$g&R$g~$k!R&[V^P!``!bpOr&Rrs&qsv&Rwx'rx!^&R!^!_(k!_~&Rq&xT^P!bpOv&qwx'Xx!^&q!^!_'g!_~&qP'^R^POv'Xw!^'X!_~'Xp'lQ!bpOv'gx~'ga'yU^P!``Or'rrs'Xsv'rw!^'r!^!_(]!_~'r`(bR!``Or(]sv(]w~(]!Q(rT!``!bpOr(krs'gsv(kwx(]x~(kW)WXiWOX)RZ])R^p)Rqr)Rsw)Rx!P)R!Q!^)R!a$f)R$g~)R!a*O^^P!``!bp!]^OX&RXY)sYZ)sZ]&R]^)s^p&Rpq)sqr&Rrs&qsv&Rwx'rx!^&R!^!_(k!_~&R!Z+TT!_h^P!bpOv&qwx'Xx!^&q!^!_'g!_~&q!Z+kbiWaPOX,sXZ.QZ],s]^.Q^p,sqr,srs.Qst/]tw,swx.Qx!P,s!P!Q.Q!Q!],s!]!^)R!^!a.Q!a$f,s$f$g.Q$g~,s!Z,xbiWOX,sXZ.QZ],s]^.Q^p,sqr,srs.Qst)Rtw,swx.Qx!P,s!P!Q.Q!Q!],s!]!^.i!^!a.Q!a$f,s$f$g.Q$g~,s!R.TTOp.Qqs.Qt!].Q!]!^.d!^~.Q!R.iO_!R!Z.pXiW_!ROX)RZ])R^p)Rqr)Rsw)Rx!P)R!Q!^)R!a$f)R$g~)R!Z/baiWOX0gXZ1qZ]0g]^1q^p0gqr0grs1qsw0gwx1qx!P0g!P!Q1q!Q!]0g!]!^)R!^!a1q!a$f0g$f$g1q$g~0g!Z0laiWOX0gXZ1qZ]0g]^1q^p0gqr0grs1qsw0gwx1qx!P0g!P!Q1q!Q!]0g!]!^2V!^!a1q!a$f0g$f$g1q$g~0g!R1tSOp1qq!]1q!]!^2Q!^~1q!R2VO`!R!Z2^XiW`!ROX)RZ])R^p)Rqr)Rsw)Rx!P)R!Q!^)R!a$f)R$g~)R!Z3SU!ax^P!``Or'rrs'Xsv'rw!^'r!^!_(]!_~'r!]3qe^PiW!``!bpOX$kXZ&RZ]$k]^&R^p$kpq&Rqr$krs&qsv$kvw)Rwx'rx}$k}!O5S!O!P$k!P!Q&R!Q!^$k!^!_(k!_!a&R!a$f$k$f$g&R$g~$k!]5_d^PiW!``!bpOX$kXZ&RZ]$k]^&R^p$kpq&Rqr$krs&qsv$kvw)Rwx'rx!P$k!P!Q&R!Q!^$k!^!_(k!_!`&R!`!a6m!a$f$k$f$g&R$g~$k!T6xV^P!``!bp!dQOr&Rrs&qsv&Rwx'rx!^&R!^!_(k!_~&R!X7hX^P!``!bpOr&Rrs&qsv&Rwx'rx!^&R!^!_(k!_!`&R!`!a8T!a~&R!X8`VjU^P!``!bpOr&Rrs&qsv&Rwx'rx!^&R!^!_(k!_~&R!a9U!YfSdQ^PiW!``!bpOX$kXZ&RZ]$k]^&R^p$kpq&Rqr$krs&qsv$kvw)Rwx'rx}$k}!O8u!O!P8u!P!Q&R!Q![8u![!]8u!]!^$k!^!_(k!_!a&R!a!c$k!c!}8u!}#R$k#R#S8u#S#T$k#T#o8u#o$f$k$f$g&R$g$}$k$}%O8u%O%W$k%W%o8u%o%p$k%p&a8u&a&b$k&b1p8u1p4U8u4U4d8u4d4e$k4e$IS8u$IS$I`$k$I`$Ib8u$Ib$Je$k$Je$Jg8u$Jg$Kh$k$Kh%#t8u%#t&/x$k&/x&Et8u&Et&FV$k&FV;'S8u;'S;:j<t;:j?&r$k?&r?Ah8u?Ah?BY$k?BY?Mn8u?Mn~$k!a=Pe^PiW!``!bpOX$kXZ&RZ]$k]^&R^p$kpq&Rqr$krs&qsv$kvw)Rwx'rx!P$k!P!Q&R!Q!^$k!^!_(k!_!a&R!a$f$k$f$g&R$g;=`$k;=`<%l8u<%l~$k!R>iW!``!bpOq(kqr?Rrs'gsv(kwx(]x!a(k!a!bKj!b~(k!R?YZ!``!bpOr(krs'gsv(kwx(]x}(k}!O?{!O!f(k!f!gAR!g#W(k#W#XGz#X~(k!R@SV!``!bpOr(krs'gsv(kwx(]x}(k}!O@i!O~(k!R@rT!``!bp!cPOr(krs'gsv(kwx(]x~(k!RAYV!``!bpOr(krs'gsv(kwx(]x!q(k!q!rAo!r~(k!RAvV!``!bpOr(krs'gsv(kwx(]x!e(k!e!fB]!f~(k!RBdV!``!bpOr(krs'gsv(kwx(]x!v(k!v!wBy!w~(k!RCQV!``!bpOr(krs'gsv(kwx(]x!{(k!{!|Cg!|~(k!RCnV!``!bpOr(krs'gsv(kwx(]x!r(k!r!sDT!s~(k!RD[V!``!bpOr(krs'gsv(kwx(]x!g(k!g!hDq!h~(k!RDxW!``!bpOrDqrsEbsvDqvwEvwxFfx!`Dq!`!aGb!a~DqqEgT!bpOvEbvxEvx!`Eb!`!aFX!a~EbPEyRO!`Ev!`!aFS!a~EvPFXOzPqF`Q!bpzPOv'gx~'gaFkV!``OrFfrsEvsvFfvwEvw!`Ff!`!aGQ!a~FfaGXR!``zPOr(]sv(]w~(]!RGkT!``!bpzPOr(krs'gsv(kwx(]x~(k!RHRV!``!bpOr(krs'gsv(kwx(]x#c(k#c#dHh#d~(k!RHoV!``!bpOr(krs'gsv(kwx(]x#V(k#V#WIU#W~(k!RI]V!``!bpOr(krs'gsv(kwx(]x#h(k#h#iIr#i~(k!RIyV!``!bpOr(krs'gsv(kwx(]x#m(k#m#nJ`#n~(k!RJgV!``!bpOr(krs'gsv(kwx(]x#d(k#d#eJ|#e~(k!RKTV!``!bpOr(krs'gsv(kwx(]x#X(k#X#YDq#Y~(k!RKqW!``!bpOrKjrsLZsvKjvwLowxNPx!aKj!a!b! g!b~KjqL`T!bpOvLZvxLox!aLZ!a!bM^!b~LZPLrRO!aLo!a!bL{!b~LoPMORO!`Lo!`!aMX!a~LoPM^OwPqMcT!bpOvLZvxLox!`LZ!`!aMr!a~LZqMyQ!bpwPOv'gx~'gaNUV!``OrNPrsLosvNPvwLow!aNP!a!bNk!b~NPaNpV!``OrNPrsLosvNPvwLow!`NP!`!a! V!a~NPa! ^R!``wPOr(]sv(]w~(]!R! nW!``!bpOrKjrsLZsvKjvwLowxNPx!`Kj!`!a!!W!a~Kj!R!!aT!``!bpwPOr(krs'gsv(kwx(]x~(k!V!!{VgS^P!``!bpOr&Rrs&qsv&Rwx'rx!^&R!^!_(k!_~&R",
+      tokenizers: [scriptTokens, styleTokens, textareaTokens, tagStart, commentContent$2, 0, 1, 2, 3, 4, 5],
+      topRules: {"Document":[0,13]},
+      dialects: {noMatch: 0},
+      tokenPrec: 464
+    });
+
+    function getAttrs(element, input) {
+      let attrs = Object.create(null);
+      for (let att of element.firstChild.getChildren("Attribute")) {
+        let name = att.getChild("AttributeName"), value = att.getChild("AttributeValue") || att.getChild("UnquotedAttributeValue");
+        if (name) attrs[input.read(name.from, name.to)] =
+          !value ? "" : value.name == "AttributeValue" ? input.read(value.from + 1, value.to - 1) : input.read(value.from, value.to);
+      }
+      return attrs
+    }
+
+    function maybeNest(node, input, tags) {
+      let attrs;
+      for (let tag of tags) {
+        if (!tag.attrs || tag.attrs(attrs || (attrs = getAttrs(node.node.parent, input))))
+          return {parser: tag.parser}
+      }
+      return null
+    }
+
+    // tags: {
+    //   tag: "script" | "style" | "textarea",
+    //   attrs?: ({[attr: string]: string}) => boolean,
+    //   parser: Parser
+    // }[]
+     
+    function configureNesting(tags) {
+      let script = [], style = [], textarea = [];
+      for (let tag of tags) {
+        let array = tag.tag == "script" ? script : tag.tag == "style" ? style : tag.tag == "textarea" ? textarea : null;
+        if (!array) throw new RangeError("Only script, style, and textarea tags can host nested parsers")
+        array.push(tag);
+      }
+      return parseMixed((node, input) => {
+        let id = node.type.id;
+        if (id == ScriptText) return maybeNest(node, input, script)
+        if (id == StyleText) return maybeNest(node, input, style)
+        if (id == TextareaText) return maybeNest(node, input, textarea)
+        return null
+      })
+    }
+
+    // This file was generated by lezer-generator. You probably shouldn't edit it.
+    const descendantOp = 93,
+      Unit = 1,
+      callee = 94,
+      identifier$1 = 95,
+      VariableName = 2;
+
+    /* Hand-written tokenizers for CSS tokens that can't be
+       expressed by Lezer's built-in tokenizer. */
+
+    const space = [9, 10, 11, 12, 13, 32, 133, 160, 5760, 8192, 8193, 8194, 8195, 8196, 8197,
+                   8198, 8199, 8200, 8201, 8202, 8232, 8233, 8239, 8287, 12288];
+    const colon = 58, parenL = 40, underscore = 95, bracketL = 91, dash = 45, period = 46,
+          hash = 35, percent = 37;
+
+    function isAlpha(ch) { return ch >= 65 && ch <= 90 || ch >= 97 && ch <= 122 || ch >= 161 }
+
+    function isDigit(ch) { return ch >= 48 && ch <= 57 }
+
+    const identifiers = new ExternalTokenizer((input, stack) => {
+      for (let inside = false, dashes = 0, i = 0;; i++) {
+        let {next} = input;
+        if (isAlpha(next) || next == dash || next == underscore || (inside && isDigit(next))) {
+          if (!inside && (next != dash || i > 0)) inside = true;
+          if (dashes === i && next == dash) dashes++;
+          input.advance();
+        } else {
+          if (inside)
+            input.acceptToken(next == parenL ? callee : dashes == 2 && stack.canShift(VariableName) ? VariableName : identifier$1);
+          break
+        }
+      }
+    });
+
+    const descendant = new ExternalTokenizer(input => {
+      if (space.includes(input.peek(-1))) {
+        let {next} = input;
+        if (isAlpha(next) || next == underscore || next == hash || next == period ||
+            next == bracketL || next == colon || next == dash)
+          input.acceptToken(descendantOp);
+      }
+    });
+
+    const unitToken = new ExternalTokenizer(input => {
+      if (!space.includes(input.peek(-1))) {
+        let {next} = input;
+        if (next == percent) { input.advance(); input.acceptToken(Unit); }
+        if (isAlpha(next)) {
+          do { input.advance(); } while (isAlpha(input.next))
+          input.acceptToken(Unit);
+        }
+      }
+    });
+
+    // This file was generated by lezer-generator. You probably shouldn't edit it.
+    const spec_callee = {__proto__:null,lang:32, "nth-child":32, "nth-last-child":32, "nth-of-type":32, dir:32, url:60, "url-prefix":60, domain:60, regexp:60, selector:134};
+    const spec_AtKeyword = {__proto__:null,"@import":114, "@media":138, "@charset":142, "@namespace":146, "@keyframes":152, "@supports":164};
+    const spec_identifier$1 = {__proto__:null,not:128, only:128, from:158, to:160};
+    const parser$2 = LRParser.deserialize({
+      version: 13,
+      states: "7WOYQ[OOOOQP'#Cd'#CdOOQP'#Cc'#CcO!ZQ[O'#CfO!}QXO'#CaO#UQ[O'#ChO#aQ[O'#DPO#fQ[O'#DTOOQP'#Ec'#EcO#kQdO'#DeO$VQ[O'#DrO#kQdO'#DtO$hQ[O'#DvO$sQ[O'#DyO$xQ[O'#EPO%WQ[O'#EROOQS'#Eb'#EbOOQS'#ES'#ESQYQ[OOOOQP'#Cg'#CgOOQP,59Q,59QO!ZQ[O,59QO%_Q[O'#EVO%yQWO,58{O&RQ[O,59SO#aQ[O,59kO#fQ[O,59oO%_Q[O,59sO%_Q[O,59uO%_Q[O,59vO'bQ[O'#D`OOQS,58{,58{OOQP'#Ck'#CkOOQO'#C}'#C}OOQP,59S,59SO'iQWO,59SO'nQWO,59SOOQP'#DR'#DROOQP,59k,59kOOQO'#DV'#DVO'sQ`O,59oOOQS'#Cp'#CpO#kQdO'#CqO'{QvO'#CsO)VQtO,5:POOQO'#Cx'#CxO'iQWO'#CwO)kQWO'#CyOOQS'#Ef'#EfOOQO'#Dh'#DhO)pQ[O'#DoO*OQWO'#EiO$xQ[O'#DmO*^QWO'#DpOOQO'#Ej'#EjO%|QWO,5:^O*cQpO,5:`OOQS'#Dx'#DxO*kQWO,5:bO*pQ[O,5:bOOQO'#D{'#D{O*xQWO,5:eO*}QWO,5:kO+VQWO,5:mOOQS-E8Q-E8QOOQP1G.l1G.lO+yQXO,5:qOOQO-E8T-E8TOOQS1G.g1G.gOOQP1G.n1G.nO'iQWO1G.nO'nQWO1G.nOOQP1G/V1G/VO,WQ`O1G/ZO,qQXO1G/_O-XQXO1G/aO-oQXO1G/bO.VQXO'#CdO.zQWO'#DaOOQS,59z,59zO/PQWO,59zO/XQ[O,59zO/`QdO'#CoO/gQ[O'#DOOOQP1G/Z1G/ZO#kQdO1G/ZO/nQpO,59]OOQS,59_,59_O#kQdO,59aO/vQWO1G/kOOQS,59c,59cO/{Q!bO,59eO0TQWO'#DhO0`QWO,5:TO0eQWO,5:ZO$xQ[O,5:VO$xQ[O'#EYO0mQWO,5;TO0xQWO,5:XO%_Q[O,5:[OOQS1G/x1G/xOOQS1G/z1G/zOOQS1G/|1G/|O1ZQWO1G/|O1`QdO'#D|OOQS1G0P1G0POOQS1G0V1G0VOOQS1G0X1G0XOOQP7+$Y7+$YOOQP7+$u7+$uO#kQdO7+$uO#kQdO,59{O1nQ[O'#EXO1xQWO1G/fOOQS1G/f1G/fO1xQWO1G/fO2QQtO'#ETO2uQdO'#EeO3PQWO,59ZO3UQXO'#EhO3]QWO,59jO3bQpO7+$uOOQS1G.w1G.wOOQS1G.{1G.{OOQS7+%V7+%VO3jQWO1G/PO#kQdO1G/oOOQO1G/u1G/uOOQO1G/q1G/qO3oQWO,5:tOOQO-E8W-E8WO3}QXO1G/vOOQS7+%h7+%hO4UQYO'#CsO%|QWO'#EZO4^QdO,5:hOOQS,5:h,5:hO4lQpO<<HaO4tQtO1G/gOOQO,5:s,5:sO5XQ[O,5:sOOQO-E8V-E8VOOQS7+%Q7+%QO5cQWO7+%QOOQS-E8R-E8RO#kQdO'#EUO5kQWO,5;POOQT1G.u1G.uO5sQWO,5;SOOQP1G/U1G/UOOQP<<Ha<<HaOOQS7+$k7+$kO5{QdO7+%ZOOQO7+%b7+%bOOQS,5:u,5:uOOQS-E8X-E8XOOQS1G0S1G0SOOQPAN={AN={O6SQtO'#EWO#kQdO'#EWO6}QdO7+%ROOQO7+%R7+%ROOQO1G0_1G0_OOQS<<Hl<<HlO7_QdO,5:pOOQO-E8S-E8SOOQO<<Hu<<HuO7iQtO,5:rOOQS-E8U-E8UOOQO<<Hm<<Hm",
+      stateData: "8j~O#TOSROS~OUWOXWO]TO^TOtUOxVO!Y_O!ZXO!gYO!iZO!k[O!n]O!t^O#RPO#WRO~O#RcO~O]hO^hOpfOtiOxjO|kO!PmO#PlO#WeO~O!RnO~P!`O`sO#QqO#RpO~O#RuO~O#RwO~OQ!QObzOf!QOh!QOn!PO#Q}O#RyO#Z{O~Ob!SO!b!UO!e!VO#R!RO!R#]P~Oh![On!PO#R!ZO~O#R!^O~Ob!SO!b!UO!e!VO#R!RO~O!W#]P~P$VOUWOXWO]TO^TOtUOxVO#RPO#WRO~OpfO!RnO~O`!hO#QqO#RpO~OQ!pOUWOXWO]TO^TOtUOxVO!Y_O!ZXO!gYO!iZO!k[O!n]O!t^O#R!oO#WRO~O!Q!qO~P&^Ob!tO~Ob!uO~Ov!vOz!wO~OP!yObgXjgX!WgX!bgX!egX#RgXagXQgXfgXhgXngXpgX#QgX#ZgXvgX!QgX!VgX~Ob!SOj!zO!b!UO!e!VO#R!RO!W#]P~Ob!}O~Ob!SO!b!UO!e!VO#R#OO~Op#SO!`#RO!R#]X!W#]X~Ob#VO~Oj!zO!W#XO~O!W#YO~Oh#ZOn!PO~O!R#[O~O!RnO!`#RO~O!RnO!W#_O~O]hO^hOtiOxjO|kO!PmO#PlO#WeO~Op!ya!R!yaa!ya~P+_Ov#aOz#bO~O]hO^hOtiOxjO#WeO~Op{i|{i!P{i!R{i#P{ia{i~P,`Op}i|}i!P}i!R}i#P}ia}i~P,`Op!Oi|!Oi!P!Oi!R!Oi#P!Oia!Oi~P,`O]WX]!UX^WXpWXtWXxWX|WX!PWX!RWX#PWX#WWX~O]#cO~O!Q#fO!W#dO~O!Q#fO~P&^Oa#XP~P#kOa#[P~P%_Oa#nOj!zO~O!W#pO~Oh#qOo#qO~O]!^Xa![X!`![X~O]#rO~Oa#sO!`#RO~Op#SO!R#]a!W#]a~O!`#ROp!aa!R!aa!W!aaa!aa~O!W#xO~O!Q#|O!q#zO!r#zO#Z#yO~O!Q!{X!W!{X~P&^O!Q$SO!W#dO~Oj!zOQ!wXa!wXb!wXf!wXh!wXn!wXp!wX#Q!wX#R!wX#Z!wX~Op$VOa#XX~P#kOa$XO~Oa#[X~P!`Oa$ZO~Oj!zOv$[O~Oa$]O~O!`#ROp!|a!R!|a!W!|a~Oa$_O~P+_OP!yO!RgX~O!Q$bO!q#zO!r#zO#Z#yO~Oj!zOv$cO~Oj!zOp$eO!V$gO!Q!Ti!W!Ti~P#kO!Q!{a!W!{a~P&^O!Q$iO!W#dO~Op$VOa#Xa~OpfOa#[a~Oa$lO~P#kOj!zOQ!zXb!zXf!zXh!zXn!zXp!zX!Q!zX!V!zX!W!zX#Q!zX#R!zX#Z!zX~Op$eO!V$oO!Q!Tq!W!Tq~P#kOa!xap!xa~P#kOj!zOQ!zab!zaf!zah!zan!zap!za!Q!za!V!za!W!za#Q!za#R!za#Z!za~Oo#Zj!Pj~",
+      goto: ",O#_PPPPP#`P#h#vP#h$U#hPP$[PPP$b$k$kP$}P$kP$k%e%wPPP&a&g#hP&mP#hP&sP#hP#h#hPPP&y']'iPP#`PP'o'o'y'oP'oP'o'oP#`P#`P#`P'|#`P(P(SPP#`P#`(V(e(s(y)T)Z)e)kPPPPPP)q)yP*e*hP+^+a+j]`Obn!s#d$QiWObfklmn!s!u#V#d$QiQObfklmn!s!u#V#d$QQdRR!ceQrTR!ghQ!gsQ!|!OR#`!hq!QXZz!t!w!z#b#c#i#r$O$V$^$e$f$jp!QXZz!t!w!z#b#c#i#r$O$V$^$e$f$jT#z#[#{q!OXZz!t!w!z#b#c#i#r$O$V$^$e$f$jp!QXZz!t!w!z#b#c#i#r$O$V$^$e$f$jQ![[R#Z!]QtTR!ihQ!gtR#`!iQvUR!jiQxVR!kjQoSQ!fgQ#W!XQ#^!`Q#_!aR$`#zQ!rnQ#g!sQ$P#dR$h$QX!pn!s#d$Qa!WY^_|!S!U#R#SR#P!SR!][R!_]R#]!_QbOU!bb!s$QQ!snR$Q#dQ#i!tU$U#i$^$jQ$^#rR$j$VQ$W#iR$k$WQgSS!eg$YR$Y#kQ$f$OR$n$fQ#e!rS$R#e$TR$T#gQ#T!TR#v#TQ#{#[R$a#{]aObn!s#d$Q[SObn!s#d$QQ!dfQ!lkQ!mlQ!nmQ#k!uR#w#VR#j!tQ|XQ!YZQ!xz[#h!t#i#r$V$^$jQ#m!wQ#o!zQ#}#bQ$O#cS$d$O$fR$m$eR#l!uQ!XYQ!a_R!{|U!TY_|Q!`^Q#Q!SQ#U!UQ#t#RR#u#S",
+      nodeNames: "⚠ Unit VariableName Comment StyleSheet RuleSet UniversalSelector TagSelector TagName NestingSelector ClassSelector ClassName PseudoClassSelector : :: PseudoClassName PseudoClassName ) ( ArgList ValueName ParenthesizedValue ColorLiteral NumberLiteral StringLiteral BinaryExpression BinOp CallExpression Callee CallLiteral CallTag ParenthesizedContent , PseudoClassName ArgList IdSelector # IdName ] AttributeSelector [ AttributeName MatchOp ChildSelector ChildOp DescendantSelector SiblingSelector SiblingOp } { Block Declaration PropertyName Important ; ImportStatement AtKeyword import KeywordQuery FeatureQuery FeatureName BinaryQuery LogicOp UnaryQuery UnaryQueryOp ParenthesizedQuery SelectorQuery selector MediaStatement media CharsetStatement charset NamespaceStatement namespace NamespaceName KeyframesStatement keyframes KeyframeName KeyframeList from to SupportsStatement supports AtRule",
+      maxTerm: 106,
+      nodeProps: [
+        [NodeProp.openedBy, 17,"(",48,"{"],
+        [NodeProp.closedBy, 18,")",49,"}"]
+      ],
+      skippedNodes: [0,3],
+      repeatNodeCount: 8,
+      tokenData: "Ay~R![OX$wX^%]^p$wpq%]qr(crs+}st,otu2Uuv$wvw2rwx2}xy3jyz3uz{3z{|4_|}8U}!O8a!O!P8x!P!Q9Z!Q![;e![!]<Y!]!^<x!^!_$w!_!`=T!`!a=`!a!b$w!b!c>O!c!}$w!}#O?[#O#P$w#P#Q?g#Q#R2U#R#T$w#T#U?r#U#c$w#c#d@q#d#o$w#o#pAQ#p#q2U#q#rA]#r#sAh#s#y$w#y#z%]#z$f$w$f$g%]$g#BY$w#BY#BZ%]#BZ$IS$w$IS$I_%]$I_$I|$w$I|$JO%]$JO$JT$w$JT$JU%]$JU$KV$w$KV$KW%]$KW&FU$w&FU&FV%]&FV~$wW$zQOy%Qz~%QW%VQoWOy%Qz~%Q~%bf#T~OX%QX^&v^p%Qpq&vqy%Qz#y%Q#y#z&v#z$f%Q$f$g&v$g#BY%Q#BY#BZ&v#BZ$IS%Q$IS$I_&v$I_$I|%Q$I|$JO&v$JO$JT%Q$JT$JU&v$JU$KV%Q$KV$KW&v$KW&FU%Q&FU&FV&v&FV~%Q~&}f#T~oWOX%QX^&v^p%Qpq&vqy%Qz#y%Q#y#z&v#z$f%Q$f$g&v$g#BY%Q#BY#BZ&v#BZ$IS%Q$IS$I_&v$I_$I|%Q$I|$JO&v$JO$JT%Q$JT$JU&v$JU$KV%Q$KV$KW&v$KW&FU%Q&FU&FV&v&FV~%Q^(fSOy%Qz#]%Q#]#^(r#^~%Q^(wSoWOy%Qz#a%Q#a#b)T#b~%Q^)YSoWOy%Qz#d%Q#d#e)f#e~%Q^)kSoWOy%Qz#c%Q#c#d)w#d~%Q^)|SoWOy%Qz#f%Q#f#g*Y#g~%Q^*_SoWOy%Qz#h%Q#h#i*k#i~%Q^*pSoWOy%Qz#T%Q#T#U*|#U~%Q^+RSoWOy%Qz#b%Q#b#c+_#c~%Q^+dSoWOy%Qz#h%Q#h#i+p#i~%Q^+wQ!VUoWOy%Qz~%Q~,QUOY+}Zr+}rs,ds#O+}#O#P,i#P~+}~,iOh~~,lPO~+}_,tWtPOy%Qz!Q%Q!Q![-^![!c%Q!c!i-^!i#T%Q#T#Z-^#Z~%Q^-cWoWOy%Qz!Q%Q!Q![-{![!c%Q!c!i-{!i#T%Q#T#Z-{#Z~%Q^.QWoWOy%Qz!Q%Q!Q![.j![!c%Q!c!i.j!i#T%Q#T#Z.j#Z~%Q^.qWfUoWOy%Qz!Q%Q!Q![/Z![!c%Q!c!i/Z!i#T%Q#T#Z/Z#Z~%Q^/bWfUoWOy%Qz!Q%Q!Q![/z![!c%Q!c!i/z!i#T%Q#T#Z/z#Z~%Q^0PWoWOy%Qz!Q%Q!Q![0i![!c%Q!c!i0i!i#T%Q#T#Z0i#Z~%Q^0pWfUoWOy%Qz!Q%Q!Q![1Y![!c%Q!c!i1Y!i#T%Q#T#Z1Y#Z~%Q^1_WoWOy%Qz!Q%Q!Q![1w![!c%Q!c!i1w!i#T%Q#T#Z1w#Z~%Q^2OQfUoWOy%Qz~%QY2XSOy%Qz!_%Q!_!`2e!`~%QY2lQzQoWOy%Qz~%QX2wQXPOy%Qz~%Q~3QUOY2}Zw2}wx,dx#O2}#O#P3d#P~2}~3gPO~2}_3oQbVOy%Qz~%Q~3zOa~_4RSUPjSOy%Qz!_%Q!_!`2e!`~%Q_4fUjS!PPOy%Qz!O%Q!O!P4x!P!Q%Q!Q![7_![~%Q^4}SoWOy%Qz!Q%Q!Q![5Z![~%Q^5bWoW#ZUOy%Qz!Q%Q!Q![5Z![!g%Q!g!h5z!h#X%Q#X#Y5z#Y~%Q^6PWoWOy%Qz{%Q{|6i|}%Q}!O6i!O!Q%Q!Q![6z![~%Q^6nSoWOy%Qz!Q%Q!Q![6z![~%Q^7RSoW#ZUOy%Qz!Q%Q!Q![6z![~%Q^7fYoW#ZUOy%Qz!O%Q!O!P5Z!P!Q%Q!Q![7_![!g%Q!g!h5z!h#X%Q#X#Y5z#Y~%Q_8ZQpVOy%Qz~%Q^8fUjSOy%Qz!O%Q!O!P4x!P!Q%Q!Q![7_![~%Q_8}S#WPOy%Qz!Q%Q!Q![5Z![~%Q~9`RjSOy%Qz{9i{~%Q~9nSoWOy9iyz9zz{:o{~9i~9}ROz9zz{:W{~9z~:ZTOz9zz{:W{!P9z!P!Q:j!Q~9z~:oOR~~:tUoWOy9iyz9zz{:o{!P9i!P!Q;W!Q~9i~;_QR~oWOy%Qz~%Q^;jY#ZUOy%Qz!O%Q!O!P5Z!P!Q%Q!Q![7_![!g%Q!g!h5z!h#X%Q#X#Y5z#Y~%QX<_S]POy%Qz![%Q![!]<k!]~%QX<rQ^PoWOy%Qz~%Q_<}Q!WVOy%Qz~%QY=YQzQOy%Qz~%QX=eS|POy%Qz!`%Q!`!a=q!a~%QX=xQ|PoWOy%Qz~%QX>RUOy%Qz!c%Q!c!}>e!}#T%Q#T#o>e#o~%QX>lY!YPoWOy%Qz}%Q}!O>e!O!Q%Q!Q![>e![!c%Q!c!}>e!}#T%Q#T#o>e#o~%QX?aQxPOy%Qz~%Q^?lQvUOy%Qz~%QX?uSOy%Qz#b%Q#b#c@R#c~%QX@WSoWOy%Qz#W%Q#W#X@d#X~%QX@kQ!`PoWOy%Qz~%QX@tSOy%Qz#f%Q#f#g@d#g~%QXAVQ!RPOy%Qz~%Q_AbQ!QVOy%Qz~%QZAmS!PPOy%Qz!_%Q!_!`2e!`~%Q",
+      tokenizers: [descendant, unitToken, identifiers, 0, 1, 2, 3],
+      topRules: {"StyleSheet":[0,4]},
+      specialized: [{term: 94, get: value => spec_callee[value] || -1},{term: 56, get: value => spec_AtKeyword[value] || -1},{term: 95, get: value => spec_identifier$1[value] || -1}],
+      tokenPrec: 1078
+    });
+
+    let _properties = null;
+    function properties() {
+        if (!_properties && typeof document == "object" && document.body) {
+            let names = [];
+            for (let prop in document.body.style) {
+                if (!/[A-Z]|^-|^(item|length)$/.test(prop))
+                    names.push(prop);
+            }
+            _properties = names.sort().map(name => ({ type: "property", label: name }));
+        }
+        return _properties || [];
+    }
+    const pseudoClasses = /*@__PURE__*/[
+        "active", "after", "before", "checked", "default",
+        "disabled", "empty", "enabled", "first-child", "first-letter",
+        "first-line", "first-of-type", "focus", "hover", "in-range",
+        "indeterminate", "invalid", "lang", "last-child", "last-of-type",
+        "link", "not", "nth-child", "nth-last-child", "nth-last-of-type",
+        "nth-of-type", "only-of-type", "only-child", "optional", "out-of-range",
+        "placeholder", "read-only", "read-write", "required", "root",
+        "selection", "target", "valid", "visited"
+    ].map(name => ({ type: "class", label: name }));
+    const values = /*@__PURE__*/[
+        "above", "absolute", "activeborder", "additive", "activecaption", "after-white-space",
+        "ahead", "alias", "all", "all-scroll", "alphabetic", "alternate", "always",
+        "antialiased", "appworkspace", "asterisks", "attr", "auto", "auto-flow", "avoid", "avoid-column",
+        "avoid-page", "avoid-region", "axis-pan", "background", "backwards", "baseline", "below",
+        "bidi-override", "blink", "block", "block-axis", "bold", "bolder", "border", "border-box",
+        "both", "bottom", "break", "break-all", "break-word", "bullets", "button", "button-bevel",
+        "buttonface", "buttonhighlight", "buttonshadow", "buttontext", "calc", "capitalize",
+        "caps-lock-indicator", "caption", "captiontext", "caret", "cell", "center", "checkbox", "circle",
+        "cjk-decimal", "clear", "clip", "close-quote", "col-resize", "collapse", "color", "color-burn",
+        "color-dodge", "column", "column-reverse", "compact", "condensed", "contain", "content",
+        "contents", "content-box", "context-menu", "continuous", "copy", "counter", "counters", "cover",
+        "crop", "cross", "crosshair", "currentcolor", "cursive", "cyclic", "darken", "dashed", "decimal",
+        "decimal-leading-zero", "default", "default-button", "dense", "destination-atop", "destination-in",
+        "destination-out", "destination-over", "difference", "disc", "discard", "disclosure-closed",
+        "disclosure-open", "document", "dot-dash", "dot-dot-dash", "dotted", "double", "down", "e-resize",
+        "ease", "ease-in", "ease-in-out", "ease-out", "element", "ellipse", "ellipsis", "embed", "end",
+        "ethiopic-abegede-gez", "ethiopic-halehame-aa-er", "ethiopic-halehame-gez", "ew-resize", "exclusion",
+        "expanded", "extends", "extra-condensed", "extra-expanded", "fantasy", "fast", "fill", "fill-box",
+        "fixed", "flat", "flex", "flex-end", "flex-start", "footnotes", "forwards", "from",
+        "geometricPrecision", "graytext", "grid", "groove", "hand", "hard-light", "help", "hidden", "hide",
+        "higher", "highlight", "highlighttext", "horizontal", "hsl", "hsla", "hue", "icon", "ignore",
+        "inactiveborder", "inactivecaption", "inactivecaptiontext", "infinite", "infobackground", "infotext",
+        "inherit", "initial", "inline", "inline-axis", "inline-block", "inline-flex", "inline-grid",
+        "inline-table", "inset", "inside", "intrinsic", "invert", "italic", "justify", "keep-all",
+        "landscape", "large", "larger", "left", "level", "lighter", "lighten", "line-through", "linear",
+        "linear-gradient", "lines", "list-item", "listbox", "listitem", "local", "logical", "loud", "lower",
+        "lower-hexadecimal", "lower-latin", "lower-norwegian", "lowercase", "ltr", "luminosity", "manipulation",
+        "match", "matrix", "matrix3d", "medium", "menu", "menutext", "message-box", "middle", "min-intrinsic",
+        "mix", "monospace", "move", "multiple", "multiple_mask_images", "multiply", "n-resize", "narrower",
+        "ne-resize", "nesw-resize", "no-close-quote", "no-drop", "no-open-quote", "no-repeat", "none",
+        "normal", "not-allowed", "nowrap", "ns-resize", "numbers", "numeric", "nw-resize", "nwse-resize",
+        "oblique", "opacity", "open-quote", "optimizeLegibility", "optimizeSpeed", "outset", "outside",
+        "outside-shape", "overlay", "overline", "padding", "padding-box", "painted", "page", "paused",
+        "perspective", "pinch-zoom", "plus-darker", "plus-lighter", "pointer", "polygon", "portrait",
+        "pre", "pre-line", "pre-wrap", "preserve-3d", "progress", "push-button", "radial-gradient", "radio",
+        "read-only", "read-write", "read-write-plaintext-only", "rectangle", "region", "relative", "repeat",
+        "repeating-linear-gradient", "repeating-radial-gradient", "repeat-x", "repeat-y", "reset", "reverse",
+        "rgb", "rgba", "ridge", "right", "rotate", "rotate3d", "rotateX", "rotateY", "rotateZ", "round",
+        "row", "row-resize", "row-reverse", "rtl", "run-in", "running", "s-resize", "sans-serif", "saturation",
+        "scale", "scale3d", "scaleX", "scaleY", "scaleZ", "screen", "scroll", "scrollbar", "scroll-position",
+        "se-resize", "self-start", "self-end", "semi-condensed", "semi-expanded", "separate", "serif", "show",
+        "single", "skew", "skewX", "skewY", "skip-white-space", "slide", "slider-horizontal",
+        "slider-vertical", "sliderthumb-horizontal", "sliderthumb-vertical", "slow", "small", "small-caps",
+        "small-caption", "smaller", "soft-light", "solid", "source-atop", "source-in", "source-out",
+        "source-over", "space", "space-around", "space-between", "space-evenly", "spell-out", "square", "start",
+        "static", "status-bar", "stretch", "stroke", "stroke-box", "sub", "subpixel-antialiased", "svg_masks",
+        "super", "sw-resize", "symbolic", "symbols", "system-ui", "table", "table-caption", "table-cell",
+        "table-column", "table-column-group", "table-footer-group", "table-header-group", "table-row",
+        "table-row-group", "text", "text-bottom", "text-top", "textarea", "textfield", "thick", "thin",
+        "threeddarkshadow", "threedface", "threedhighlight", "threedlightshadow", "threedshadow", "to", "top",
+        "transform", "translate", "translate3d", "translateX", "translateY", "translateZ", "transparent",
+        "ultra-condensed", "ultra-expanded", "underline", "unidirectional-pan", "unset", "up", "upper-latin",
+        "uppercase", "url", "var", "vertical", "vertical-text", "view-box", "visible", "visibleFill",
+        "visiblePainted", "visibleStroke", "visual", "w-resize", "wait", "wave", "wider", "window", "windowframe",
+        "windowtext", "words", "wrap", "wrap-reverse", "x-large", "x-small", "xor", "xx-large", "xx-small"
+    ].map(name => ({ type: "keyword", label: name })).concat(/*@__PURE__*/[
+        "aliceblue", "antiquewhite", "aqua", "aquamarine", "azure", "beige",
+        "bisque", "black", "blanchedalmond", "blue", "blueviolet", "brown",
+        "burlywood", "cadetblue", "chartreuse", "chocolate", "coral", "cornflowerblue",
+        "cornsilk", "crimson", "cyan", "darkblue", "darkcyan", "darkgoldenrod",
+        "darkgray", "darkgreen", "darkkhaki", "darkmagenta", "darkolivegreen",
+        "darkorange", "darkorchid", "darkred", "darksalmon", "darkseagreen",
+        "darkslateblue", "darkslategray", "darkturquoise", "darkviolet",
+        "deeppink", "deepskyblue", "dimgray", "dodgerblue", "firebrick",
+        "floralwhite", "forestgreen", "fuchsia", "gainsboro", "ghostwhite",
+        "gold", "goldenrod", "gray", "grey", "green", "greenyellow", "honeydew",
+        "hotpink", "indianred", "indigo", "ivory", "khaki", "lavender",
+        "lavenderblush", "lawngreen", "lemonchiffon", "lightblue", "lightcoral",
+        "lightcyan", "lightgoldenrodyellow", "lightgray", "lightgreen", "lightpink",
+        "lightsalmon", "lightseagreen", "lightskyblue", "lightslategray",
+        "lightsteelblue", "lightyellow", "lime", "limegreen", "linen", "magenta",
+        "maroon", "mediumaquamarine", "mediumblue", "mediumorchid", "mediumpurple",
+        "mediumseagreen", "mediumslateblue", "mediumspringgreen", "mediumturquoise",
+        "mediumvioletred", "midnightblue", "mintcream", "mistyrose", "moccasin",
+        "navajowhite", "navy", "oldlace", "olive", "olivedrab", "orange", "orangered",
+        "orchid", "palegoldenrod", "palegreen", "paleturquoise", "palevioletred",
+        "papayawhip", "peachpuff", "peru", "pink", "plum", "powderblue",
+        "purple", "rebeccapurple", "red", "rosybrown", "royalblue", "saddlebrown",
+        "salmon", "sandybrown", "seagreen", "seashell", "sienna", "silver", "skyblue",
+        "slateblue", "slategray", "snow", "springgreen", "steelblue", "tan",
+        "teal", "thistle", "tomato", "turquoise", "violet", "wheat", "white",
+        "whitesmoke", "yellow", "yellowgreen"
+    ].map(name => ({ type: "constant", label: name })));
+    const tags = /*@__PURE__*/[
+        "a", "abbr", "address", "article", "aside", "b", "bdi", "bdo", "blockquote", "body",
+        "br", "button", "canvas", "caption", "cite", "code", "col", "colgroup", "dd", "del",
+        "details", "dfn", "dialog", "div", "dl", "dt", "em", "figcaption", "figure", "footer",
+        "form", "header", "hgroup", "h1", "h2", "h3", "h4", "h5", "h6", "hr", "html", "i", "iframe",
+        "img", "input", "ins", "kbd", "label", "legend", "li", "main", "meter", "nav", "ol", "output",
+        "p", "pre", "ruby", "section", "select", "small", "source", "span", "strong", "sub", "summary",
+        "sup", "table", "tbody", "td", "template", "textarea", "tfoot", "th", "thead", "tr", "u", "ul"
+    ].map(name => ({ type: "type", label: name }));
+    const span = /^[\w-]*/;
+    /**
+    CSS property and value keyword completion source.
+    */
+    const cssCompletionSource = context => {
+        let { state, pos } = context, node = syntaxTree(state).resolveInner(pos, -1);
+        if (node.name == "PropertyName")
+            return { from: node.from, options: properties(), span };
+        if (node.name == "ValueName")
+            return { from: node.from, options: values, span };
+        if (node.name == "PseudoClassName")
+            return { from: node.from, options: pseudoClasses, span };
+        if (node.name == "TagName") {
+            for (let { parent } = node; parent; parent = parent.parent)
+                if (parent.name == "Block")
+                    return { from: node.from, options: properties(), span };
+            return { from: node.from, options: tags, span };
+        }
+        if (!context.explicit)
+            return null;
+        let above = node.resolve(pos), before = above.childBefore(pos);
+        if (before && before.name == ":" && above.name == "PseudoClassSelector")
+            return { from: pos, options: pseudoClasses, span };
+        if (before && before.name == ":" && above.name == "Declaration" || above.name == "ArgList")
+            return { from: pos, options: values, span };
+        if (above.name == "Block")
+            return { from: pos, options: properties(), span };
+        return null;
+    };
+
+    /**
+    A language provider based on the [Lezer CSS
+    parser](https://github.com/lezer-parser/css), extended with
+    highlighting and indentation information.
+    */
+    const cssLanguage = /*@__PURE__*/LRLanguage.define({
+        parser: /*@__PURE__*/parser$2.configure({
+            props: [
+                /*@__PURE__*/indentNodeProp.add({
+                    Declaration: /*@__PURE__*/continuedIndent()
+                }),
+                /*@__PURE__*/foldNodeProp.add({
+                    Block: foldInside$1
+                }),
+                /*@__PURE__*/styleTags({
+                    "import charset namespace keyframes": tags$1.definitionKeyword,
+                    "media supports": tags$1.controlKeyword,
+                    "from to selector": tags$1.keyword,
+                    NamespaceName: tags$1.namespace,
+                    KeyframeName: tags$1.labelName,
+                    TagName: tags$1.tagName,
+                    ClassName: tags$1.className,
+                    PseudoClassName: /*@__PURE__*/tags$1.constant(tags$1.className),
+                    IdName: tags$1.labelName,
+                    "FeatureName PropertyName": tags$1.propertyName,
+                    AttributeName: tags$1.attributeName,
+                    NumberLiteral: tags$1.number,
+                    KeywordQuery: tags$1.keyword,
+                    UnaryQueryOp: tags$1.operatorKeyword,
+                    "CallTag ValueName": tags$1.atom,
+                    VariableName: tags$1.variableName,
+                    Callee: tags$1.operatorKeyword,
+                    Unit: tags$1.unit,
+                    "UniversalSelector NestingSelector": tags$1.definitionOperator,
+                    AtKeyword: tags$1.keyword,
+                    MatchOp: tags$1.compareOperator,
+                    "ChildOp SiblingOp, LogicOp": tags$1.logicOperator,
+                    BinOp: tags$1.arithmeticOperator,
+                    Important: tags$1.modifier,
+                    Comment: tags$1.blockComment,
+                    ParenthesizedContent: /*@__PURE__*/tags$1.special(tags$1.name),
+                    ColorLiteral: tags$1.color,
+                    StringLiteral: tags$1.string,
+                    ":": tags$1.punctuation,
+                    "PseudoOp #": tags$1.derefOperator,
+                    "; ,": tags$1.separator,
+                    "( )": tags$1.paren,
+                    "[ ]": tags$1.squareBracket,
+                    "{ }": tags$1.brace
+                })
+            ]
+        }),
+        languageData: {
+            commentTokens: { block: { open: "/*", close: "*/" } },
+            indentOnInput: /^\s*\}$/,
+            wordChars: "-"
+        }
+    });
+    // FIXME remove on next major version
+    const cssCompletion = /*@__PURE__*/cssLanguage.data.of({ autocomplete: cssCompletionSource });
+    /**
+    Language support for CSS.
+    */
+    function css() {
+        return new LanguageSupport(cssLanguage, cssCompletion);
+    }
+
+    const Targets = ["_blank", "_self", "_top", "_parent"];
+    const Charsets = ["ascii", "utf-8", "utf-16", "latin1", "latin1"];
+    const Methods = ["get", "post", "put", "delete"];
+    const Encs = ["application/x-www-form-urlencoded", "multipart/form-data", "text/plain"];
+    const Bool = ["true", "false"];
+    const S = {}; // Empty tag spec
+    const Tags = {
+        a: {
+            attrs: {
+                href: null, ping: null, type: null,
+                media: null,
+                target: Targets,
+                hreflang: null
+            }
+        },
+        abbr: S,
+        acronym: S,
+        address: S,
+        applet: S,
+        area: {
+            attrs: {
+                alt: null, coords: null, href: null, target: null, ping: null,
+                media: null, hreflang: null, type: null,
+                shape: ["default", "rect", "circle", "poly"]
+            }
+        },
+        article: S,
+        aside: S,
+        audio: {
+            attrs: {
+                src: null, mediagroup: null,
+                crossorigin: ["anonymous", "use-credentials"],
+                preload: ["none", "metadata", "auto"],
+                autoplay: ["autoplay"],
+                loop: ["loop"],
+                controls: ["controls"]
+            }
+        },
+        b: S,
+        base: { attrs: { href: null, target: Targets } },
+        basefont: S,
+        bdi: S,
+        bdo: S,
+        big: S,
+        blockquote: { attrs: { cite: null } },
+        body: S,
+        br: S,
+        button: {
+            attrs: {
+                form: null, formaction: null, name: null, value: null,
+                autofocus: ["autofocus"],
+                disabled: ["autofocus"],
+                formenctype: Encs,
+                formmethod: Methods,
+                formnovalidate: ["novalidate"],
+                formtarget: Targets,
+                type: ["submit", "reset", "button"]
+            }
+        },
+        canvas: { attrs: { width: null, height: null } },
+        caption: S,
+        center: S,
+        cite: S,
+        code: S,
+        col: { attrs: { span: null } },
+        colgroup: { attrs: { span: null } },
+        command: {
+            attrs: {
+                type: ["command", "checkbox", "radio"],
+                label: null, icon: null, radiogroup: null, command: null, title: null,
+                disabled: ["disabled"],
+                checked: ["checked"]
+            }
+        },
+        data: { attrs: { value: null } },
+        datagrid: { attrs: { disabled: ["disabled"], multiple: ["multiple"] } },
+        datalist: { attrs: { data: null } },
+        dd: S,
+        del: { attrs: { cite: null, datetime: null } },
+        details: { attrs: { open: ["open"] } },
+        dfn: S,
+        dir: S,
+        div: S,
+        dl: S,
+        dt: S,
+        em: S,
+        embed: { attrs: { src: null, type: null, width: null, height: null } },
+        eventsource: { attrs: { src: null } },
+        fieldset: { attrs: { disabled: ["disabled"], form: null, name: null } },
+        figcaption: S,
+        figure: S,
+        font: S,
+        footer: S,
+        form: {
+            attrs: {
+                action: null, name: null,
+                "accept-charset": Charsets,
+                autocomplete: ["on", "off"],
+                enctype: Encs,
+                method: Methods,
+                novalidate: ["novalidate"],
+                target: Targets
+            }
+        },
+        frame: S,
+        frameset: S,
+        h1: S, h2: S, h3: S, h4: S, h5: S, h6: S,
+        head: {
+            children: ["title", "base", "link", "style", "meta", "script", "noscript", "command"]
+        },
+        header: S,
+        hgroup: S,
+        hr: S,
+        html: {
+            attrs: { manifest: null }
+        },
+        i: S,
+        iframe: {
+            attrs: {
+                src: null, srcdoc: null, name: null, width: null, height: null,
+                sandbox: ["allow-top-navigation", "allow-same-origin", "allow-forms", "allow-scripts"],
+                seamless: ["seamless"]
+            }
+        },
+        img: {
+            attrs: {
+                alt: null, src: null, ismap: null, usemap: null, width: null, height: null,
+                crossorigin: ["anonymous", "use-credentials"]
+            }
+        },
+        input: {
+            attrs: {
+                alt: null, dirname: null, form: null, formaction: null,
+                height: null, list: null, max: null, maxlength: null, min: null,
+                name: null, pattern: null, placeholder: null, size: null, src: null,
+                step: null, value: null, width: null,
+                accept: ["audio/*", "video/*", "image/*"],
+                autocomplete: ["on", "off"],
+                autofocus: ["autofocus"],
+                checked: ["checked"],
+                disabled: ["disabled"],
+                formenctype: Encs,
+                formmethod: Methods,
+                formnovalidate: ["novalidate"],
+                formtarget: Targets,
+                multiple: ["multiple"],
+                readonly: ["readonly"],
+                required: ["required"],
+                type: ["hidden", "text", "search", "tel", "url", "email", "password", "datetime", "date", "month",
+                    "week", "time", "datetime-local", "number", "range", "color", "checkbox", "radio",
+                    "file", "submit", "image", "reset", "button"]
+            }
+        },
+        ins: { attrs: { cite: null, datetime: null } },
+        kbd: S,
+        keygen: {
+            attrs: {
+                challenge: null, form: null, name: null,
+                autofocus: ["autofocus"],
+                disabled: ["disabled"],
+                keytype: ["RSA"]
+            }
+        },
+        label: { attrs: { for: null, form: null } },
+        legend: S,
+        li: { attrs: { value: null } },
+        link: {
+            attrs: {
+                href: null, type: null,
+                hreflang: null,
+                media: null,
+                sizes: ["all", "16x16", "16x16 32x32", "16x16 32x32 64x64"]
+            }
+        },
+        map: { attrs: { name: null } },
+        mark: S,
+        menu: { attrs: { label: null, type: ["list", "context", "toolbar"] } },
+        meta: {
+            attrs: {
+                content: null,
+                charset: Charsets,
+                name: ["viewport", "application-name", "author", "description", "generator", "keywords"],
+                "http-equiv": ["content-language", "content-type", "default-style", "refresh"]
+            }
+        },
+        meter: { attrs: { value: null, min: null, low: null, high: null, max: null, optimum: null } },
+        nav: S,
+        noframes: S,
+        noscript: S,
+        object: {
+            attrs: {
+                data: null, type: null, name: null, usemap: null, form: null, width: null, height: null,
+                typemustmatch: ["typemustmatch"]
+            }
+        },
+        ol: { attrs: { reversed: ["reversed"], start: null, type: ["1", "a", "A", "i", "I"] },
+            children: ["li", "script", "template", "ul", "ol"] },
+        optgroup: { attrs: { disabled: ["disabled"], label: null } },
+        option: { attrs: { disabled: ["disabled"], label: null, selected: ["selected"], value: null } },
+        output: { attrs: { for: null, form: null, name: null } },
+        p: S,
+        param: { attrs: { name: null, value: null } },
+        pre: S,
+        progress: { attrs: { value: null, max: null } },
+        q: { attrs: { cite: null } },
+        rp: S,
+        rt: S,
+        ruby: S,
+        s: S,
+        samp: S,
+        script: {
+            attrs: {
+                type: ["text/javascript"],
+                src: null,
+                async: ["async"],
+                defer: ["defer"],
+                charset: Charsets
+            }
+        },
+        section: S,
+        select: {
+            attrs: {
+                form: null, name: null, size: null,
+                autofocus: ["autofocus"],
+                disabled: ["disabled"],
+                multiple: ["multiple"]
+            }
+        },
+        small: S,
+        source: { attrs: { src: null, type: null, media: null } },
+        span: S,
+        strike: S,
+        strong: S,
+        style: {
+            attrs: {
+                type: ["text/css"],
+                media: null,
+                scoped: null
+            }
+        },
+        sub: S,
+        summary: S,
+        sup: S,
+        table: S,
+        tbody: S,
+        td: { attrs: { colspan: null, rowspan: null, headers: null } },
+        textarea: {
+            attrs: {
+                dirname: null, form: null, maxlength: null, name: null, placeholder: null,
+                rows: null, cols: null,
+                autofocus: ["autofocus"],
+                disabled: ["disabled"],
+                readonly: ["readonly"],
+                required: ["required"],
+                wrap: ["soft", "hard"]
+            }
+        },
+        tfoot: S,
+        th: { attrs: { colspan: null, rowspan: null, headers: null, scope: ["row", "col", "rowgroup", "colgroup"] } },
+        thead: S,
+        time: { attrs: { datetime: null } },
+        title: S,
+        tr: S,
+        track: {
+            attrs: {
+                src: null, label: null, default: null,
+                kind: ["subtitles", "captions", "descriptions", "chapters", "metadata"],
+                srclang: null
+            }
+        },
+        tt: S,
+        u: S,
+        ul: { children: ["li", "script", "template", "ul", "ol"] },
+        var: S,
+        video: {
+            attrs: {
+                src: null, poster: null, width: null, height: null,
+                crossorigin: ["anonymous", "use-credentials"],
+                preload: ["auto", "metadata", "none"],
+                autoplay: ["autoplay"],
+                mediagroup: ["movie"],
+                muted: ["muted"],
+                controls: ["controls"]
+            }
+        },
+        wbr: S
+    };
+    const GlobalAttrs = {
+        accesskey: null,
+        class: null,
+        contenteditable: Bool,
+        contextmenu: null,
+        dir: ["ltr", "rtl", "auto"],
+        draggable: ["true", "false", "auto"],
+        dropzone: ["copy", "move", "link", "string:", "file:"],
+        hidden: ["hidden"],
+        id: null,
+        inert: ["inert"],
+        itemid: null,
+        itemprop: null,
+        itemref: null,
+        itemscope: ["itemscope"],
+        itemtype: null,
+        lang: ["ar", "bn", "de", "en-GB", "en-US", "es", "fr", "hi", "id", "ja", "pa", "pt", "ru", "tr", "zh"],
+        spellcheck: Bool,
+        autocorrect: Bool,
+        autocapitalize: Bool,
+        style: null,
+        tabindex: null,
+        title: null,
+        translate: ["yes", "no"],
+        onclick: null,
+        rel: ["stylesheet", "alternate", "author", "bookmark", "help", "license", "next", "nofollow", "noreferrer", "prefetch", "prev", "search", "tag"],
+        role: /*@__PURE__*/"alert application article banner button cell checkbox complementary contentinfo dialog document feed figure form grid gridcell heading img list listbox listitem main navigation region row rowgroup search switch tab table tabpanel textbox timer".split(" "),
+        "aria-activedescendant": null,
+        "aria-atomic": Bool,
+        "aria-autocomplete": ["inline", "list", "both", "none"],
+        "aria-busy": Bool,
+        "aria-checked": ["true", "false", "mixed", "undefined"],
+        "aria-controls": null,
+        "aria-describedby": null,
+        "aria-disabled": Bool,
+        "aria-dropeffect": null,
+        "aria-expanded": ["true", "false", "undefined"],
+        "aria-flowto": null,
+        "aria-grabbed": ["true", "false", "undefined"],
+        "aria-haspopup": Bool,
+        "aria-hidden": Bool,
+        "aria-invalid": ["true", "false", "grammar", "spelling"],
+        "aria-label": null,
+        "aria-labelledby": null,
+        "aria-level": null,
+        "aria-live": ["off", "polite", "assertive"],
+        "aria-multiline": Bool,
+        "aria-multiselectable": Bool,
+        "aria-owns": null,
+        "aria-posinset": null,
+        "aria-pressed": ["true", "false", "mixed", "undefined"],
+        "aria-readonly": Bool,
+        "aria-relevant": null,
+        "aria-required": Bool,
+        "aria-selected": ["true", "false", "undefined"],
+        "aria-setsize": null,
+        "aria-sort": ["ascending", "descending", "none", "other"],
+        "aria-valuemax": null,
+        "aria-valuemin": null,
+        "aria-valuenow": null,
+        "aria-valuetext": null
+    };
+    const AllTags = /*@__PURE__*/Object.keys(Tags);
+    const GlobalAttrNames = /*@__PURE__*/Object.keys(GlobalAttrs);
+    function elementName$1(doc, tree, max = doc.length) {
+        if (!tree)
+            return "";
+        let tag = tree.firstChild;
+        let name = tag && tag.getChild("TagName");
+        return name ? doc.sliceString(name.from, Math.min(name.to, max)) : "";
+    }
+    function findParentElement$1(tree, skip = false) {
+        for (let cur = tree.parent; cur; cur = cur.parent)
+            if (cur.name == "Element") {
+                if (skip)
+                    skip = false;
+                else
+                    return cur;
+            }
+        return null;
+    }
+    function allowedChildren(doc, tree) {
+        let parentInfo = Tags[elementName$1(doc, findParentElement$1(tree, true))];
+        return (parentInfo === null || parentInfo === void 0 ? void 0 : parentInfo.children) || AllTags;
+    }
+    function openTags(doc, tree) {
+        let open = [];
+        for (let parent = tree; parent = findParentElement$1(parent);) {
+            let tagName = elementName$1(doc, parent);
+            if (tagName && parent.lastChild.name == "CloseTag")
+                break;
+            if (tagName && open.indexOf(tagName) < 0 && (tree.name == "EndTag" || tree.from >= parent.firstChild.to))
+                open.push(tagName);
+        }
+        return open;
+    }
+    const identifier = /^[:\-\.\w\u00b7-\uffff]+$/;
+    function completeTag(state, tree, from, to) {
+        let end = /\s*>/.test(state.sliceDoc(to, to + 5)) ? "" : ">";
+        return { from, to,
+            options: allowedChildren(state.doc, tree).map(tagName => ({ label: tagName, type: "type" })).concat(openTags(state.doc, tree).map((tag, i) => ({ label: "/" + tag, apply: "/" + tag + end, type: "type", boost: 99 - i }))),
+            span: /^\/?[:\-\.\w\u00b7-\uffff]*$/ };
+    }
+    function completeCloseTag(state, tree, from, to) {
+        let end = /\s*>/.test(state.sliceDoc(to, to + 5)) ? "" : ">";
+        return { from, to,
+            options: openTags(state.doc, tree).map((tag, i) => ({ label: tag, apply: tag + end, type: "type", boost: 99 - i })),
+            span: identifier };
+    }
+    function completeStartTag(state, tree, pos) {
+        let options = [], level = 0;
+        for (let tagName of allowedChildren(state.doc, tree))
+            options.push({ label: "<" + tagName, type: "type" });
+        for (let open of openTags(state.doc, tree))
+            options.push({ label: "</" + open + ">", type: "type", boost: 99 - level++ });
+        return { from: pos, to: pos, options, span: /^<\/?[:\-\.\w\u00b7-\uffff]*$/ };
+    }
+    function completeAttrName(state, tree, from, to) {
+        let elt = findParentElement$1(tree), info = elt ? Tags[elementName$1(state.doc, elt)] : null;
+        let names = (info && info.attrs ? Object.keys(info.attrs).concat(GlobalAttrNames) : GlobalAttrNames);
+        return { from, to,
+            options: names.map(attrName => ({ label: attrName, type: "property" })),
+            span: identifier };
+    }
+    function completeAttrValue(state, tree, from, to) {
+        var _a;
+        let nameNode = (_a = tree.parent) === null || _a === void 0 ? void 0 : _a.getChild("AttributeName");
+        let options = [], span = undefined;
+        if (nameNode) {
+            let attrName = state.sliceDoc(nameNode.from, nameNode.to);
+            let attrs = GlobalAttrs[attrName];
+            if (!attrs) {
+                let elt = findParentElement$1(tree), info = elt ? Tags[elementName$1(state.doc, elt)] : null;
+                attrs = (info === null || info === void 0 ? void 0 : info.attrs) && info.attrs[attrName];
+            }
+            if (attrs) {
+                let base = state.sliceDoc(from, to).toLowerCase(), quoteStart = '"', quoteEnd = '"';
+                if (/^['"]/.test(base)) {
+                    span = base[0] == '"' ? /^[^"]*$/ : /^[^']*$/;
+                    quoteStart = "";
+                    quoteEnd = state.sliceDoc(to, to + 1) == base[0] ? "" : base[0];
+                    base = base.slice(1);
+                    from++;
+                }
+                else {
+                    span = /^[^\s<>='"]*$/;
+                }
+                for (let value of attrs)
+                    options.push({ label: value, apply: quoteStart + value + quoteEnd, type: "constant" });
+            }
+        }
+        return { from, to, options, span };
+    }
+    /**
+    HTML tag completion. Opens and closes tags and attributes in a
+    context-aware way.
+    */
+    function htmlCompletionSource(context) {
+        let { state, pos } = context, around = syntaxTree(state).resolveInner(pos), tree = around.resolve(pos, -1);
+        for (let scan = pos, before; around == tree && (before = tree.childBefore(scan));) {
+            let last = before.lastChild;
+            if (!last || !last.type.isError || last.from < last.to)
+                break;
+            around = tree = before;
+            scan = last.from;
+        }
+        if (tree.name == "TagName") {
+            return tree.parent && /CloseTag$/.test(tree.parent.name) ? completeCloseTag(state, tree, tree.from, pos)
+                : completeTag(state, tree, tree.from, pos);
+        }
+        else if (tree.name == "StartTag") {
+            return completeTag(state, tree, pos, pos);
+        }
+        else if (tree.name == "StartCloseTag" || tree.name == "IncompleteCloseTag") {
+            return completeCloseTag(state, tree, pos, pos);
+        }
+        else if (context.explicit && (tree.name == "OpenTag" || tree.name == "SelfClosingTag") || tree.name == "AttributeName") {
+            return completeAttrName(state, tree, tree.name == "AttributeName" ? tree.from : pos, pos);
+        }
+        else if (tree.name == "Is" || tree.name == "AttributeValue" || tree.name == "UnquotedAttributeValue") {
+            return completeAttrValue(state, tree, tree.name == "Is" ? pos : tree.from, pos);
+        }
+        else if (context.explicit && (around.name == "Element" || around.name == "Text" || around.name == "Document")) {
+            return completeStartTag(state, tree, pos);
+        }
+        else {
+            return null;
+        }
+    }
+
+    /**
+    A language provider based on the [Lezer HTML
+    parser](https://github.com/lezer-parser/html), extended with the
+    JavaScript and CSS parsers to parse the content of `<script>` and
+    `<style>` tags.
+    */
+    const htmlLanguage = /*@__PURE__*/LRLanguage.define({
+        parser: /*@__PURE__*/parser$3.configure({
+            props: [
+                /*@__PURE__*/indentNodeProp.add({
+                    Element(context) {
+                        let after = /^(\s*)(<\/)?/.exec(context.textAfter);
+                        if (context.node.to <= context.pos + after[0].length)
+                            return context.continue();
+                        return context.lineIndent(context.node.from) + (after[2] ? 0 : context.unit);
+                    },
+                    "OpenTag CloseTag SelfClosingTag"(context) {
+                        return context.column(context.node.from) + context.unit;
+                    },
+                    Document(context) {
+                        if (context.pos + /\s*/.exec(context.textAfter)[0].length < context.node.to)
+                            return context.continue();
+                        let endElt = null, close;
+                        for (let cur = context.node;;) {
+                            let last = cur.lastChild;
+                            if (!last || last.name != "Element" || last.to != cur.to)
+                                break;
+                            endElt = cur = last;
+                        }
+                        if (endElt && !((close = endElt.lastChild) && (close.name == "CloseTag" || close.name == "SelfClosingTag")))
+                            return context.lineIndent(endElt.from) + context.unit;
+                        return null;
+                    }
+                }),
+                /*@__PURE__*/foldNodeProp.add({
+                    Element(node) {
+                        let first = node.firstChild, last = node.lastChild;
+                        if (!first || first.name != "OpenTag")
+                            return null;
+                        return { from: first.to, to: last.name == "CloseTag" ? last.from : node.to };
+                    }
+                }),
+                /*@__PURE__*/styleTags({
+                    "Text RawText": tags$1.content,
+                    "StartTag StartCloseTag SelfCloserEndTag EndTag SelfCloseEndTag": tags$1.angleBracket,
+                    TagName: tags$1.tagName,
+                    "MismatchedCloseTag/TagName": [tags$1.tagName, tags$1.invalid],
+                    AttributeName: tags$1.attributeName,
+                    "AttributeValue UnquotedAttributeValue": tags$1.attributeValue,
+                    Is: tags$1.definitionOperator,
+                    "EntityReference CharacterReference": tags$1.character,
+                    Comment: tags$1.blockComment,
+                    ProcessingInst: tags$1.processingInstruction,
+                    DoctypeDecl: tags$1.documentMeta
+                })
+            ],
+            wrap: /*@__PURE__*/configureNesting([
+                { tag: "script",
+                    attrs(attrs) {
+                        return !attrs.type || /^(?:text|application)\/(?:x-)?(?:java|ecma)script$|^module$|^$/i.test(attrs.type);
+                    },
+                    parser: javascriptLanguage.parser },
+                { tag: "style",
+                    attrs(attrs) {
+                        return (!attrs.lang || attrs.lang == "css") && (!attrs.type || /^(text\/)?(x-)?(stylesheet|css)$/i.test(attrs.type));
+                    },
+                    parser: cssLanguage.parser }
+            ])
+        }),
+        languageData: {
+            commentTokens: { block: { open: "<!--", close: "-->" } },
+            indentOnInput: /^\s*<\/\w+\W$/,
+            wordChars: "-._"
+        }
+    });
+    // FIXME remove on next major version
+    const htmlCompletion = /*@__PURE__*/htmlLanguage.data.of({ autocomplete: htmlCompletionSource });
+    /**
+    Language support for HTML, including
+    [`htmlCompletion`](https://codemirror.net/6/docs/ref/#lang-html.htmlCompletion) and JavaScript and
+    CSS support extensions.
+    */
+    function html(config = {}) {
+        let lang = htmlLanguage;
+        if (config.matchClosingTags === false)
+            lang = lang.configure({ dialect: "noMatch" });
+        return new LanguageSupport(lang, [
+            htmlCompletion,
+            config.autoCloseTags !== false ? autoCloseTags : [],
+            javascript().support,
+            css().support
+        ]);
+    }
+    /**
+    Extension that will automatically insert close tags when a `>` or
+    `/` is typed.
+    */
+    const autoCloseTags = /*@__PURE__*/EditorView.inputHandler.of((view, from, to, text) => {
+        if (view.composing || view.state.readOnly || from != to || (text != ">" && text != "/") ||
+            !htmlLanguage.isActiveAt(view.state, from, -1))
+            return false;
+        let { state } = view;
+        let changes = state.changeByRange(range => {
+            var _a, _b, _c;
+            let { head } = range, around = syntaxTree(state).resolveInner(head, -1), name;
+            if (around.name == "TagName" || around.name == "StartTag")
+                around = around.parent;
+            if (text == ">" && around.name == "OpenTag") {
+                if (((_b = (_a = around.parent) === null || _a === void 0 ? void 0 : _a.lastChild) === null || _b === void 0 ? void 0 : _b.name) != "CloseTag" && (name = elementName$1(state.doc, around.parent, head)))
+                    return { range: EditorSelection.cursor(head + 1), changes: { from: head, insert: `></${name}>` } };
+            }
+            else if (text == "/" && around.name == "OpenTag") {
+                let empty = around.parent, base = empty === null || empty === void 0 ? void 0 : empty.parent;
+                if (empty.from == head - 1 && ((_c = base.lastChild) === null || _c === void 0 ? void 0 : _c.name) != "CloseTag" && (name = elementName$1(state.doc, base, head))) {
+                    let insert = `/${name}>`;
+                    return { range: EditorSelection.cursor(head + insert.length), changes: { from: head, insert } };
+                }
+            }
+            return { range };
+        });
+        if (changes.changes.empty)
+            return false;
+        view.dispatch(changes, { userEvent: "input.type", scrollIntoView: true });
+        return true;
+    });
+
+    const data = /*@__PURE__*/defineLanguageFacet({ block: { open: "<!--", close: "-->" } });
+    const commonmark = /*@__PURE__*/parser$4.configure({
+        props: [
+            /*@__PURE__*/styleTags({
+                "Blockquote/...": tags$1.quote,
+                HorizontalRule: tags$1.contentSeparator,
+                "ATXHeading1/... SetextHeading1/...": tags$1.heading1,
+                "ATXHeading2/... SetextHeading2/...": tags$1.heading2,
+                "ATXHeading3/...": tags$1.heading3,
+                "ATXHeading4/...": tags$1.heading4,
+                "ATXHeading5/...": tags$1.heading5,
+                "ATXHeading6/...": tags$1.heading6,
+                "Comment CommentBlock": tags$1.comment,
+                Escape: tags$1.escape,
+                Entity: tags$1.character,
+                "Emphasis/...": tags$1.emphasis,
+                "StrongEmphasis/...": tags$1.strong,
+                "Link/... Image/...": tags$1.link,
+                "OrderedList/... BulletList/...": tags$1.list,
+                "BlockQuote/...": tags$1.quote,
+                "InlineCode CodeText": tags$1.monospace,
+                URL: tags$1.url,
+                "HeaderMark HardBreak QuoteMark ListMark LinkMark EmphasisMark CodeMark": tags$1.processingInstruction,
+                "CodeInfo LinkLabel": tags$1.labelName,
+                LinkTitle: tags$1.string,
+                Paragraph: tags$1.content
+            }),
+            /*@__PURE__*/foldNodeProp.add(type => {
+                if (!type.is("Block") || type.is("Document"))
+                    return undefined;
+                return (tree, state) => ({ from: state.doc.lineAt(tree.from).to, to: tree.to });
+            }),
+            /*@__PURE__*/indentNodeProp.add({
+                Document: () => null
+            }),
+            /*@__PURE__*/languageDataProp.add({
+                Document: data
+            })
+        ]
+    });
+    function mkLang(parser) {
+        return new Language(data, parser, parser.nodeSet.types.find(t => t.name == "Document"));
+    }
+    /**
+    Language support for strict CommonMark.
+    */
+    const commonmarkLanguage = /*@__PURE__*/mkLang(commonmark);
+    const extended = /*@__PURE__*/commonmark.configure([GFM, Subscript, Superscript, Emoji, {
+            props: [
+                /*@__PURE__*/styleTags({
+                    "TableDelimiter SubscriptMark SuperscriptMark StrikethroughMark": tags$1.processingInstruction,
+                    "TableHeader/...": tags$1.heading,
+                    "Strikethrough/...": tags$1.strikethrough,
+                    TaskMarker: tags$1.atom,
+                    Task: tags$1.list,
+                    Emoji: tags$1.character,
+                    "Subscript Superscript": /*@__PURE__*/tags$1.special(tags$1.content),
+                    TableCell: tags$1.content
+                })
+            ]
+        }]);
+    /**
+    Language support for [GFM](https://github.github.com/gfm/) plus
+    subscript, superscript, and emoji syntax.
+    */
+    const markdownLanguage = /*@__PURE__*/mkLang(extended);
+    function getCodeParser(languages, defaultLanguage) {
+        return (info) => {
+            let found = info && LanguageDescription.matchLanguageName(languages, info, true);
+            if (!found)
+                return defaultLanguage ? defaultLanguage.parser : null;
+            if (found.support)
+                return found.support.language.parser;
+            return ParseContext.getSkippingParser(found.load());
+        };
+    }
+
+    function nodeStart(node, doc) {
+        return doc.sliceString(node.from, node.from + 50);
+    }
+    class Context {
+        constructor(node, from, to, spaceBefore, spaceAfter, type, item) {
+            this.node = node;
+            this.from = from;
+            this.to = to;
+            this.spaceBefore = spaceBefore;
+            this.spaceAfter = spaceAfter;
+            this.type = type;
+            this.item = item;
+        }
+        blank(trailing = true) {
+            let result = this.spaceBefore;
+            if (this.node.name == "Blockquote")
+                result += ">";
+            else
+                for (let i = this.to - this.from - result.length - this.spaceAfter.length; i > 0; i--)
+                    result += " ";
+            return result + (trailing ? this.spaceAfter : "");
+        }
+        marker(doc, add) {
+            let number = this.node.name == "OrderedList" ? String((+itemNumber(this.item, doc)[2] + add)) : "";
+            return this.spaceBefore + number + this.type + this.spaceAfter;
+        }
+    }
+    function getContext(node, line, doc) {
+        let nodes = [];
+        for (let cur = node; cur && cur.name != "Document"; cur = cur.parent) {
+            if (cur.name == "ListItem" || cur.name == "Blockquote")
+                nodes.push(cur);
+        }
+        let context = [], pos = 0;
+        for (let i = nodes.length - 1; i >= 0; i--) {
+            let node = nodes[i], match, start = pos;
+            if (node.name == "Blockquote" && (match = /^[ \t]*>( ?)/.exec(line.slice(pos)))) {
+                pos += match[0].length;
+                context.push(new Context(node, start, pos, "", match[1], ">", null));
+            }
+            else if (node.name == "ListItem" && node.parent.name == "OrderedList" &&
+                (match = /^([ \t]*)\d+([.)])([ \t]*)/.exec(nodeStart(node, doc)))) {
+                let after = match[3], len = match[0].length;
+                if (after.length >= 4) {
+                    after = after.slice(0, after.length - 4);
+                    len -= 4;
+                }
+                pos += len;
+                context.push(new Context(node.parent, start, pos, match[1], after, match[2], node));
+            }
+            else if (node.name == "ListItem" && node.parent.name == "BulletList" &&
+                (match = /^([ \t]*)([-+*])([ \t]+)/.exec(nodeStart(node, doc)))) {
+                let after = match[3], len = match[0].length;
+                if (after.length > 4) {
+                    after = after.slice(0, after.length - 4);
+                    len -= 4;
+                }
+                pos += len;
+                context.push(new Context(node.parent, start, pos, match[1], after, match[2], node));
+            }
+        }
+        return context;
+    }
+    function itemNumber(item, doc) {
+        return /^(\s*)(\d+)(?=[.)])/.exec(doc.sliceString(item.from, item.from + 10));
+    }
+    function renumberList(after, doc, changes, offset = 0) {
+        for (let prev = -1, node = after;;) {
+            if (node.name == "ListItem") {
+                let m = itemNumber(node, doc);
+                let number = +m[2];
+                if (prev >= 0) {
+                    if (number != prev + 1)
+                        return;
+                    changes.push({ from: node.from + m[1].length, to: node.from + m[0].length, insert: String(prev + 2 + offset) });
+                }
+                prev = number;
+            }
+            let next = node.nextSibling;
+            if (!next)
+                break;
+            node = next;
+        }
+    }
+    /**
+    This command, when invoked in Markdown context with cursor
+    selection(s), will create a new line with the markup for
+    blockquotes and lists that were active on the old line. If the
+    cursor was directly after the end of the markup for the old line,
+    trailing whitespace and list markers are removed from that line.
+
+    The command does nothing in non-Markdown context, so it should
+    not be used as the only binding for Enter (even in a Markdown
+    document, HTML and code regions might use a different language).
+    */
+    const insertNewlineContinueMarkup = ({ state, dispatch }) => {
+        let tree = syntaxTree(state), { doc } = state;
+        let dont = null, changes = state.changeByRange(range => {
+            if (!range.empty || !markdownLanguage.isActiveAt(state, range.from))
+                return dont = { range };
+            let pos = range.from, line = doc.lineAt(pos);
+            let context = getContext(tree.resolveInner(pos, -1), line.text, doc);
+            while (context.length && context[context.length - 1].from > pos - line.from)
+                context.pop();
+            if (!context.length)
+                return dont = { range };
+            let inner = context[context.length - 1];
+            if (inner.to - inner.spaceAfter.length > pos - line.from)
+                return dont = { range };
+            let emptyLine = pos >= (inner.to - inner.spaceAfter.length) && !/\S/.test(line.text.slice(inner.to));
+            // Empty line in list
+            if (inner.item && emptyLine) {
+                // First list item or blank line before: delete a level of markup
+                if (inner.node.firstChild.to >= pos ||
+                    line.from > 0 && !/[^\s>]/.test(doc.lineAt(line.from - 1).text)) {
+                    let next = context.length > 1 ? context[context.length - 2] : null;
+                    let delTo, insert = "";
+                    if (next && next.item) { // Re-add marker for the list at the next level
+                        delTo = line.from + next.from;
+                        insert = next.marker(doc, 1);
+                    }
+                    else {
+                        delTo = line.from + (next ? next.to : 0);
+                    }
+                    let changes = [{ from: delTo, to: pos, insert }];
+                    if (inner.node.name == "OrderedList")
+                        renumberList(inner.item, doc, changes, -2);
+                    if (next && next.node.name == "OrderedList")
+                        renumberList(next.item, doc, changes);
+                    return { range: EditorSelection.cursor(delTo + insert.length), changes };
+                }
+                else { // Move this line down
+                    let insert = "";
+                    for (let i = 0, e = context.length - 2; i <= e; i++)
+                        insert += context[i].blank(i < e);
+                    insert += state.lineBreak;
+                    return { range: EditorSelection.cursor(pos + insert.length), changes: { from: line.from, insert } };
+                }
+            }
+            if (inner.node.name == "Blockquote" && emptyLine && line.from) {
+                let prevLine = doc.lineAt(line.from - 1), quoted = />\s*$/.exec(prevLine.text);
+                // Two aligned empty quoted lines in a row
+                if (quoted && quoted.index == inner.from) {
+                    let changes = state.changes([{ from: prevLine.from + quoted.index, to: prevLine.to },
+                        { from: line.from + inner.from, to: line.to }]);
+                    return { range: range.map(changes), changes };
+                }
+            }
+            let changes = [];
+            if (inner.node.name == "OrderedList")
+                renumberList(inner.item, doc, changes);
+            let insert = state.lineBreak;
+            let continued = inner.item && inner.item.from < line.from;
+            // If not dedented
+            if (!continued || /^[\s\d.)\-+*>]*/.exec(line.text)[0].length >= inner.to) {
+                for (let i = 0, e = context.length - 1; i <= e; i++)
+                    insert += i == e && !continued ? context[i].marker(doc, 1) : context[i].blank();
+            }
+            let from = pos;
+            while (from > line.from && /\s/.test(line.text.charAt(from - line.from - 1)))
+                from--;
+            changes.push({ from, to: pos, insert });
+            return { range: EditorSelection.cursor(from + insert.length), changes };
+        });
+        if (dont)
+            return false;
+        dispatch(state.update(changes, { scrollIntoView: true, userEvent: "input" }));
+        return true;
+    };
+    function isMark(node) {
+        return node.name == "QuoteMark" || node.name == "ListMark";
+    }
+    function contextNodeForDelete(tree, pos) {
+        let node = tree.resolveInner(pos, -1), scan = pos;
+        if (isMark(node)) {
+            scan = node.from;
+            node = node.parent;
+        }
+        for (let prev; prev = node.childBefore(scan);) {
+            if (isMark(prev)) {
+                scan = prev.from;
+            }
+            else if (prev.name == "OrderedList" || prev.name == "BulletList") {
+                node = prev.lastChild;
+                scan = node.to;
+            }
+            else {
+                break;
+            }
+        }
+        return node;
+    }
+    /**
+    This command will, when invoked in a Markdown context with the
+    cursor directly after list or blockquote markup, delete one level
+    of markup. When the markup is for a list, it will be replaced by
+    spaces on the first invocation (a further invocation will delete
+    the spaces), to make it easy to continue a list.
+
+    When not after Markdown block markup, this command will return
+    false, so it is intended to be bound alongside other deletion
+    commands, with a higher precedence than the more generic commands.
+    */
+    const deleteMarkupBackward = ({ state, dispatch }) => {
+        let tree = syntaxTree(state);
+        let dont = null, changes = state.changeByRange(range => {
+            let pos = range.from, { doc } = state;
+            if (range.empty && markdownLanguage.isActiveAt(state, range.from)) {
+                let line = doc.lineAt(pos);
+                let context = getContext(contextNodeForDelete(tree, pos), line.text, doc);
+                if (context.length) {
+                    let inner = context[context.length - 1];
+                    let spaceEnd = inner.to - inner.spaceAfter.length + (inner.spaceAfter ? 1 : 0);
+                    // Delete extra trailing space after markup
+                    if (pos - line.from > spaceEnd && !/\S/.test(line.text.slice(spaceEnd, pos - line.from)))
+                        return { range: EditorSelection.cursor(line.from + spaceEnd),
+                            changes: { from: line.from + spaceEnd, to: pos } };
+                    if (pos - line.from == spaceEnd) {
+                        let start = line.from + inner.from;
+                        // Replace a list item marker with blank space
+                        if (inner.item && inner.node.from < inner.item.from && /\S/.test(line.text.slice(inner.from, inner.to)))
+                            return { range, changes: { from: start, to: line.from + inner.to, insert: inner.blank() } };
+                        // Delete one level of indentation
+                        if (start < pos)
+                            return { range: EditorSelection.cursor(start), changes: { from: start, to: pos } };
+                    }
+                }
+            }
+            return dont = { range };
+        });
+        if (dont)
+            return false;
+        dispatch(state.update(changes, { scrollIntoView: true, userEvent: "delete" }));
+        return true;
+    };
+
+    /**
+    A small keymap with Markdown-specific bindings. Binds Enter to
+    [`insertNewlineContinueMarkup`](https://codemirror.net/6/docs/ref/#lang-markdown.insertNewlineContinueMarkup)
+    and Backspace to
+    [`deleteMarkupBackward`](https://codemirror.net/6/docs/ref/#lang-markdown.deleteMarkupBackward).
+    */
+    const markdownKeymap = [
+        { key: "Enter", run: insertNewlineContinueMarkup },
+        { key: "Backspace", run: deleteMarkupBackward }
+    ];
+    const htmlNoMatch = /*@__PURE__*/html({ matchClosingTags: false });
+    /**
+    Markdown language support.
+    */
+    function markdown(config = {}) {
+        let { codeLanguages, defaultCodeLanguage, addKeymap = true, base: { parser } = commonmarkLanguage } = config;
+        if (!(parser instanceof MarkdownParser))
+            throw new RangeError("Base parser provided to `markdown` should be a Markdown parser");
+        let extensions = config.extensions ? [config.extensions] : [];
+        let support = [htmlNoMatch.support], defaultCode;
+        if (defaultCodeLanguage instanceof LanguageSupport) {
+            support.push(defaultCodeLanguage.support);
+            defaultCode = defaultCodeLanguage.language;
+        }
+        else if (defaultCodeLanguage) {
+            defaultCode = defaultCodeLanguage;
+        }
+        let codeParser = codeLanguages || defaultCode ? getCodeParser(codeLanguages || [], defaultCode) : undefined;
+        extensions.push(parseCode({ codeParser, htmlParser: htmlNoMatch.language.parser }));
+        if (addKeymap)
+            support.push(Prec.high(keymap.of(markdownKeymap)));
+        return new LanguageSupport(mkLang(parser.configure(extensions)), support);
+    }
+
+    // This file was generated by lezer-generator. You probably shouldn't edit it.
+    const StartTag = 1,
+      StartCloseTag = 2,
+      MissingCloseTag = 3,
+      mismatchedStartCloseTag = 4,
+      incompleteStartCloseTag = 5,
+      commentContent$1 = 36,
+      piContent$1 = 37,
+      cdataContent$1 = 38,
+      Element$1 = 10,
+      OpenTag = 12;
+
+    /* Hand-written tokenizer for XML tag matching. */
+
+    function nameChar(ch) {
+      return ch == 45 || ch == 46 || ch == 58 || ch >= 65 && ch <= 90 || ch == 95 || ch >= 97 && ch <= 122 || ch >= 161
+    }
+
+    function isSpace(ch) {
+      return ch == 9 || ch == 10 || ch == 13 || ch == 32
+    }
+
+    let cachedName = null, cachedInput = null, cachedPos = 0;
+    function tagNameAfter(input, offset) {
+      let pos = input.pos + offset;
+      if (cachedInput == input && cachedPos == pos) return cachedName
+      while (isSpace(input.peek(offset))) offset++;
+      let name = "";
+      for (;;) {
+        let next = input.peek(offset);
+        if (!nameChar(next)) break
+        name += String.fromCharCode(next);
+        offset++;
+      }
+      cachedInput = input; cachedPos = pos;
+      return cachedName = name || null
+    }
+
+    function ElementContext(name, parent) {
+      this.name = name;
+      this.parent = parent;
+      this.hash = parent ? parent.hash : 0;
+      for (let i = 0; i < name.length; i++) this.hash += (this.hash << 4) + name.charCodeAt(i) + (name.charCodeAt(i) << 8);
+    }
+
+    const elementContext = new ContextTracker({
+      start: null,
+      shift(context, term, stack, input) {
+        return term == StartTag ? new ElementContext(tagNameAfter(input, 1) || "", context) : context
+      },
+      reduce(context, term) {
+        return term == Element$1 && context ? context.parent : context
+      },
+      reuse(context, node, _stack, input) {
+        let type = node.type.id;
+        return type == StartTag || type == OpenTag
+          ? new ElementContext(tagNameAfter(input, 1) || "", context) : context
+      },
+      hash(context) { return context ? context.hash : 0 },
+      strict: false
+    });
+
+    const startTag = new ExternalTokenizer((input, stack) => {
+      if (input.next != 60 /* '<' */) return
+      input.advance();
+      if (input.next == 47 /* '/' */) {
+        input.advance();
+        let name = tagNameAfter(input, 0);
+        if (!name) return input.acceptToken(incompleteStartCloseTag)
+        if (stack.context && name == stack.context.name) return input.acceptToken(StartCloseTag)
+        for (let cx = stack.context; cx; cx = cx.parent) if (cx.name == name) return input.acceptToken(MissingCloseTag, -2)
+        input.acceptToken(mismatchedStartCloseTag);
+      } else if (input.next != 33 /* '!' */ && input.next != 63 /* '?' */) {
+        return input.acceptToken(StartTag)
+      }
+    }, {contextual: true});
+
+    function scanTo(type, end) {
+      return new ExternalTokenizer(input => {
+        for (let endPos = 0, len = 0;; len++) {
+          if (input.next < 0) {
+            if (len) input.acceptToken(type);
+            break
+          } 
+          if (input.next == end.charCodeAt(endPos)) {
+            endPos++;
+            if (endPos == end.length) {
+              if (len > end.length) input.acceptToken(type, 1 - end.length);
+              break
+            }
+          } else {
+            endPos = 0;
+          }
+          input.advance();
+        }
+      })
+    }
+
+    const commentContent = scanTo(commentContent$1, "-->");
+    const piContent = scanTo(piContent$1, "?>");
+    const cdataContent = scanTo(cdataContent$1, "]]>");
+
+    // This file was generated by lezer-generator. You probably shouldn't edit it.
+    const parser$1 = LRParser.deserialize({
+      version: 13,
+      states: "-OOQOaOOOcObO'#CcOkOdO'#CdOOOP'#Cv'#CvOsOaO'#DTO!XOaOOOOOQ'#Cw'#CwO!aObO,58}OOOP,58},58}OOOS'#Cx'#CxO!iOdO,59OOOOP,59O,59OOOOP-E6t-E6tO!qO`O'#ChO#kOqO'#CfOOOP'#Cf'#CfO#rOaO'#CyQ$TOPOOO$YOaOOOOOQ-E6u-E6uOOOP1G.i1G.iOOOS-E6v-E6vOOOP1G.j1G.jOOOO'#Cz'#CzO$hO`O,59SO$pO!bO,59SO%OOhO'#CqO%WO`O'#CrOOOP'#D]'#D]OOOP'#C}'#C}O%`OqO,59QO%gO`O'#CsOOOP,59Q,59QOOOP,59e,59eOOOP-E6w-E6wO$TOPOOOOOO-E6x-E6xO%oO!bO1G.nO%oO!bO1G.nO%}O`O'#CjO&VO!bO'#C{O&eO!bO1G.nOOOP1G.n1G.nOOOP1G.{1G.{OOOW'#DO'#DOO&pOhO,59]OOOP,59],59]O&xO`O,59^O'QO`O,59^OOOP-E6{-E6{OOOP1G.l1G.lO'YO`O,59_O'bO`O,59_O'jO!bO7+$YO'xO!bO7+$YOOOP7+$Y7+$YOOOP7+$g7+$gO(TO`O,59UO(]O`O,59UO(eO!bO,59gOOOO-E6y-E6yOOOW-E6|-E6|OOOP1G.w1G.wO(sO`O1G.xO(sO`O1G.xOOOP1G.x1G.xO({O`O1G.yO({O`O1G.yOOOP1G.y1G.yO)TO!bO<<GtOOOP<<Gt<<GtOOOP<<HR<<HRO(]O`O1G.pO(]O`O1G.pO)`O#tO'#CmOOOO1G.p1G.pO)nO`O7+$dOOOP7+$d7+$dO)vO`O7+$eOOOP7+$e7+$eOOOPAN=`AN=`OOOPAN=mAN=mO(]O`O7+$[OOOO7+$[7+$[OOOO'#C|'#C|O*OO#tO,59XOOOO,59X,59XOOOP<<HO<<HOOOOP<<HP<<HPOOOO<<Gv<<GvOOOO-E6z-E6zOOOO1G.s1G.s",
+      stateData: "*^~OyPOzRO|QOPwPXwP~OtUOxWO~OuXO{ZO~OyPOzRO|QOPwXXwXswX~OP]OXbO~OtUOxdO~OuXO{fO~O]iOzgO~OP]OQoOSkOTlOblOclOdlOyPO|QO!RjO~ORpO~P!yOyPOzRO|QOPwPswP~OP]O~OyPOzRO|QOPwP~O]uOzgO~OZzO_wOh{OzgO~Ov|O!Q!OO~O]!QOzgO~OR!SO~P!yO]!UOzgO~OZ!XO_wOh!YOzgO~O`![OzgO~OzgOZoX_oXhoX~OZ!XO_wOh!YO~Ov|O!Q!`O~O]!aOzgO~OZ!cOzgO~O]!dOzgO~OZ!fOzgO~OZ!hO_wOh!iOzgO~OZ!hO_wOh!iO~O`!jOzgO~OzgO}!lO~OzgOZoa_oahoa~OZ!oOzgO~OZ!qOzgO~OZ!rO_wOh!sO~Ob!vOc!vO}!xO!O!vO~OZ!yOzgO~OZ!zOzgO~Ob!vOc!vO}!}O!O!vO~O",
+      goto: "&S!QPPPPPPP!R!RP!]P!fP!mPP!vPPP!X!X#QP#W#_#g#m#s#z%S%c%i%oPPPP%uPPPPPPP&OWROS`bTl^nU`TasTl^nZ^T^ans_xiuvy!V!W!gQ!m![S!u!j!kR!{!tQp^R!SnZ_T^ansUSO`bR[SQVPRcVQYQReYSaTsRraQh]jthv!P!T!V!Z!]!b!e!k!n!p!tQviQ!PkQ!ToQ!VuQ!ZwQ!]xQ!b!QQ!e!UQ!k![Q!n!aQ!p!dR!t!jQyiS!WuvU!^y!W!gR!g!VQ!w!lR!|!wQn^R!RnQ}jR!_}QTOQq`RsbTm^n",
+      nodeNames: "⚠ StartTag StartCloseTag MissingCloseTag StartCloseTag StartCloseTag Document Comment ProcessingInst DoctypeDecl Element EndTag OpenTag TagName Attribute AttributeName Is AttributeValue EntityReference CharacterReference Text Cdata MismatchedCloseTag CloseTag SelfCloseEndTag SelfClosingTag",
+      maxTerm: 49,
+      context: elementContext,
+      nodeProps: [
+        [NodeProp.closedBy, 1,"SelfCloseEndTag EndTag",12,"CloseTag MissingCloseTag"],
+        [NodeProp.openedBy, 11,"StartTag StartCloseTag",23,"OpenTag",24,"StartTag"]
+      ],
+      skippedNodes: [0],
+      repeatNodeCount: 9,
+      tokenData: "Az~R!WOX$kXY%rYZ%rZ]$k]^%r^p$kpq%rqr$krs&tsv$kvw'Uw}$k}!O(q!O!P$k!P!Q*n!Q![$k![!]+z!]!^$k!^!_/s!_!`=i!`!a>U!a!b>q!b!c$k!c!}+z!}#P$k#P#Q?}#Q#R$k#R#S+z#S#T$k#T#o+z#o%W$k%W%o+z%o%p$k%p&a+z&a&b$k&b1p+z1p4U$k4U4d+z4d4e$k4e$IS+z$IS$I`$k$I`$Ib+z$Ib$Kh$k$Kh%#t+z%#t&/x$k&/x&Et+z&Et&FV$k&FV;'S+z;'S;:j/S;:j?&r$k?&r?Ah+z?Ah?BY$k?BY?Mn+z?Mn~$kY$rUdQ!OWOr$krs%Usv$kw!^$k!^!_%d!_~$kQ%ZRdQOv%Uw!^%U!_~%UW%iR!OWOr%dsv%dw~%d_%{]dQ!OWzTOX$kXY%rYZ%rZ]$k]^%r^p$kpq%rqr$krs%Usv$kw!^$k!^!_%d!_~$kZ&{R}XdQOv%Uw!^%U!_~%U~'XTOp'hqs'hst(Pt!]'h!^~'h~'kTOp'hqs'ht!]'h!]!^'z!^~'h~(POb~~(SROp(]q!](]!^~(]~(`SOp(]q!](]!]!^(l!^~(]~(qOc~Z(xWdQ!OWOr$krs%Usv$kw}$k}!O)b!O!^$k!^!_%d!_~$kZ)iWdQ!OWOr$krs%Usv$kw!^$k!^!_%d!_!`$k!`!a*R!a~$kZ*[UxPdQ!OWOr$krs%Usv$kw!^$k!^!_%d!_~$k^*uWdQ!OWOr$krs%Usv$kw!^$k!^!_%d!_!`$k!`!a+_!a~$k^+hUhSdQ!OWOr$krs%Usv$kw!^$k!^!_%d!_~$k_,V}_S]PdQ!OWOr$krs%Usv$kw}$k}!O+z!O!P+z!P!Q$k!Q![+z![!]+z!]!^$k!^!_%d!_!c$k!c!}+z!}#R$k#R#S+z#S#T$k#T#o+z#o$}$k$}%O+z%O%W$k%W%o+z%o%p$k%p&a+z&a&b$k&b1p+z1p4U+z4U4d+z4d4e$k4e$IS+z$IS$I`$k$I`$Ib+z$Ib$Je$k$Je$Jg+z$Jg$Kh$k$Kh%#t+z%#t&/x$k&/x&Et+z&Et&FV$k&FV;'S+z;'S;:j/S;:j?&r$k?&r?Ah+z?Ah?BY$k?BY?Mn+z?Mn~$k_/ZWdQ!OWOr$krs%Usv$kw!^$k!^!_%d!_;=`$k;=`<%l+z<%l~$kZ/xU!OWOq%dqr0[sv%dw!a%d!a!b=X!b~%dZ0aZ!OWOr%dsv%dw}%d}!O1S!O!f%d!f!g1x!g!}%d!}#O5s#O#W%d#W#X:k#X~%dZ1XT!OWOr%dsv%dw}%d}!O1h!O~%dZ1oRyR!OWOr%dsv%dw~%dX1}T!OWOr%dsv%dw!q%d!q!r2^!r~%dX2cT!OWOr%dsv%dw!e%d!e!f2r!f~%dX2wT!OWOr%dsv%dw!v%d!v!w3W!w~%dX3]T!OWOr%dsv%dw!{%d!{!|3l!|~%dX3qT!OWOr%dsv%dw!r%d!r!s4Q!s~%dX4VT!OWOr%dsv%dw!g%d!g!h4f!h~%dX4kV!OWOr4frs5Qsv4fvw5Qw!`4f!`!a5c!a~4fP5TRO!`5Q!`!a5^!a~5QP5cOXPX5jRXP!OWOr%dsv%dw~%dY5xV!OWOr%dsv%dw!e%d!e!f6_!f#V%d#V#W8w#W~%dY6dT!OWOr%dsv%dw!f%d!f!g6s!g~%dY6xT!OWOr%dsv%dw!c%d!c!d7X!d~%dY7^T!OWOr%dsv%dw!v%d!v!w7m!w~%dY7rT!OWOr%dsv%dw!c%d!c!d8R!d~%dY8WT!OWOr%dsv%dw!}%d!}#O8g#O~%dY8nR!OW!RQOr%dsv%dw~%dY8|T!OWOr%dsv%dw#W%d#W#X9]#X~%dY9bT!OWOr%dsv%dw#T%d#T#U9q#U~%dY9vT!OWOr%dsv%dw#h%d#h#i:V#i~%dY:[T!OWOr%dsv%dw#T%d#T#U8R#U~%dX:pT!OWOr%dsv%dw#c%d#c#d;P#d~%dX;UT!OWOr%dsv%dw#V%d#V#W;e#W~%dX;jT!OWOr%dsv%dw#h%d#h#i;y#i~%dX<OT!OWOr%dsv%dw#m%d#m#n<_#n~%dX<dT!OWOr%dsv%dw#d%d#d#e<s#e~%dX<xT!OWOr%dsv%dw#X%d#X#Y4f#Y~%dZ=`R|R!OWOr%dsv%dw~%dZ=rU`PdQ!OWOr$krs%Usv$kw!^$k!^!_%d!_~$k_>_UZTdQ!OWOr$krs%Usv$kw!^$k!^!_%d!_~$kZ>xWdQ!OWOr$krs%Usv$kw!^$k!^!_%d!_!`$k!`!a?b!a~$kZ?kU{PdQ!OWOr$krs%Usv$kw!^$k!^!_%d!_~$kZ@UWdQ!OWOr$krs%Usv$kw!^$k!^!_%d!_#P$k#P#Q@n#Q~$kZ@uWdQ!OWOr$krs%Usv$kw!^$k!^!_%d!_!`$k!`!aA_!a~$kZAhU!QPdQ!OWOr$krs%Usv$kw!^$k!^!_%d!_~$k",
+      tokenizers: [startTag, commentContent, piContent, cdataContent, 0, 1, 2, 3],
+      topRules: {"Document":[0,6]},
+      tokenPrec: 0
+    });
+
+    function tagName(doc, tag) {
+        let name = tag && tag.getChild("TagName");
+        return name ? doc.sliceString(name.from, name.to) : "";
+    }
+    function elementName(doc, tree) {
+        let tag = tree && tree.firstChild;
+        return !tag || tag.name != "OpenTag" ? "" : tagName(doc, tag);
+    }
+    function attrName(doc, tag, pos) {
+        let attr = tag && tag.getChildren("Attribute").find(a => a.from <= pos && a.to >= pos);
+        let name = attr && attr.getChild("AttributeName");
+        return name ? doc.sliceString(name.from, name.to) : "";
+    }
+    function findParentElement(tree) {
+        for (let cur = tree && tree.parent; cur; cur = cur.parent)
+            if (cur.name == "Element")
+                return cur;
+        return null;
+    }
+    function findLocation(state, pos) {
+        var _a;
+        let at = syntaxTree(state).resolveInner(pos, -1), inTag = null;
+        for (let cur = at; !inTag && cur.parent; cur = cur.parent)
+            if (cur.name == "OpenTag" || cur.name == "CloseTag" || cur.name == "SelfClosingTag" || cur.name == "MismatchedCloseTag")
+                inTag = cur;
+        if (inTag && (inTag.to > pos || inTag.lastChild.type.isError)) {
+            let elt = inTag.parent;
+            if (at.name == "TagName")
+                return inTag.name == "CloseTag" || inTag.name == "MismatchedCloseTag"
+                    ? { type: "closeTag", from: at.from, context: elt }
+                    : { type: "openTag", from: at.from, context: findParentElement(elt) };
+            if (at.name == "AttributeName")
+                return { type: "attrName", from: at.from, context: inTag };
+            if (at.name == "AttributeValue")
+                return { type: "attrValue", from: at.from, context: inTag };
+            let before = at == inTag || at.name == "Attribute" ? at.childBefore(pos) : at;
+            if ((before === null || before === void 0 ? void 0 : before.name) == "StartTag")
+                return { type: "openTag", from: pos, context: findParentElement(elt) };
+            if ((before === null || before === void 0 ? void 0 : before.name) == "StartCloseTag" && before.to <= pos)
+                return { type: "closeTag", from: pos, context: elt };
+            if ((before === null || before === void 0 ? void 0 : before.name) == "Is")
+                return { type: "attrValue", from: pos, context: inTag };
+            if (before)
+                return { type: "attrName", from: pos, context: inTag };
+            return null;
+        }
+        else if (at.name == "StartCloseTag") {
+            return { type: "closeTag", from: pos, context: at.parent };
+        }
+        while (at.parent && at.to == pos && !((_a = at.lastChild) === null || _a === void 0 ? void 0 : _a.type.isError))
+            at = at.parent;
+        if (at.name == "Element" || at.name == "Text" || at.name == "Document")
+            return { type: "tag", from: pos, context: at.name == "Element" ? at : findParentElement(at) };
+        return null;
+    }
+    class Element {
+        constructor(spec, attrs, attrValues) {
+            this.attrs = attrs;
+            this.attrValues = attrValues;
+            this.children = [];
+            this.name = spec.name;
+            this.completion = Object.assign(Object.assign({ type: "type" }, spec.completion || {}), { label: this.name });
+            this.openCompletion = Object.assign(Object.assign({}, this.completion), { label: "<" + this.name });
+            this.closeCompletion = Object.assign(Object.assign({}, this.completion), { label: "</" + this.name + ">", boost: 2 });
+            this.closeNameCompletion = Object.assign(Object.assign({}, this.completion), { label: this.name + ">" });
+            this.text = spec.textContent ? spec.textContent.map(s => ({ label: s, type: "text" })) : [];
+        }
+    }
+    const Identifier = /^[:\-\.\w\u00b7-\uffff]*$/;
+    function attrCompletion(spec) {
+        return Object.assign(Object.assign({ type: "property" }, spec.completion || {}), { label: spec.name });
+    }
+    function valueCompletion(spec) {
+        return typeof spec == "string" ? { label: `"${spec}"`, type: "constant" }
+            : /^"/.test(spec.label) ? spec
+                : Object.assign(Object.assign({}, spec), { label: `"${spec.label}"` });
+    }
+    function completeFromSchema(eltSpecs, attrSpecs) {
+        let allAttrs = [], globalAttrs = [];
+        let attrValues = Object.create(null);
+        for (let s of attrSpecs) {
+            let completion = attrCompletion(s);
+            allAttrs.push(completion);
+            if (s.global)
+                globalAttrs.push(completion);
+            if (s.values)
+                attrValues[s.name] = s.values.map(valueCompletion);
+        }
+        let allElements = [], topElements = [];
+        let byName = Object.create(null);
+        for (let s of eltSpecs) {
+            let attrs = globalAttrs, attrVals = attrValues;
+            if (s.attributes)
+                attrs = attrs.concat(s.attributes.map(s => {
+                    if (typeof s == "string")
+                        return allAttrs.find(a => a.label == s) || { label: s, type: "property" };
+                    if (s.values) {
+                        if (attrVals == attrValues)
+                            attrVals = Object.create(attrVals);
+                        attrVals[s.name] = s.values.map(valueCompletion);
+                    }
+                    return attrCompletion(s);
+                }));
+            let elt = new Element(s, attrs, attrVals);
+            byName[elt.name] = elt;
+            allElements.push(elt);
+            if (s.top)
+                topElements.push(elt);
+        }
+        if (!topElements.length)
+            topElements = allElements;
+        for (let i = 0; i < allElements.length; i++) {
+            let s = eltSpecs[i], elt = allElements[i];
+            if (s.children) {
+                for (let ch of s.children)
+                    if (byName[ch])
+                        elt.children.push(byName[ch]);
+            }
+            else {
+                elt.children = allElements;
+            }
+        }
+        return cx => {
+            var _a;
+            let { doc } = cx.state, loc = findLocation(cx.state, cx.pos);
+            if (!loc || (loc.type == "tag" && !cx.explicit))
+                return null;
+            let { type, from, context } = loc;
+            if (type == "openTag") {
+                let children = topElements;
+                let parentName = elementName(doc, context);
+                if (parentName) {
+                    let parent = byName[parentName];
+                    children = (parent === null || parent === void 0 ? void 0 : parent.children) || allElements;
+                }
+                return {
+                    from,
+                    options: children.map(ch => ch.completion),
+                    span: Identifier
+                };
+            }
+            else if (type == "closeTag") {
+                let parentName = elementName(doc, context);
+                return parentName ? {
+                    from,
+                    to: cx.pos + (doc.sliceString(cx.pos, cx.pos + 1) == ">" ? 1 : 0),
+                    options: [((_a = byName[parentName]) === null || _a === void 0 ? void 0 : _a.closeNameCompletion) || { label: parentName + ">", type: "type" }],
+                    span: Identifier
+                } : null;
+            }
+            else if (type == "attrName") {
+                let parent = byName[tagName(doc, context)];
+                return {
+                    from,
+                    options: (parent === null || parent === void 0 ? void 0 : parent.attrs) || globalAttrs,
+                    span: Identifier
+                };
+            }
+            else if (type == "attrValue") {
+                let attr = attrName(doc, context, from);
+                if (!attr)
+                    return null;
+                let parent = byName[tagName(doc, context)];
+                let values = ((parent === null || parent === void 0 ? void 0 : parent.attrValues) || attrValues)[attr];
+                if (!values || !values.length)
+                    return null;
+                return {
+                    from,
+                    to: cx.pos + (doc.sliceString(cx.pos, cx.pos + 1) == '"' ? 1 : 0),
+                    options: values,
+                    span: /^"[^"]*"?$/
+                };
+            }
+            else if (type == "tag") {
+                let parentName = elementName(doc, context), parent = byName[parentName];
+                let closing = [], last = context && context.lastChild;
+                if (parentName && (!last || last.name != "CloseTag" || tagName(doc, last) != parentName))
+                    closing.push(parent ? parent.closeCompletion : { label: "</" + parentName + ">", type: "type", boost: 2 });
+                let options = closing.concat(((parent === null || parent === void 0 ? void 0 : parent.children) || (context ? allElements : topElements)).map(e => e.openCompletion));
+                if (context && (parent === null || parent === void 0 ? void 0 : parent.text.length)) {
+                    let openTag = context.firstChild;
+                    if (openTag.to > cx.pos - 20 && !/\S/.test(cx.state.sliceDoc(openTag.to, cx.pos)))
+                        options = options.concat(parent.text);
+                }
+                return {
+                    from,
+                    options,
+                    span: /^<\/?[:\-\.\w\u00b7-\uffff]*$/
+                };
+            }
+            else {
+                return null;
+            }
+        };
+    }
+
+    /**
+    A language provider based on the [Lezer XML
+    parser](https://github.com/lezer-parser/xml), extended with
+    highlighting and indentation information.
+    */
+    const xmlLanguage = /*@__PURE__*/LRLanguage.define({
+        parser: /*@__PURE__*/parser$1.configure({
+            props: [
+                /*@__PURE__*/indentNodeProp.add({
+                    Element(context) {
+                        let closed = /^\s*<\//.test(context.textAfter);
+                        return context.lineIndent(context.node.from) + (closed ? 0 : context.unit);
+                    },
+                    "OpenTag CloseTag SelfClosingTag"(context) {
+                        return context.column(context.node.from) + context.unit;
+                    }
+                }),
+                /*@__PURE__*/foldNodeProp.add({
+                    Element(subtree) {
+                        let first = subtree.firstChild, last = subtree.lastChild;
+                        if (!first || first.name != "OpenTag")
+                            return null;
+                        return { from: first.to, to: last.name == "CloseTag" ? last.from : subtree.to };
+                    }
+                }),
+                /*@__PURE__*/styleTags({
+                    Text: tags$1.content,
+                    "StartTag StartCloseTag EndTag SelfCloseEndTag": tags$1.angleBracket,
+                    TagName: tags$1.tagName,
+                    "MismatchedCloseTag/Tagname": [tags$1.tagName, tags$1.invalid],
+                    AttributeName: tags$1.attributeName,
+                    AttributeValue: tags$1.attributeValue,
+                    Is: tags$1.definitionOperator,
+                    "EntityReference CharacterReference": tags$1.character,
+                    Comment: tags$1.blockComment,
+                    ProcessingInst: tags$1.processingInstruction,
+                    DoctypeDecl: tags$1.documentMeta,
+                    Cdata: /*@__PURE__*/tags$1.special(tags$1.string)
+                })
+            ]
+        }),
+        languageData: {
+            commentTokens: { block: { open: "<!--", close: "-->" } },
+            indentOnInput: /^\s*<\/$/
+        }
+    });
+    /**
+    XML language support. Includes schema-based autocompletion when
+    configured.
+    */
+    function xml(conf = {}) {
+        return new LanguageSupport(xmlLanguage, xmlLanguage.data.of({
+            autocomplete: completeFromSchema(conf.elements || [], conf.attributes || [])
+        }));
+    }
+
     // This file was generated by lezer-generator. You probably shouldn't edit it.
     const spec_identifier = {__proto__:null,return:362};
     const parser = /*@__PURE__*/LRParser.deserialize({
@@ -23296,98 +27613,98 @@
         parser: /*@__PURE__*/parser.configure({
             props: [
                 /*@__PURE__*/styleTags({
-                    NilLiteral: tags.null,
-                    BooleanLiteral: tags.bool,
-                    NumericLiteral: tags.number,
-                    StaticStringLiteral: tags.string,
-                    MultilineStaticStringLiteral: /*@__PURE__*/tags.special(tags.string),
-                    InterpolatedStringLiteralStart: /*@__PURE__*/tags.special(tags.string),
-                    InterpolatedStringLiteralMiddle: /*@__PURE__*/tags.special(tags.string),
-                    InterpolatedStringLiteralEnd: /*@__PURE__*/tags.special(tags.string),
-                    MultilineInterpolatedStringLiteral: /*@__PURE__*/tags.special(tags.string),
-                    MultilineInterpolatedStringLiteralStart: /*@__PURE__*/tags.special(tags.string),
-                    MultilineInterpolatedStringLiteralMiddle: /*@__PURE__*/tags.special(tags.string),
-                    MultilineInterpolatedStringLiteralEnd: /*@__PURE__*/tags.special(tags.string),
-                    DocComment: tags.docComment,
-                    Comment: tags.lineComment,
-                    MultilineComment: tags.blockComment,
-                    ReturnType: tags.name,
-                    VariableName: tags.variableName,
-                    VariableDeclaredName: /*@__PURE__*/tags.definition(tags.variableName),
-                    ArgumentName: tags.name,
-                    ArgumentLabel: tags.name,
-                    CallExpression: /*@__PURE__*/tags.function(tags.propertyName),
-                    MemberExpression: /*@__PURE__*/tags.function(tags.propertyName),
-                    PropertyName: /*@__PURE__*/tags.function(tags.propertyName),
-                    Super: tags.self,
-                    Self: tags.self,
-                    Class: tags.definitionKeyword,
-                    Extension: tags.definitionKeyword,
-                    Struct: tags.definitionKeyword,
-                    Enum: tags.definitionKeyword,
-                    SelfType: tags.operatorKeyword,
-                    AnyType: tags.operatorKeyword,
-                    VoidType: tags.operatorKeyword,
-                    ProtocolName: tags.typeName,
-                    TypeName: tags.typeName,
-                    ReturnType: tags.typeName,
-                    ReturnExpression: tags.moduleKeyword,
-                    ModuleName: /*@__PURE__*/tags.definition(tags.variableName),
-                    AttributeName: tags.annotation,
-                    Switch: tags.controlKeyword,
-                    Case: tags.controlKeyword,
-                    Default: tags.controlKeyword,
-                    Break: tags.controlKeyword,
-                    Continue: tags.controlKeyword,
-                    Repeat: tags.controlKeyword,
-                    While: tags.controlKeyword,
-                    For: tags.controlKeyword,
-                    Do: tags.controlKeyword,
-                    In: tags.controlKeyword,
-                    Public: tags.moduleKeyword,
-                    Open: tags.moduleKeyword,
-                    Internal: tags.moduleKeyword,
-                    Private: tags.moduleKeyword,
-                    FilePrivate: tags.moduleKeyword,
-                    Guard: tags.moduleKeyword,
-                    If: tags.moduleKeyword,
-                    Else: tags.moduleKeyword,
-                    Func: tags.moduleKeyword,
-                    Import: tags.moduleKeyword,
-                    Var: tags.moduleKeyword,
-                    Let: tags.moduleKeyword,
-                    "( )": tags.paren,
-                    "[ ]": tags.squareBracket,
-                    "{ }": tags.brace,
-                    ".": tags.derefOperator,
-                    ", ;": tags.separator,
-                    ClosedRange: tags.operator,
-                    HalfOpenRange: tags.operator,
-                    divisionOperator: tags.arithmeticOperator,
-                    addOperator: tags.arithmeticOperator,
-                    subtractOperator: tags.arithmeticOperator,
-                    multiplyOperator: tags.arithmeticOperator,
-                    modulusOperator: tags.arithmeticOperator,
-                    invertOperator: tags.arithmeticOperator,
-                    divisionAssignmentOperator: tags.updateOperator,
-                    addAssignmentOperator: tags.updateOperator,
-                    subtractAssignmentOperator: tags.updateOperator,
-                    multiplyAssignmentOperator: tags.updateOperator,
-                    modulusAssignmentOperator: tags.updateOperator,
-                    greatherThanOperator: tags.compareOperator,
-                    greatherThanEqualToOperator: tags.compareOperator,
-                    lessThanOperator: tags.compareOperator,
-                    lessThanEqualToOperator: tags.compareOperator,
-                    notEqualToOperator: tags.compareOperator,
-                    equalToOperator: tags.compareOperator,
-                    notEquivalentToOperator: tags.compareOperator,
-                    equivalentToOperator: tags.compareOperator,
-                    bitwiseOrOperator: tags.bitwiseOperator,
-                    bitwiseXorOperator: tags.bitwiseOperator,
-                    bitwiseAndOperator: tags.bitwiseOperator,
-                    logicAndOperator: tags.logicOperator,
-                    logicOrOperator: tags.logicOperator,
-                    assignmentOperator: tags.updateOperator
+                    NilLiteral: tags$1.null,
+                    BooleanLiteral: tags$1.bool,
+                    NumericLiteral: tags$1.number,
+                    StaticStringLiteral: tags$1.string,
+                    MultilineStaticStringLiteral: /*@__PURE__*/tags$1.special(tags$1.string),
+                    InterpolatedStringLiteralStart: /*@__PURE__*/tags$1.special(tags$1.string),
+                    InterpolatedStringLiteralMiddle: /*@__PURE__*/tags$1.special(tags$1.string),
+                    InterpolatedStringLiteralEnd: /*@__PURE__*/tags$1.special(tags$1.string),
+                    MultilineInterpolatedStringLiteral: /*@__PURE__*/tags$1.special(tags$1.string),
+                    MultilineInterpolatedStringLiteralStart: /*@__PURE__*/tags$1.special(tags$1.string),
+                    MultilineInterpolatedStringLiteralMiddle: /*@__PURE__*/tags$1.special(tags$1.string),
+                    MultilineInterpolatedStringLiteralEnd: /*@__PURE__*/tags$1.special(tags$1.string),
+                    DocComment: tags$1.docComment,
+                    Comment: tags$1.lineComment,
+                    MultilineComment: tags$1.blockComment,
+                    ReturnType: tags$1.name,
+                    VariableName: tags$1.variableName,
+                    VariableDeclaredName: /*@__PURE__*/tags$1.definition(tags$1.variableName),
+                    ArgumentName: tags$1.name,
+                    ArgumentLabel: tags$1.name,
+                    CallExpression: /*@__PURE__*/tags$1.function(tags$1.propertyName),
+                    MemberExpression: /*@__PURE__*/tags$1.function(tags$1.propertyName),
+                    PropertyName: /*@__PURE__*/tags$1.function(tags$1.propertyName),
+                    Super: tags$1.self,
+                    Self: tags$1.self,
+                    Class: tags$1.definitionKeyword,
+                    Extension: tags$1.definitionKeyword,
+                    Struct: tags$1.definitionKeyword,
+                    Enum: tags$1.definitionKeyword,
+                    SelfType: tags$1.operatorKeyword,
+                    AnyType: tags$1.operatorKeyword,
+                    VoidType: tags$1.operatorKeyword,
+                    ProtocolName: tags$1.typeName,
+                    TypeName: tags$1.typeName,
+                    ReturnType: tags$1.typeName,
+                    ReturnExpression: tags$1.moduleKeyword,
+                    ModuleName: /*@__PURE__*/tags$1.definition(tags$1.variableName),
+                    AttributeName: tags$1.annotation,
+                    Switch: tags$1.controlKeyword,
+                    Case: tags$1.controlKeyword,
+                    Default: tags$1.controlKeyword,
+                    Break: tags$1.controlKeyword,
+                    Continue: tags$1.controlKeyword,
+                    Repeat: tags$1.controlKeyword,
+                    While: tags$1.controlKeyword,
+                    For: tags$1.controlKeyword,
+                    Do: tags$1.controlKeyword,
+                    In: tags$1.controlKeyword,
+                    Public: tags$1.moduleKeyword,
+                    Open: tags$1.moduleKeyword,
+                    Internal: tags$1.moduleKeyword,
+                    Private: tags$1.moduleKeyword,
+                    FilePrivate: tags$1.moduleKeyword,
+                    Guard: tags$1.moduleKeyword,
+                    If: tags$1.moduleKeyword,
+                    Else: tags$1.moduleKeyword,
+                    Func: tags$1.moduleKeyword,
+                    Import: tags$1.moduleKeyword,
+                    Var: tags$1.moduleKeyword,
+                    Let: tags$1.moduleKeyword,
+                    "( )": tags$1.paren,
+                    "[ ]": tags$1.squareBracket,
+                    "{ }": tags$1.brace,
+                    ".": tags$1.derefOperator,
+                    ", ;": tags$1.separator,
+                    ClosedRange: tags$1.operator,
+                    HalfOpenRange: tags$1.operator,
+                    divisionOperator: tags$1.arithmeticOperator,
+                    addOperator: tags$1.arithmeticOperator,
+                    subtractOperator: tags$1.arithmeticOperator,
+                    multiplyOperator: tags$1.arithmeticOperator,
+                    modulusOperator: tags$1.arithmeticOperator,
+                    invertOperator: tags$1.arithmeticOperator,
+                    divisionAssignmentOperator: tags$1.updateOperator,
+                    addAssignmentOperator: tags$1.updateOperator,
+                    subtractAssignmentOperator: tags$1.updateOperator,
+                    multiplyAssignmentOperator: tags$1.updateOperator,
+                    modulusAssignmentOperator: tags$1.updateOperator,
+                    greatherThanOperator: tags$1.compareOperator,
+                    greatherThanEqualToOperator: tags$1.compareOperator,
+                    lessThanOperator: tags$1.compareOperator,
+                    lessThanEqualToOperator: tags$1.compareOperator,
+                    notEqualToOperator: tags$1.compareOperator,
+                    equalToOperator: tags$1.compareOperator,
+                    notEquivalentToOperator: tags$1.compareOperator,
+                    equivalentToOperator: tags$1.compareOperator,
+                    bitwiseOrOperator: tags$1.bitwiseOperator,
+                    bitwiseXorOperator: tags$1.bitwiseOperator,
+                    bitwiseAndOperator: tags$1.bitwiseOperator,
+                    logicAndOperator: tags$1.logicOperator,
+                    logicOrOperator: tags$1.logicOperator,
+                    assignmentOperator: tags$1.updateOperator
                 }),
                 /*@__PURE__*/indentNodeProp.add({
                     IfStatement: /*@__PURE__*/continuedIndent({ except: /^\s*({|else\b)/ }),
@@ -23511,25 +27828,25 @@
     });
 
     const lightHighlightStyle = HighlightStyle.define([
-      {tag: tags.link, textDecoration: "underline"},
-      {tag: tags.heading, textDecoration: "underline", fontWeight: "bold"},
-      {tag: tags.emphasis, fontStyle: "italic"},
-      {tag: tags.strong, fontWeight: "bold"},
-      {tag: tags.strikethrough, textDecoration: "line-through"},
-      {tag: tags.keyword, color: "#708"},
-      {tag: [tags.atom, tags.bool, tags.url, tags.contentSeparator, tags.labelName], color: "#219"},
-      {tag: [tags.literal, tags.inserted], color: "#164"},
-      {tag: [tags.string, tags.deleted], color: "#a11"},
-      {tag: [tags.regexp, tags.escape, tags.special(tags.string)], color: "#e40"},
-      {tag: tags.definition(tags.variableName), color: "#619bd3"},
-      {tag: tags.local(tags.variableName), color: "#30a"},
-      {tag: [tags.typeName, tags.namespace], color: "#085"},
-      {tag: tags.className, color: "#167"},
-      {tag: [tags.special(tags.variableName), tags.macroName], color: "#256"},
-      {tag: tags.definition(tags.propertyName), color: "#00c"},
-      {tag: tags.comment, color: "#737f8c"},
-      {tag: tags.meta, color: "#999999"},
-      {tag: tags.invalid, color: "#f00"}
+      {tag: tags$1.link, textDecoration: "underline"},
+      {tag: tags$1.heading, textDecoration: "underline", fontWeight: "bold"},
+      {tag: tags$1.emphasis, fontStyle: "italic"},
+      {tag: tags$1.strong, fontWeight: "bold"},
+      {tag: tags$1.strikethrough, textDecoration: "line-through"},
+      {tag: tags$1.keyword, color: "#708"},
+      {tag: [tags$1.atom, tags$1.bool, tags$1.url, tags$1.contentSeparator, tags$1.labelName], color: "#219"},
+      {tag: [tags$1.literal, tags$1.inserted], color: "#164"},
+      {tag: [tags$1.string, tags$1.deleted], color: "#a11"},
+      {tag: [tags$1.regexp, tags$1.escape, tags$1.special(tags$1.string)], color: "#e40"},
+      {tag: tags$1.definition(tags$1.variableName), color: "#619bd3"},
+      {tag: tags$1.local(tags$1.variableName), color: "#30a"},
+      {tag: [tags$1.typeName, tags$1.namespace], color: "#085"},
+      {tag: tags$1.className, color: "#167"},
+      {tag: [tags$1.special(tags$1.variableName), tags$1.macroName], color: "#256"},
+      {tag: tags$1.definition(tags$1.propertyName), color: "#00c"},
+      {tag: tags$1.comment, color: "#737f8c"},
+      {tag: tags$1.meta, color: "#999999"},
+      {tag: tags$1.invalid, color: "#f00"}
     ]);
 
     const light = [lightTheme, lightHighlightStyle];
@@ -23626,25 +27943,25 @@
     });
 
     const darkHighlightStyle = HighlightStyle.define([
-      {tag: tags.link, textDecoration: "underline"},
-      {tag: tags.heading, textDecoration: "underline", fontWeight: "bold"},
-      {tag: tags.emphasis, fontStyle: "italic"},
-      {tag: tags.strong, fontWeight: "bold"},
-      {tag: tags.strikethrough, textDecoration: "line-through"},
-      {tag: tags.keyword, color: "#b800d2"},
-      {tag: [tags.atom, tags.bool, tags.url, tags.contentSeparator, tags.labelName], color: "#6859cf"},
-      {tag: [tags.literal, tags.inserted], color: "#559e81"},
-      {tag: [tags.string, tags.deleted], color: "#ca6666"},
-      {tag: [tags.regexp, tags.escape, tags.special(tags.string)], color: "#f17d4e"},
-      {tag: tags.definition(tags.variableName), color: "#94b9dc"},
-      {tag: tags.local(tags.variableName), color: "#9579d7"},
-      {tag: [tags.typeName, tags.namespace], color: "#6fc8a7"},
-      {tag: tags.className, color: "#69a3ae"},
-      {tag: [tags.special(tags.variableName), tags.macroName], color: "#639bad"},
-      {tag: tags.definition(tags.propertyName), color: "#7171d6"},
-      {tag: tags.comment, color: "#929da9"},
-      {tag: tags.meta, color: "#929da9"},
-      {tag: tags.invalid, color: "#ff8888"}
+      {tag: tags$1.link, textDecoration: "underline"},
+      {tag: tags$1.heading, textDecoration: "underline", fontWeight: "bold"},
+      {tag: tags$1.emphasis, fontStyle: "italic"},
+      {tag: tags$1.strong, fontWeight: "bold"},
+      {tag: tags$1.strikethrough, textDecoration: "line-through"},
+      {tag: tags$1.keyword, color: "#b800d2"},
+      {tag: [tags$1.atom, tags$1.bool, tags$1.url, tags$1.contentSeparator, tags$1.labelName], color: "#6859cf"},
+      {tag: [tags$1.literal, tags$1.inserted], color: "#559e81"},
+      {tag: [tags$1.string, tags$1.deleted], color: "#ca6666"},
+      {tag: [tags$1.regexp, tags$1.escape, tags$1.special(tags$1.string)], color: "#f17d4e"},
+      {tag: tags$1.definition(tags$1.variableName), color: "#94b9dc"},
+      {tag: tags$1.local(tags$1.variableName), color: "#9579d7"},
+      {tag: [tags$1.typeName, tags$1.namespace], color: "#6fc8a7"},
+      {tag: tags$1.className, color: "#69a3ae"},
+      {tag: [tags$1.special(tags$1.variableName), tags$1.macroName], color: "#639bad"},
+      {tag: tags$1.definition(tags$1.propertyName), color: "#7171d6"},
+      {tag: tags$1.comment, color: "#929da9"},
+      {tag: tags$1.meta, color: "#929da9"},
+      {tag: tags$1.invalid, color: "#ff8888"}
     ]);
 
     const dark = [darkTheme, darkHighlightStyle];
@@ -23735,7 +28052,7 @@
     let cm = {};
     window.cm = cm;
 
-    cm.swiftSetup = [
+    cm.anyLanguageSetup = [
         highlightSpecialChars(),
         history(),
         drawSelection(),
@@ -23759,66 +28076,16 @@
             ...lintKeymap
         ]),
         indentUnit.of("    "),
-        keymap.of([indentWithTab]),
-        swift()
+        keymap.of([indentWithTab])
     ];
 
-    cm.javascriptSetup = [
-        highlightSpecialChars(),
-        history(),
-        drawSelection(),
-        dropCursor(),
-        EditorState.allowMultipleSelections.of(true),
-        indentOnInput(),
-        defaultHighlightStyle.fallback,
-        bracketMatching(),
-        closeBrackets(),
-        autocompletion(),
-        rectangularSelection(),
-        highlightSelectionMatches(),
-        keymap.of([
-            ...closeBracketsKeymap,
-            ...defaultKeymap,
-            ...searchKeymap,
-            ...historyKeymap,
-            ...foldKeymap,
-            ...commentKeymap,
-            ...completionKeymap,
-            ...lintKeymap
-        ]),
-        indentUnit.of("    "),
-        keymap.of([indentWithTab]),
-        javascript()
-    ];
-
-
-    cm.jsonSetup = [
-        highlightSpecialChars(),
-        history(),
-        drawSelection(),
-        dropCursor(),
-        EditorState.allowMultipleSelections.of(true),
-        indentOnInput(),
-        defaultHighlightStyle.fallback,
-        bracketMatching(),
-        closeBrackets(),
-        autocompletion(),
-        rectangularSelection(),
-        highlightSelectionMatches(),
-        keymap.of([
-            ...closeBracketsKeymap,
-            ...defaultKeymap,
-            ...searchKeymap,
-            ...historyKeymap,
-            ...foldKeymap,
-            ...commentKeymap,
-            ...completionKeymap,
-            ...lintKeymap
-        ]),
-        indentUnit.of("    "),
-        keymap.of([indentWithTab]),
-        json()
-    ];
+    cm.swiftSetup = cm.anyLanguageSetup.concat([swift()]);
+    cm.javascriptSetup = cm.anyLanguageSetup.concat([javascript()]);
+    cm.markdownSetup = cm.anyLanguageSetup.concat([markdown()]);
+    cm.jsonSetup = cm.anyLanguageSetup.concat([json()]);
+    cm.htmlSetup = cm.anyLanguageSetup.concat([html()]);
+    cm.cssSetup = cm.anyLanguageSetup.concat([css()]);
+    cm.xmlSetup = cm.anyLanguageSetup.concat([xml()]);
 
     cm.minimalSetup = [
         highlightSpecialChars(),
@@ -23840,9 +28107,19 @@
             ...lintKeymap
         ]),
         indentUnit.of("    "),
-        keymap.of([indentWithTab]),
-        json()
+        keymap.of([indentWithTab])
     ];
+
+    cm.swiftMinimalSetup = cm.minimalSetup.concat([swift()]);
+    cm.javascriptMinimalSetup = cm.minimalSetup.concat([javascript()]);
+    cm.markdownMinimalSetup = cm.minimalSetup.concat([markdown()]);
+    cm.jsonMinimalSetup = cm.minimalSetup.concat([json()]);
+    cm.htmlMinimalSetup = cm.minimalSetup.concat([html()]);
+    cm.cssMinimalSetup = cm.minimalSetup.concat([css()]);
+    cm.xmlMinimalSetup = cm.minimalSetup.concat([xml()]);
+
+    // backwards compatibility...
+    cm.minimalSetup = cm.jsonMinimalSetup;
 
     cm.endeavourJsonParse = function(json) {
         try {
@@ -24366,7 +28643,11 @@
         ];
     };
 
-    cm.CreateEditor = function(parentDivId, extensions, content="", editable=true) {
+    cm.CreateEditor = function(parentDivId,
+    						   extensions,
+    						   content="", 
+    						   editable=true,
+    						   darkModeOnly=false) {
         let parentDiv = document.getElementById(parentDivId);
             
         if (editable) {
@@ -24385,7 +28666,7 @@
         darkExtensions.push(dark);
         lightExtensions.push(light);
         
-        if (isDarkMode()) {
+        if (isDarkMode() || darkModeOnly) {
             extensions = darkExtensions;
         } else {
             extensions = lightExtensions;
@@ -24399,17 +28680,21 @@
             }),
             parent: parentDiv
         });
-                
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-            if (event.matches) {
-                editor.dispatch({
-                    effects: StateEffect.reconfigure.of(darkExtensions)
-                });
-            } else {
-                editor.dispatch({
-                    effects: StateEffect.reconfigure.of(lightExtensions)
-                });
-            }    });
+    	
+    	print(darkModeOnly);
+        
+    	if (darkModeOnly == false) {
+    	    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+    	        if (event.matches) {
+    	            editor.dispatch({
+    	                effects: StateEffect.reconfigure.of(darkExtensions)
+    	            });
+    	        } else {
+    	            editor.dispatch({
+    	                effects: StateEffect.reconfigure.of(lightExtensions)
+    	            });
+    	        }	    });
+    	}
 
         return editor;
     };

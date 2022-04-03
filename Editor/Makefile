@@ -11,6 +11,10 @@ install:
 	npm i @codemirror/collab
 	npm i @codemirror/lang-javascript
 	npm i @codemirror/lang-json
+	npm i @codemirror/lang-markdown
+	npm i @codemirror/lang-html
+	npm i @codemirror/lang-css
+	npm i @codemirror/lang-xml
 	npm i rollup @rollup/plugin-node-resolve
 	
 	npm update
