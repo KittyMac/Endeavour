@@ -123,7 +123,9 @@ cm.broadcastStatus = function(documentUUID, command, message) {
     }
     
     allDocumentUUIDs.forEach(function(documentUUID) {
-        cm.endeavourDocuments[documentUUID]?.didError(message);
+		if (cm.endeavourDocuments[documentUUID] != undefined) {
+			cm.endeavourDocuments[documentUUID].didError(message);
+		}        
     });
 }
 
@@ -296,7 +298,11 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                     };
                 });
                 
-                cm.endeavourPushUpdates(this, docUpdates, update?.state?.selection?.ranges);
+				let ranges = undefined;
+				if (update != undefined && update.state != undefined && update.state.selection != undefined) {
+					ranges = update.state.selection.ranges;
+				}
+                cm.endeavourPushUpdates(this, docUpdates, ranges);
             }
         }
         
@@ -355,7 +361,7 @@ cm.endeavourExtension = function (serviceJson, statusCallback) {
                 // Horrible hack to reset our version history
                 for (let idx = 0; idx < this.view.state.values.length; idx++) {
                     let value = this.view.state.values[idx];
-                    if (value?.version != undefined && value?.unconfirmed != undefined) {
+                    if (value != undefined && value.version != undefined && value.unconfirmed != undefined) {
                         value.version = 0;
                         value.unconfirmed.length = 0;
                     }

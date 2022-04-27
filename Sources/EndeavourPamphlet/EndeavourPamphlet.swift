@@ -5,6 +5,8 @@ import Foundation
 
 
 public enum EndeavourPamphlet {
+    public static let version = "v0.0.0"
+    
     #if DEBUG
     public static func get(string member: String) -> String? {
         switch member {

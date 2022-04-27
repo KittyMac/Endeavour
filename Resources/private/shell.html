@@ -215,7 +215,7 @@ ID_ELEMENT(document##ID, VSTACK()MAXHEIGHT(50)STDSHADOW()MARGIN(1,1,0,1)DOCUMENT
             let editor = cm.CreateEditor(editorID, [
                 cm.swiftSetup,
                 cm.endeavourExtension(serviceJson, documentStatusUpdate)
-            ], xhttp.responseText, serviceJson.canWrite == 1, true);
+            ], xhttp.responseText, serviceJson.canWrite == 1);
             
             let myDocument = document.getElementById(documentID);
             Laba.animate(myDocument, "!<200!f")
