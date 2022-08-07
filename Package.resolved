@@ -1,88 +1,122 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "Chronometer",
-        "repositoryURL": "https://github.com/KittyMac/Chronometer.git",
-        "state": {
-          "branch": null,
-          "revision": "35289a90ee0bb4a76f8acd647b773aeacf4d8856",
-          "version": "0.1.2"
-        }
-      },
-      {
-        "package": "Figurehead",
-        "repositoryURL": "https://github.com/KittyMac/Figurehead.git",
-        "state": {
-          "branch": "main",
-          "revision": "e22cfa33485c8030ab056363fbf01bfda4949e9d",
-          "version": null
-        }
-      },
-      {
-        "package": "Flynn",
-        "repositoryURL": "https://github.com/KittyMac/Flynn.git",
-        "state": {
-          "branch": null,
-          "revision": "c58a430d75b7597bf56e05067dee533c98140ea7",
-          "version": "0.2.5"
-        }
-      },
-      {
-        "package": "Gzip",
-        "repositoryURL": "https://github.com/1024jp/GzipSwift.git",
-        "state": {
-          "branch": "develop",
-          "revision": "ae02027cd030c73a9d177f50e612bbd491ebe371",
-          "version": null
-        }
-      },
-      {
-        "package": "Hitch",
-        "repositoryURL": "https://github.com/KittyMac/Hitch.git",
-        "state": {
-          "branch": null,
-          "revision": "4bf2cca39f0b2c1bbed72577b0ce81d67e036033",
-          "version": "0.4.26"
-        }
-      },
-      {
-        "package": "Picaroon",
-        "repositoryURL": "https://github.com/KittyMac/Picaroon.git",
-        "state": {
-          "branch": null,
-          "revision": "5d48f42fa2e4b5e10eccea913bfa9bbae3a19482",
-          "version": "0.3.22"
-        }
-      },
-      {
-        "package": "Sextant",
-        "repositoryURL": "https://github.com/KittyMac/Sextant.git",
-        "state": {
-          "branch": null,
-          "revision": "58c6c0ca016ee743ecc69840b526a3715b145cd7",
-          "version": "0.4.9"
-        }
-      },
-      {
-        "package": "Spanker",
-        "repositoryURL": "https://github.com/KittyMac/Spanker.git",
-        "state": {
-          "branch": null,
-          "revision": "b57e8aef16069f205ac74d5f2b27fa1224824a0c",
-          "version": "0.2.19"
-        }
-      },
-      {
-        "package": "swift-argument-parser",
-        "repositoryURL": "https://github.com/apple/swift-argument-parser",
-        "state": {
-          "branch": null,
-          "revision": "82905286cc3f0fa8adc4674bf49437cab65a8373",
-          "version": "1.1.1"
-        }
+  "pins" : [
+    {
+      "identity" : "chronometer",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/KittyMac/Chronometer.git",
+      "state" : {
+        "revision" : "bf49dace3be107ab11609ed428c1b7878a07be52",
+        "version" : "0.1.4"
       }
-    ]
-  },
-  "version": 1
+    },
+    {
+      "identity" : "figurehead",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/KittyMac/Figurehead.git",
+      "state" : {
+        "branch" : "SPM_Build_Tool",
+        "revision" : "252c7d85bc60d802273ca977e9c4c40a95e08a05"
+      }
+    },
+    {
+      "identity" : "flynn",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/KittyMac/Flynn.git",
+      "state" : {
+        "branch" : "SPM_Build_Tool",
+        "revision" : "d063903b7baf4c986979c52f2cd19e3b1c6b5a19"
+      }
+    },
+    {
+      "identity" : "gzipswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/1024jp/GzipSwift.git",
+      "state" : {
+        "branch" : "develop",
+        "revision" : "e99ced22d05d7933377cd24cc147651f58948a65"
+      }
+    },
+    {
+      "identity" : "hitch",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/KittyMac/Hitch.git",
+      "state" : {
+        "revision" : "eec08edd53a0d433f707d241483e03e59becafe9",
+        "version" : "0.4.36"
+      }
+    },
+    {
+      "identity" : "pamphlet",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/KittyMac/Pamphlet.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "2da64c931bf2c61c6ed1458af3e4b4a7c71fd147"
+      }
+    },
+    {
+      "identity" : "picaroon",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/KittyMac/Picaroon.git",
+      "state" : {
+        "branch" : "SPM_Build_Tool",
+        "revision" : "c0c983cb4967ee77554c15e6ffbe60ec8b800a54"
+      }
+    },
+    {
+      "identity" : "sextant",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/KittyMac/Sextant.git",
+      "state" : {
+        "revision" : "ce0e5bd27b04c80de12d3729f028d01155d4b2a8",
+        "version" : "0.4.11"
+      }
+    },
+    {
+      "identity" : "sourcekitten",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jpsim/SourceKitten",
+      "state" : {
+        "revision" : "817dfa6f2e09b0476f3a6c9dbc035991f02f0241",
+        "version" : "0.32.0"
+      }
+    },
+    {
+      "identity" : "spanker",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/KittyMac/Spanker.git",
+      "state" : {
+        "revision" : "6becc7caf3e1648d2b9331652dc4809e91514cff",
+        "version" : "0.2.25"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "df9ee6676cd5b3bf5b330ec7568a5644f547201b",
+        "version" : "1.1.3"
+      }
+    },
+    {
+      "identity" : "swxmlhash",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/drmohundro/SWXMLHash.git",
+      "state" : {
+        "revision" : "6469881a3f30417c5bb02404ea4b69207f297592",
+        "version" : "6.0.0"
+      }
+    },
+    {
+      "identity" : "yams",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jpsim/Yams.git",
+      "state" : {
+        "revision" : "9ff1cc9327586db4e0c8f46f064b6a82ec1566fa",
+        "version" : "4.0.6"
+      }
+    }
+  ],
+  "version" : 2
 }

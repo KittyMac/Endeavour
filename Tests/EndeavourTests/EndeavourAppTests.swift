@@ -27,10 +27,22 @@ struct FakeConnection: AnyConnection {
     func beSendServiceUnavailable() -> Self {
         return self
     }
+    func beSendResult(_ message: Hitch?) -> Self {
+        return self
+    }
     func beSendSuccess(_ message: Hitch) -> Self {
         return self
     }
     func beSendError(_ error: Hitch) -> Self {
+        return self
+    }
+    func beSendResult(_ message: String?) -> Self {
+        return self
+    }
+    func beSendSuccess(_ message: String) -> Self {
+        return self
+    }
+    func beSendError(_ error: String) -> Self {
         return self
     }
     func beSendNotModified() -> Self {

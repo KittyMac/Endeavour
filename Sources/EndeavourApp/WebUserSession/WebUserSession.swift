@@ -1,7 +1,6 @@
 import Flynn
 import Foundation
 import Picaroon
-import EndeavourPamphlet
 import Hitch
 import Sextant
 import Endeavour
@@ -27,7 +26,7 @@ public class WebUserSession: UserServiceableSession {
 
         let headers: [HalfHitch] = ["Set-Cookie: SESSION_UUID={0}" << [unsafeJavascriptSessionUUID]]
 
-        let payload: Payloadable = httpRequest.supportsGzip ? EndeavourPamphlet.Private.ShellHtmlGzip() : EndeavourPamphlet.Private.ShellHtml()
+        let payload: Payloadable = httpRequest.supportsGzip ? Pamphlet.Private.ShellHtmlGzip() : Pamphlet.Private.ShellHtml()
 
         connection.beSend(httpResponse: HttpResponse(html: payload,
                                                      headers: headers))

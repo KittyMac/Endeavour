@@ -2,7 +2,6 @@ import Foundation
 import ArgumentParser
 import Picaroon
 import Flynn
-import EndeavourPamphlet
 import Endeavour
 import Hitch
 
@@ -27,23 +26,23 @@ func handleStaticRequest(config: ServerConfig,
 
             // We only ever allow script.combined.js to be downloaded, and it is a combination of scripts.
             if url.ends(with: "script.combined.js") {
-                let payload: Payloadable = httpRequest.supportsGzip ? EndeavourPamphlet.Private.ScriptCombinedJsGzip() : EndeavourPamphlet.Private.ScriptCombinedJs()
+                let payload: Payloadable = httpRequest.supportsGzip ? Pamphlet.Private.ScriptCombinedJsGzip() : Pamphlet.Private.ScriptCombinedJs()
                 return HttpResponse(javascript: payload)
             }
 
             let urlString = url.description
-            if let content = EndeavourPamphlet.get(gzip: urlString), httpRequest.supportsGzip {
+            if let content = Pamphlet.get(gzip: urlString), httpRequest.supportsGzip {
                 return HttpResponse(status: .ok,
                                     type: HttpContentType.fromPath(url),
                                     payload: content,
                                     encoding: HttpEncoding.gzip.rawValue,
                                     cacheMaxAge: cacheMaxAge)
-            } else if let content = EndeavourPamphlet.get(data: urlString) {
+            } else if let content = Pamphlet.get(data: urlString) {
                 return HttpResponse(status: .ok,
                                     type: HttpContentType.fromPath(url),
                                     payload: content,
                                     cacheMaxAge: cacheMaxAge)
-            } else if let content = EndeavourPamphlet.get(string: urlString) {
+            } else if let content = Pamphlet.get(string: urlString) {
                 return HttpResponse(status: .ok,
                                     type: HttpContentType.fromPath(url),
                                     payload: content,
