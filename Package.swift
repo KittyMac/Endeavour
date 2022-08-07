@@ -11,8 +11,8 @@ let package = Package(
         .executable(name: "EndeavourApp", targets: ["EndeavourApp"])
     ],
     dependencies: [
-        .package(url: "https://github.com/KittyMac/Pamphlet.git", branch: "master"),
-        .package(url: "https://github.com/KittyMac/Figurehead.git", branch: "SPM_Build_Tool"),
+        .package(url: "https://github.com/KittyMac/Pamphlet.git", .upToNextMinor(from: "0.2.0")),
+        .package(url: "https://github.com/KittyMac/Figurehead.git", .upToNextMinor(from: "0.2.0")),
 		.package(url: "https://github.com/KittyMac/Flynn.git", branch: "SPM_Build_Tool"),
         .package(url: "https://github.com/KittyMac/Sextant.git", .upToNextMinor(from: "0.4.0")),
         .package(url: "https://github.com/KittyMac/Hitch.git", .upToNextMinor(from: "0.4.0")),

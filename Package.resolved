@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/KittyMac/Figurehead.git",
       "state" : {
-        "branch" : "SPM_Build_Tool",
-        "revision" : "252c7d85bc60d802273ca977e9c4c40a95e08a05"
+        "revision" : "252c7d85bc60d802273ca977e9c4c40a95e08a05",
+        "version" : "0.2.0"
       }
     },
     {
@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/KittyMac/Pamphlet.git",
       "state" : {
-        "branch" : "master",
-        "revision" : "2da64c931bf2c61c6ed1458af3e4b4a7c71fd147"
+        "revision" : "2da64c931bf2c61c6ed1458af3e4b4a7c71fd147",
+        "version" : "0.2.0"
       }
     },
     {
