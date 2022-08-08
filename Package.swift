@@ -11,14 +11,14 @@ let package = Package(
         .executable(name: "EndeavourApp", targets: ["EndeavourApp"])
     ],
     dependencies: [
-        .package(url: "https://github.com/KittyMac/Pamphlet.git", .upToNextMinor(from: "0.2.0")),
-        .package(url: "https://github.com/KittyMac/Figurehead.git", .upToNextMinor(from: "0.2.0")),
-		.package(url: "https://github.com/KittyMac/Flynn.git", branch: "SPM_Build_Tool"),
-        .package(url: "https://github.com/KittyMac/Sextant.git", .upToNextMinor(from: "0.4.0")),
-        .package(url: "https://github.com/KittyMac/Hitch.git", .upToNextMinor(from: "0.4.0")),
-        .package(url: "https://github.com/KittyMac/Picaroon.git", branch: "SPM_Build_Tool"),
-        .package(url: "https://github.com/1024jp/GzipSwift.git", branch: "develop"),
-        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
+        .package(url: "https://github.com/KittyMac/Pamphlet.git", branch: "master"),
+        .package(url: "https://github.com/KittyMac/Figurehead.git", from: "0.2.0"),
+		.package(url: "https://github.com/KittyMac/Flynn.git", from: "0.3.0"),
+        .package(url: "https://github.com/KittyMac/Sextant.git", from: "0.4.0"),
+        .package(url: "https://github.com/KittyMac/Hitch.git", from: "0.4.0"),
+        .package(url: "https://github.com/KittyMac/Picaroon.git", from: "0.4.0"),
+        .package(url: "https://github.com/1024jp/GzipSwift.git", branch: "5.2.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0")
     ],
     targets: [
         .target(
@@ -28,10 +28,12 @@ let package = Package(
                 "Sextant",
                 "Hitch",
                 "Picaroon",
-                "Pamphlet"
+                "Pamphlet",
+                .product(name: "PamphletFramework", package: "Pamphlet"),
             ],
             plugins: [
-                .plugin(name: "PamphletPlugin", package: "Pamphlet")
+                .plugin(name: "PamphletPlugin", package: "Pamphlet"),
+                .plugin(name: "FlynnPlugin", package: "Flynn")
             ]
         ),
         .executableTarget(
@@ -44,11 +46,13 @@ let package = Package(
                 "Hitch",
                 "Picaroon",
                 "Pamphlet",
+                .product(name: "PamphletFramework", package: "Pamphlet"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "Gzip", package: "GzipSwift"),
             ],
             plugins: [
-                .plugin(name: "PamphletPlugin", package: "Pamphlet")
+                .plugin(name: "PamphletPlugin", package: "Pamphlet"),
+                .plugin(name: "FlynnPlugin", package: "Flynn")
             ]
         ),
         .testTarget(

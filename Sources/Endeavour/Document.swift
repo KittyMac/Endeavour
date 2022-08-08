@@ -165,8 +165,8 @@ extension Endeavour {
             }
         }
 
-        private func _beSetDelegate(userSession: UserServiceableSession,
-                                    delegate: Documentable) {
+        internal func _beSetDelegate(userSession: UserServiceableSession,
+                                     delegate: Documentable) {
             self.delegate = delegate
 
             delegate.beAuthorize(userSession: userSession,
@@ -176,8 +176,8 @@ extension Endeavour {
             }
         }
 
-        private func _beSetDelegate(ownerName: Hitch?,
-                                    delegate: Documentable) {
+        internal func _beSetDelegate(ownerName: Hitch?,
+                                     delegate: Documentable) {
             self.delegate = delegate
             self.owner.name = ownerName
         }
@@ -199,9 +199,9 @@ extension Endeavour {
             return owner.userUUID == user || peers[user] != nil
         }
 
-        private func _beAdd(userSession: UserServiceableSession,
-                            user: UserUUID,
-                            _ returnCallback: @escaping (DocumentInfo?, Endeavour.Document?, Error?) -> Void) {
+        internal func _beAdd(userSession: UserServiceableSession,
+                             user: UserUUID,
+                             _ returnCallback: @escaping (DocumentInfo?, Endeavour.Document?, Error?) -> Void) {
             guard closed == false else { return returnCallback(nil, nil, "document is closed") }
 
             observers[user] = nil
@@ -237,8 +237,8 @@ extension Endeavour {
             broadcastPeers()
         }
 
-        private func _beLeave(user: UserUUID,
-                              service: Endeavour.Service) -> (Bool, Error?) {
+        internal func _beLeave(user: UserUUID,
+                               service: Endeavour.Service) -> (Bool, Error?) {
 
             observers[user] = nil
             peers[user] = nil
@@ -264,30 +264,30 @@ extension Endeavour {
             return (false, nil)
         }
 
-        private func _beAuthorize(peer: UserUUID) -> Error? {
+        internal func _beAuthorize(peer: UserUUID) -> Error? {
             guard closed == false else { return "document is closed" }
             guard peers[peer] != nil else { return "You are not authorized as a peer of this document" }
             return nil
         }
 
-        private func _beAuthorize(owner: UserUUID) -> Error? {
+        internal func _beAuthorize(owner: UserUUID) -> Error? {
             guard closed == false else { return "document is closed" }
             guard self.owner.userUUID == owner else { return "You are not authorized as an owner of this document" }
             return nil
         }
 
-        private func _beGetInfo(user: UserUUID,
+        internal func _beGetInfo(user: UserUUID,
                                 _ returnCallback: (DocumentInfo?, Error?) -> Void) {
             guard closed == false else { return returnCallback(nil, "document is closed") }
             guard canRead(user: user) else { return returnCallback(nil, "You are not authorized to access this document") }
             returnCallback(getDocumentInfo(user: user), nil)
         }
 
-        private func _bePublish(peer: UserUUID,
-                                clientID: Hitch?,
-                                version: Int,
-                                updates: JsonElement?,
-                                cursors: JsonElement?) -> Error? {
+        internal func _bePublish(peer: UserUUID,
+                                 clientID: Hitch?,
+                                 version: Int,
+                                 updates: JsonElement?,
+                                 cursors: JsonElement?) -> Error? {
             guard closed == false else { return "document is closed" }
             guard owner.userUUID == peer || peers[peer] != nil else { return "You are not authorized as a peer of this document" }
 
@@ -319,9 +319,9 @@ extension Endeavour {
             return nil
         }
 
-        private func _beSave(peer: UserUUID,
-                             version: Int,
-                             _ returnCallback: @escaping ((Error?) -> Void)) {
+        internal func _beSave(peer: UserUUID,
+                              version: Int,
+                              _ returnCallback: @escaping ((Error?) -> Void)) {
             guard closed == false else { return returnCallback("document is closed") }
             guard owner.userUUID == peer || peers[peer] != nil else { return returnCallback("You are not authorized as a peer of this document") }
             guard version == history.count else {
@@ -351,9 +351,9 @@ extension Endeavour {
             }
         }
 
-        private func _beRevert(peer: UserUUID,
-                               version: Int,
-                               _ returnCallback: @escaping ((Error?) -> Void)) {
+        internal func _beRevert(peer: UserUUID,
+                                version: Int,
+                                _ returnCallback: @escaping ((Error?) -> Void)) {
             guard closed == false else { return returnCallback("document is closed") }
             guard owner.userUUID == peer || peers[peer] != nil else { return returnCallback("You are not authorized as a peer of this document") }
             guard version == history.count else {
@@ -387,8 +387,8 @@ extension Endeavour {
             }
         }
 
-        private func _beSubscribe(peer: UserUUID,
-                                  service: Endeavour.Service) {
+        internal func _beSubscribe(peer: UserUUID,
+                                   service: Endeavour.Service) {
             guard closed == false else { return }
             guard owner.userUUID == peer || peers[peer] != nil else {
                return
@@ -404,8 +404,8 @@ extension Endeavour {
             self.broadcastPeers()
         }
 
-        private func _beGetUpdates(peer: UserUUID,
-                                   version: DocumentVersion) -> HalfHitch? {
+        internal func _beGetUpdates(peer: UserUUID,
+                                    version: DocumentVersion) -> HalfHitch? {
             guard closed == false else { return nil }
             guard owner.userUUID == peer || peers[peer] != nil else {
                return nil
@@ -430,145 +430,4 @@ extension Endeavour {
             return nil
         }
     }
-}
-
-// MARK: - Autogenerated by FlynnLint
-// Contents of file after this marker will be overwritten as needed
-
-extension Endeavour.Document {
-
-    @discardableResult
-    public func beSetDelegate(userSession: UserServiceableSession,
-                              delegate: Documentable) -> Self {
-        unsafeSend { self._beSetDelegate(userSession: userSession, delegate: delegate) }
-        return self
-    }
-    @discardableResult
-    public func beSetDelegate(ownerName: Hitch?,
-                              delegate: Documentable) -> Self {
-        unsafeSend { self._beSetDelegate(ownerName: ownerName, delegate: delegate) }
-        return self
-    }
-    @discardableResult
-    public func beAdd(userSession: UserServiceableSession,
-                      user: UserUUID,
-                      _ sender: Actor,
-                      _ callback: @escaping ((DocumentInfo?, Endeavour.Document?, Error?) -> Void)) -> Self {
-        unsafeSend {
-            self._beAdd(userSession: userSession, user: user) { arg0, arg1, arg2 in
-                sender.unsafeSend {
-                    callback(arg0, arg1, arg2)
-                }
-            }
-        }
-        return self
-    }
-    @discardableResult
-    public func beLeave(user: UserUUID,
-                        service: Endeavour.Service,
-                        _ sender: Actor,
-                        _ callback: @escaping (((Bool, Error?)) -> Void)) -> Self {
-        unsafeSend {
-            let result = self._beLeave(user: user, service: service)
-            sender.unsafeSend { callback(result) }
-        }
-        return self
-    }
-    @discardableResult
-    public func beAuthorize(peer: UserUUID,
-                            _ sender: Actor,
-                            _ callback: @escaping ((Error?) -> Void)) -> Self {
-        unsafeSend {
-            let result = self._beAuthorize(peer: peer)
-            sender.unsafeSend { callback(result) }
-        }
-        return self
-    }
-    @discardableResult
-    public func beAuthorize(owner: UserUUID,
-                            _ sender: Actor,
-                            _ callback: @escaping ((Error?) -> Void)) -> Self {
-        unsafeSend {
-            let result = self._beAuthorize(owner: owner)
-            sender.unsafeSend { callback(result) }
-        }
-        return self
-    }
-    @discardableResult
-    public func beGetInfo(user: UserUUID,
-                          _ sender: Actor,
-                          _ callback: @escaping ((DocumentInfo?, Error?) -> Void)) -> Self {
-        unsafeSend {
-            self._beGetInfo(user: user) { arg0, arg1 in
-                sender.unsafeSend {
-                    callback(arg0, arg1)
-                }
-            }
-        }
-        return self
-    }
-    @discardableResult
-    public func bePublish(peer: UserUUID,
-                          clientID: Hitch?,
-                          version: Int,
-                          updates: JsonElement?,
-                          cursors: JsonElement?,
-                          _ sender: Actor,
-                          _ callback: @escaping ((Error?) -> Void)) -> Self {
-        unsafeSend {
-            let result = self._bePublish(peer: peer, clientID: clientID, version: version, updates: updates, cursors: cursors)
-            sender.unsafeSend { callback(result) }
-        }
-        return self
-    }
-    @discardableResult
-    public func beSave(peer: UserUUID,
-                       version: Int,
-                       _ sender: Actor,
-                       _ callback: @escaping ((Error?) -> Void)) -> Self {
-        unsafeSend {
-            self._beSave(peer: peer, version: version) { arg0 in
-                sender.unsafeSend {
-                    callback(arg0)
-                }
-            }
-        }
-        return self
-    }
-    @discardableResult
-    public func beRevert(peer: UserUUID,
-                         version: Int,
-                         _ sender: Actor,
-                         _ callback: @escaping ((Error?) -> Void)) -> Self {
-        unsafeSend {
-            self._beRevert(peer: peer, version: version) { arg0 in
-                sender.unsafeSend {
-                    callback(arg0)
-                }
-            }
-        }
-        return self
-    }
-    @discardableResult
-    public func beSubscribe(peer: UserUUID,
-                            service: Endeavour.Service) -> Self {
-        unsafeSend { self._beSubscribe(peer: peer, service: service) }
-        return self
-    }
-    @discardableResult
-    public func beGetUpdates(peer: UserUUID,
-                             version: DocumentVersion,
-                             _ sender: Actor,
-                             _ callback: @escaping ((HalfHitch?) -> Void)) -> Self {
-        unsafeSend {
-            let result = self._beGetUpdates(peer: peer, version: version)
-            sender.unsafeSend { callback(result) }
-        }
-        return self
-    }
-
-}
-
-extension Endeavour {
-
 }

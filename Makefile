@@ -1,6 +1,6 @@
 SWIFT_BUILD_FLAGS=--configuration release
 
-build: preprocess
+build:
 	swift build -v $(SWIFT_BUILD_FLAGS)
 
 update:
@@ -20,8 +20,13 @@ docker:
 	-docker login
 	docker buildx build --platform linux/amd64,linux/arm64 --push -t kittymac/endeavour .
 
-docker-local:
-	docker run --publish published=8080,target=8080,mode=host kittymac/endeavour:latest ./EndeavourApp http
+docker-shell:
+	docker pull kittymac/endeavour
+	docker run --rm -it --entrypoint bash kittymac/endeavour
+
+docker-run:
+	docker pull kittymac/endeavour
+	docker run --publish published=8080,target=8080,mode=host kittymac/endeavour ./EndeavourApp http
 
 docker-service-log:
 	-ssh rjbowli@192.168.1.200 "docker service logs --follow endeavour-http"

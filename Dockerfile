@@ -1,30 +1,35 @@
-FROM swiftarm/swift:5.5.2-ubuntu-bionic as builder
+FROM swiftarm/swift:5.6.2-ubuntu-jammy as builder
 
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true && apt-get -q update && \
-    apt-get -q install -y \
+    apt-get install -y \
     libpq-dev \
     libpng-dev \
-    libjpeg-dev
+    libjpeg-dev \
+    libjavascriptcoregtk-4.0-dev \
+    libatomic1
+
 RUN rm -rf /var/lib/apt/lists/*
+
 
 WORKDIR /root/EndeavourApp
 COPY ./Makefile ./Makefile
 COPY ./Package.swift ./Package.swift
-COPY ./meta ./meta
 COPY ./Sources ./Sources
 COPY ./Tests ./Tests
 
 RUN swift package update
-RUN swift test
 RUN swift build --configuration release
 
-FROM swiftarm/swift:5.5.2-ubuntu-bionic-slim
+FROM swiftarm/swift:5.6.2-ubuntu-jammy-slim as app
 
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true && apt-get -q update && \
     apt-get -q install -y \
     libpq-dev \
     libpng-dev \
-    libjpeg-dev
+    libjpeg-dev \
+    libjavascriptcoregtk-4.0-dev \
+    libatomic1
+    
 RUN rm -rf /var/lib/apt/lists/*
 
 WORKDIR /root

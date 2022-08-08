@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/KittyMac/Flynn.git",
       "state" : {
-        "branch" : "SPM_Build_Tool",
-        "revision" : "d063903b7baf4c986979c52f2cd19e3b1c6b5a19"
+        "revision" : "ca0ceb13395b970944ff970504c911ea29d5a6bb",
+        "version" : "0.3.2"
       }
     },
     {
@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/1024jp/GzipSwift.git",
       "state" : {
-        "branch" : "develop",
-        "revision" : "e99ced22d05d7933377cd24cc147651f58948a65"
+        "branch" : "5.2.0",
+        "revision" : "7a7f17761c76a932662ab77028a4329f67d645a4"
       }
     },
     {
@@ -46,12 +46,21 @@
       }
     },
     {
+      "identity" : "jxkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jectivex/JXKit.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "b1310c8a93cf862f9d673f52a025d4724475dd86"
+      }
+    },
+    {
       "identity" : "pamphlet",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/KittyMac/Pamphlet.git",
       "state" : {
-        "revision" : "2da64c931bf2c61c6ed1458af3e4b4a7c71fd147",
-        "version" : "0.2.0"
+        "branch" : "master",
+        "revision" : "1dc98af310baeb970923806c92c001a3828a94a5"
       }
     },
     {
@@ -59,8 +68,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/KittyMac/Picaroon.git",
       "state" : {
-        "branch" : "SPM_Build_Tool",
-        "revision" : "c0c983cb4967ee77554c15e6ffbe60ec8b800a54"
+        "revision" : "8ab5ed50d18270bd8b134c5e9636ba8f68ef28a3",
+        "version" : "0.4.1"
       }
     },
     {
