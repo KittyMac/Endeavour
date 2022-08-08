@@ -11,13 +11,13 @@ let package = Package(
         .executable(name: "EndeavourApp", targets: ["EndeavourApp"])
     ],
     dependencies: [
-        .package(url: "https://github.com/KittyMac/Pamphlet.git", branch: "master"),
+        .package(url: "https://github.com/KittyMac/Pamphlet.git", from: "0.3.5"),
         .package(url: "https://github.com/KittyMac/Figurehead.git", from: "0.2.0"),
 		.package(url: "https://github.com/KittyMac/Flynn.git", from: "0.3.0"),
         .package(url: "https://github.com/KittyMac/Sextant.git", from: "0.4.0"),
         .package(url: "https://github.com/KittyMac/Hitch.git", from: "0.4.0"),
         .package(url: "https://github.com/KittyMac/Picaroon.git", from: "0.4.0"),
-        .package(url: "https://github.com/1024jp/GzipSwift.git", branch: "5.2.0"),
+        .package(url: "https://github.com/1024jp/GzipSwift.git", from: "5.2.0"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0")
     ],
     targets: [

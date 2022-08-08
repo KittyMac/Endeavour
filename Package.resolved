@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/1024jp/GzipSwift.git",
       "state" : {
-        "branch" : "5.2.0",
-        "revision" : "7a7f17761c76a932662ab77028a4329f67d645a4"
+        "revision" : "7a7f17761c76a932662ab77028a4329f67d645a4",
+        "version" : "5.2.0"
       }
     },
     {
@@ -46,21 +46,12 @@
       }
     },
     {
-      "identity" : "jxkit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/jectivex/JXKit.git",
-      "state" : {
-        "branch" : "main",
-        "revision" : "b1310c8a93cf862f9d673f52a025d4724475dd86"
-      }
-    },
-    {
       "identity" : "pamphlet",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/KittyMac/Pamphlet.git",
       "state" : {
-        "branch" : "master",
-        "revision" : "1dc98af310baeb970923806c92c001a3828a94a5"
+        "revision" : "a0d990cfb7b199d104c9cfdb1ab3aec927af4b63",
+        "version" : "0.3.6"
       }
     },
     {
