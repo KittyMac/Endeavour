@@ -1,4 +1,4 @@
-FROM swiftarm/swift:5.6.2-ubuntu-jammy as builder
+FROM swiftarm/swift:5.6.2-ubuntu-focal as builder
 
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true && apt-get -q update && \
     apt-get install -y \
@@ -20,7 +20,7 @@ COPY ./Tests ./Tests
 RUN swift package update
 RUN swift build --configuration release
 
-FROM swiftarm/swift:5.6.2-ubuntu-jammy-slim as app
+FROM swiftarm/swift:5.6.2-ubuntu-focal-slim as app
 
 RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true && apt-get -q update && \
     apt-get -q install -y \
