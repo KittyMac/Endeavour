@@ -28,7 +28,6 @@ let package = Package(
                 "Sextant",
                 "Hitch",
                 "Picaroon",
-                "Pamphlet",
                 .product(name: "PamphletFramework", package: "Pamphlet"),
             ],
             plugins: [
@@ -45,7 +44,6 @@ let package = Package(
                 "Sextant",
                 "Hitch",
                 "Picaroon",
-                "Pamphlet",
                 .product(name: "PamphletFramework", package: "Pamphlet"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "Gzip", package: "GzipSwift"),
