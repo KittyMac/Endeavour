@@ -9,10 +9,7 @@ import Hitch
 typealias SubscribeLongPull = (JsonElement?, HttpResponse?) -> Void
 
 extension Endeavour {
-    public class Service: ServiceActor, Equatable {
-        public static func == (lhs: Endeavour.Service, rhs: Endeavour.Service) -> Bool {
-            lhs.userUUID == rhs.userUUID
-        }
+    public class Service: ServiceActor {
 
         private var userUUID: UserUUID = UUID().uuidHitch
 

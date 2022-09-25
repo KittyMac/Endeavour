@@ -13,7 +13,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/KittyMac/Pamphlet.git", from: "0.3.5"),
         .package(url: "https://github.com/KittyMac/Figurehead.git", from: "0.2.0"),
-		.package(url: "https://github.com/KittyMac/Flynn.git", from: "0.3.0"),
+		.package(url: "https://github.com/KittyMac/Flynn.git", from: "0.4.0"),
         .package(url: "https://github.com/KittyMac/Sextant.git", from: "0.4.0"),
         .package(url: "https://github.com/KittyMac/Hitch.git", from: "0.4.0"),
         .package(url: "https://github.com/KittyMac/Picaroon.git", from: "0.4.0"),

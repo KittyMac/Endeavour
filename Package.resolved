@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/KittyMac/Flynn.git",
       "state" : {
-        "revision" : "19ad097271c6a787d569f9be7a3adcd52df196bf",
-        "version" : "0.3.27"
+        "revision" : "1bd9d3bddda5fdc49e33f1d60cbe245eec322102",
+        "version" : "0.4.12"
       }
     },
     {
@@ -41,8 +41,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/KittyMac/Hitch.git",
       "state" : {
-        "revision" : "6c4eeb3a675c5649a27e51a8dfd67ab0439357d1",
-        "version" : "0.4.48"
+        "revision" : "f016a7ea5aef15e706a21aec11e3ea3adb56437f",
+        "version" : "0.4.50"
       }
     },
     {
@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/KittyMac/Jib.git",
       "state" : {
-        "revision" : "27c16a0ebbbd2cc66156ac9ead371e2018232fc3",
-        "version" : "0.0.11"
+        "revision" : "b5fe9fbba59683920de582ee2e4561f32c36c606",
+        "version" : "0.0.20"
       }
     },
     {
@@ -59,8 +59,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/KittyMac/Pamphlet.git",
       "state" : {
-        "revision" : "e0ced2de7d03907431a8c831bc7171c77f0e3b67",
-        "version" : "0.3.50"
+        "revision" : "16a6ffe151c2e2a6933dcac5d2dd73ca5fa2250b",
+        "version" : "0.3.56"
       }
     },
     {
@@ -68,8 +68,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/KittyMac/Picaroon.git",
       "state" : {
-        "revision" : "407493cef3959351d7ea5502f7eb3da01acbd8e4",
-        "version" : "0.4.2"
+        "revision" : "602a17073515d584cf643e340ac88f8190038f7d",
+        "version" : "0.4.11"
       }
     },
     {
