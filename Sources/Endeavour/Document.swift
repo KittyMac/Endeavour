@@ -296,8 +296,8 @@ extension Endeavour {
 
             if let updates = updates {
                 guard version == history.count else {
-                    // return "Version mismatch ({0} != {1})" << [version, history.count]
-                    return nil
+                    return "Version mismatch ({0} != {1})" << [version, history.count]
+                    //return nil
                 }
                 for update in updates.iterValues {
                     utf16Document.apply(changeSet: update)
