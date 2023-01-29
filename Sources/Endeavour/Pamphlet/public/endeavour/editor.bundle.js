@@ -28147,26 +28147,24 @@
     cm.endeavourSend = function(command, documentUUID) {
         let xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
-    		if (this.readyState != 4) { return; }
-    		
-    		try {
+            if (this.readyState == 4) {
                 let plugin = undefined;
-            
+                
                 if (command.command == "pull") {
-                    cm.endeavourIsPulling = false;
+                    cm.endeavourIsPulling = undefined;
                 } else if (command.command == "push") {
                     cm.endeavourIsPushing = false;
                 }
-            
+                
                 let serviceResponse = xhttp.getResponseHeader("Service-Response");
                 let serviceJson = cm.endeavourJsonParse(serviceResponse);
                 if (serviceJson != undefined) {
                     plugin = cm.endeavourDocuments[serviceJson.documentUUID];
                 }
-            
+                
                 if (this.status != 200) {
                     cm.endeavourSendErrorCount += 1;
-                
+                    
                     if (plugin != undefined) {
                         plugin.didError(xhttp.responseText);
                     }
@@ -28182,16 +28180,17 @@
                         break;
                     }
                 }
-                        
+                            
                 if (cm.endeavourSendErrorCount > 6) {
                     cm.broadcastStatus(documentUUID, command, "Disconnected from server");
-                    cm.endeavourIsPulling = false;
+    				cm.endeavourIsPulling.abort();
+                    cm.endeavourIsPulling = undefined;
                     return;
-                }        
-    		} catch(error) { }
-    		
-            if (command.command == "pull") {
-                cm.endeavourPullUpdates();
+                }
+                
+                if (command.command == "pull") {
+                    cm.endeavourPullUpdates();
+                }
             }
         };
         xhttp.open("POST", "/");
@@ -28204,6 +28203,8 @@
         xhttp.setRequestHeader("Cache-Control", "no-cache");
         xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         xhttp.send(JSON.stringify(command));
+    	
+    	return xhttp;
     };
 
     // Modern browsers can only keep open a limited number of concurrent connections to the backend.
@@ -28237,9 +28238,9 @@
         }
     };
 
-    cm.endeavourIsPulling = false;
+    cm.endeavourIsPulling = undefined;
     cm.endeavourPullUpdates = function() {    
-        if (cm.endeavourIsPulling == false) {
+        if (cm.endeavourIsPulling == undefined) {
             var documentUUIDs = [];
             var documentVersions = [];
             
@@ -28256,8 +28257,7 @@
                 documentVersions: documentVersions
             };
             
-            cm.endeavourIsPulling = true;
-            cm.endeavourSend(msg);
+            cm.endeavourIsPulling = cm.endeavourSend(msg);
         }
     };
 
@@ -28686,7 +28686,10 @@
             parent: parentDiv
         });
     	
-    	print(darkModeOnly);
+    	if (cm.endeavourIsPulling != undefined) {
+    		cm.endeavourIsPulling.abort();
+    		cm.endeavourIsPulling = undefined;
+    	}
         
     	if (darkModeOnly == false) {
     	    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
