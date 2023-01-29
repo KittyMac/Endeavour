@@ -28152,8 +28152,6 @@
                 
                 if (command.command == "pull") {
                     cm.endeavourIsPulling = undefined;
-                } else if (command.command == "push") {
-                    cm.endeavourIsPushing = false;
                 }
                 
                 let serviceResponse = xhttp.getResponseHeader("Service-Response");
@@ -28212,9 +28210,10 @@
     // otherwise we can lead to a deadlock.
     cm.endeavourDocuments = {};
 
-    cm.endeavourIsPushing = false;
+    cm.endeavourIsPushing = undefined;
     cm.endeavourPushUpdates = function(plugin, docUpdates, docRanges) {
-        if (cm.endeavourIsPushing == false) {
+    	let newVersion = plugin.documentVersion();
+        if (cm.endeavourIsPushing == undefined || newVersion > cm.endeavourIsPushing) {
             let msg = {
                 service: "EndeavourService",
                 command: "push",
@@ -28232,7 +28231,7 @@
                 };
             }
             if (msg.cursors || msg.updates) {
-                cm.endeavourIsPushing = true;
+                cm.endeavourIsPushing = newVersion;
                 cm.endeavourSend(msg, plugin.documentUUID);
             }
         }
@@ -28366,7 +28365,7 @@
                 if (serviceJson.command == "save") {
                     
                     // Suppress our code from sharing this change with the server
-                    cm.endeavourIsPushing = true;
+                    cm.endeavourIsPushing = 0;
                     this.view.dispatch({
                         changes: {
                             from: 0,
@@ -28384,7 +28383,7 @@
                         }
                     }
                     
-                    cm.endeavourIsPushing = false;
+                    cm.endeavourIsPushing = undefined;
                 }
                 
                 // Partial document updates:
