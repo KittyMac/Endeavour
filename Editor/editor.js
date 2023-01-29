@@ -198,7 +198,10 @@ cm.endeavourDocuments = {};
 cm.endeavourIsPushing = undefined;
 cm.endeavourPushUpdates = function(plugin, docUpdates, docRanges) {
 	let newVersion = plugin.documentVersion();
-    if (cm.endeavourIsPushing == undefined || newVersion > cm.endeavourIsPushing) {
+	print(`${newVersion} > ${cm.endeavourIsPushing}`);
+    if (cm.endeavourIsPushing == undefined ||
+		newVersion > cm.endeavourIsPushing ||
+		newVersion == 0) {
         let msg = {
             service: "EndeavourService",
             command: "push",
