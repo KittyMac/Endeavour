@@ -28214,6 +28214,7 @@
 
     cm.endeavourIsPushing = false;
     cm.endeavourPushUpdates = function(plugin, docUpdates, docRanges) {
+    	print(`cm.endeavourIsPushing: ${cm.endeavourIsPushing}`);
         if (cm.endeavourIsPushing == false) {
             let msg = {
                 service: "EndeavourService",
@@ -28303,6 +28304,7 @@
                     this.decorations = this.getDeco(this.view);
                 });
                 
+    			print("cm.endeavourPushUpdates 1");
                 cm.endeavourPushUpdates(this, [], []);
             }
 
@@ -28319,6 +28321,8 @@
     				if (update != undefined && update.state != undefined && update.state.selection != undefined) {
     					ranges = update.state.selection.ranges;
     				}
+    				
+    				print(`cm.endeavourPushUpdates 2: ${update} ${update?.docChanged} ${update?.selectionSet}`);
                     cm.endeavourPushUpdates(this, docUpdates, ranges);
                 }
             }
