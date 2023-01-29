@@ -132,24 +132,26 @@ cm.broadcastStatus = function(documentUUID, command, message) {
 cm.endeavourSend = function(command, documentUUID) {
     let xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
-        if (this.readyState == 4) {
+		if (this.readyState != 4) { return; }
+		
+		try {
             let plugin = undefined;
-            
+        
             if (command.command == "pull") {
                 cm.endeavourIsPulling = false;
             } else if (command.command == "push") {
                 cm.endeavourIsPushing = false;
             }
-            
+        
             let serviceResponse = xhttp.getResponseHeader("Service-Response");
             let serviceJson = cm.endeavourJsonParse(serviceResponse);
             if (serviceJson != undefined) {
                 plugin = cm.endeavourDocuments[serviceJson.documentUUID];
             }
-            
+        
             if (this.status != 200) {
                 cm.endeavourSendErrorCount += 1;
-                
+            
                 if (plugin != undefined) {
                     plugin.didError(xhttp.responseText);
                 }
@@ -165,16 +167,16 @@ cm.endeavourSend = function(command, documentUUID) {
                     break;
                 }
             }
-                        
+                    
             if (cm.endeavourSendErrorCount > 6) {
                 cm.broadcastStatus(documentUUID, command, "Disconnected from server")
                 cm.endeavourIsPulling = false;
                 return;
-            }
-            
-            if (command.command == "pull") {
-                cm.endeavourPullUpdates();
-            }
+            }        
+		} catch(error) { }
+		
+        if (command.command == "pull") {
+            cm.endeavourPullUpdates();
         }
     };
     xhttp.open("POST", "/");
