@@ -3,9 +3,6 @@ import PackageDescription
 
 let package = Package(
     name: "Endeavour",
-    platforms: [
-        .macOS(.v10_15), .iOS(.v9)
-    ],
     products: [
         .library(name: "Endeavour", targets: ["Endeavour"]),
         .executable(name: "EndeavourApp", targets: ["EndeavourApp"])

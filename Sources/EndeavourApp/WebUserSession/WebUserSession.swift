@@ -14,8 +14,12 @@ public class WebUserSession: UserServiceableSession {
         beAdd(service: Endeavour.Service())
     }
 
-    required init(cookieSessionUUID: Hitch?, javascriptSessionUUID: Hitch?) {
-        super.init(cookieSessionUUID: cookieSessionUUID, javascriptSessionUUID: javascriptSessionUUID)
+    required init(cookieSessionUUID: Hitch?,
+                  javascriptSessionUUID: Hitch?,
+                  sessionActivityTimeout: TimeInterval) {
+        super.init(cookieSessionUUID: cookieSessionUUID,
+                   javascriptSessionUUID: javascriptSessionUUID,
+                   sessionActivityTimeout: sessionActivityTimeout)
         unsafePriority = 99
 
         beAdd(service: Endeavour.Service())

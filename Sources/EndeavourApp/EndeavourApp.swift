@@ -1,9 +1,9 @@
 import Foundation
 import ArgumentParser
-import Picaroon
 import Flynn
 import Endeavour
 import Hitch
+import Picaroon
 
 #if DEBUG
 let cacheMaxAge = 5
@@ -116,11 +116,14 @@ public enum EndeavourApp {
 
         let config = ServerConfig(address: address,
                                   port: Int(httpPort),
-                                  requestTimeout: 30.0,
+                                  maximumSessions: 1024,
+                                  clientTimeout: 60.0 * 1.0,
+                                  serverTimeout: 60.0 * 5.0,
                                   maxRequestInBytes: 1024 * 1024 * 15)
 
-        Server<WebUserSession>(config: config,
-                               staticStorageHandler: handleStaticRequest).run()
+        //let server = Server<WebUserSession>(config: config,
+        //                                    staticStorageHandler: handleStaticRequest)
+        //server.run()
     }
 
 }
